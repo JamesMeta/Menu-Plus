@@ -12,6 +12,8 @@ dependencies:
   supabase_flutter: any
   file_picker: any
   go_router: any
+  go_router_builder: any
+  google_sign_in: any
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +22,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/menuplus.png
+
+

@@ -56,6 +56,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(title: 'MenuPlus', routerConfig: _router);
+    return MaterialApp.router(
+      title: 'MenuPlus',
+      routerConfig: _router,
+      theme: ThemeData(brightness: Brightness.light),
+      darkTheme: ThemeData(),
+    );
   }
 }
