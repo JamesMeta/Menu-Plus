@@ -1,0 +1,31 @@
+name: rankmyroast
+description: "A menu creation tool with a collaborative ranking system"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: any
+  file_picker: any
+  go_router: any
+  go_router_builder: any
+  google_sign_in: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/rankmyroast_icon.png
+    - assets/images/rankmyroast_icon2.png
+    - assets/images/rankmyroast_icon3.png
+    - assets/images/rankmyroast_icon4.png
+
+
