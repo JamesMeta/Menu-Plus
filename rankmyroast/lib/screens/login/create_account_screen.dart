@@ -81,11 +81,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             Expanded(flex: 1, child: SizedBox()),
 
                             Expanded(
-                              flex: 300,
+                              flex: 500,
                               child: SizedBox(
                                 child: Image.asset(
-                                  "assets/images/rankmyroast_logo.png",
+                                  "assets/images/rankmyroast_icon3.png",
                                   width: screenWidth,
+                                  scale: 1,
                                 ),
                               ),
                             ),
@@ -168,21 +169,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             Expanded(flex: 10, child: SizedBox()),
 
                             Expanded(flex: 1, child: SizedBox()),
-
-                            TextButton(
-                              style: ButtonStyle(
-                                padding: WidgetStatePropertyAll(
-                                  EdgeInsets.zero,
-                                ),
-                              ),
-                              onPressed: () {},
-                              child: Text(
-                                "Don't have an account? Sign Up",
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),

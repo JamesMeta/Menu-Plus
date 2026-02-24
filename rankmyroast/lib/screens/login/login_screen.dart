@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Expanded(flex: 1, child: SizedBox()),
 
                             Expanded(
-                              flex: 300,
+                              flex: 400,
                               child: SizedBox(
                                 child: Image.asset(
                                   "assets/images/rankmyroast_icon4.png",

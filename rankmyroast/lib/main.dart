@@ -67,7 +67,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'MenuPlus',
       routerConfig: _router,
-      theme: ThemeData(brightness: Brightness.light),
+      theme: ThemeData(brightness: Brightness.light, fontFamily: "Open Sans"),
       darkTheme: ThemeData(),
     );
   }
