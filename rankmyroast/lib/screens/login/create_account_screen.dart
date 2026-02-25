@@ -15,6 +15,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent),
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           Center(

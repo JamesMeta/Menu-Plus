@@ -90,7 +90,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Image.asset(
                                   "assets/images/rankmyroast_icon4.png",
                                   width: screenWidth,
-                                  scale: 1,
                                 ),
                               ),
                             ),
@@ -109,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
 
-                            Expanded(flex: 1, child: SizedBox()),
+                            Expanded(flex: 10, child: SizedBox()),
 
                             TextField(
                               decoration: InputDecoration(
@@ -129,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               obscureText: true,
                             ),
 
-                            Expanded(flex: 20, child: SizedBox()),
+                            Expanded(flex: 60, child: SizedBox()),
 
                             Expanded(
                               flex: 100,

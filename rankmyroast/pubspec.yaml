@@ -14,6 +14,7 @@ dependencies:
   go_router: any
   go_router_builder: any
   google_sign_in: any
+  gap: any
 
 dev_dependencies:
   flutter_test:
@@ -27,5 +28,15 @@ flutter:
     - assets/images/rankmyroast_icon2.png
     - assets/images/rankmyroast_icon3.png
     - assets/images/rankmyroast_icon4.png
+  
+  fonts:
+    - family: opensans
+      fonts: 
+        - asset: assets/fonts/OpenSans-VariableFont_wdth,wght.ttf
+    
+    - family: montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat-VariableFont_wght.ttf
+
 
 
