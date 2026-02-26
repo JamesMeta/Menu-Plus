@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ConfirmEmailScreen extends StatefulWidget {
@@ -12,51 +15,326 @@ class ConfirmEmailScreen extends StatefulWidget {
 }
 
 class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
+  late final String email;
+  late final String password;
+  final TextEditingController _codeController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _isResending = false;
+
   @override
   void initState() {
+    email = widget.extra.first;
+    password = widget.extra.last;
     super.initState();
-    _loopCheckIfVerified();
-  }
-
-  Future<void> _loopCheckIfVerified() async {
-    while (mounted) {
-      await Future.delayed(const Duration(seconds: 5));
-      await _checkIfVerified();
-    }
-  }
-
-  Future<void> _checkIfVerified() async {
-    final response = await Supabase.instance.client.auth.getUser();
-    final user = response.user;
-    if (user?.emailConfirmedAt != null) {
-      if (mounted) {
-        context.go('/home');
-      }
-      return;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Please check your email to confirm your account.",
-              style: TextStyle(fontSize: 18),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          Container(decoration: const BoxDecoration(color: Colors.green)),
+          Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipPath(
+                  clipper: ClippedContainer(),
+                  child: Container(
+                    height: height * 0.8,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32.0,
+                        vertical: 24.0,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildHeaderSection(),
+                          const SizedBox(height: 28),
+                          _buildCodeInputSection(),
+                          const SizedBox(height: 24),
+                          _buildVerifyButton(),
+                          const SizedBox(height: 12),
+                          _buildResendButton(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                //TODO
-              },
-              child: const Text("Resend Confirmation Email"),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildHeaderSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Verify Your Email",
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          "A confirmation email has been sent to $email",
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.black54, height: 1.5),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Please enter the 8-digit verification code below.",
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.black54, height: 1.5),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCodeInputSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Verification Code",
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _codeController,
+          keyboardType: TextInputType.number,
+          maxLength: 8,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 18,
+            letterSpacing: 4,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.black12),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.black12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.green, width: 2),
+            ),
+            hintText: '00000000',
+            hintStyle: TextStyle(color: Colors.grey[400], letterSpacing: 4),
+            counterText: '',
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVerifyButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 2,
+        ),
+        onPressed: _isLoading ? null : _handleVerifyPressed,
+        child:
+            _isLoading
+                ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                  ),
+                )
+                : const Text(
+                  'Verify Email',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+      ),
+    );
+  }
+
+  Widget _buildResendButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () {
+          if (_isResending) return;
+          setState(() {
+            _isResending = true;
+          });
+          _resendCode().whenComplete(() {
+            if (mounted) {
+              setState(() {
+                _isResending = false;
+              });
+            }
+          });
+        },
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child:
+            _isResending
+                ? CircularProgressIndicator()
+                : Text(
+                  'Didn\'t receive the code? Resend',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Colors.green,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+      ),
+    );
+  }
+
+  void _handleVerifyPressed() {
+    if (_isLoading) return;
+    setState(() {
+      _isLoading = true;
+    });
+    _confirmEmail();
+  }
+
+  Future<void> _confirmEmail() async {
+    final code = _codeController.text.trim();
+
+    if (code.isEmpty) {
+      _resetLoadingState();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the verification code.')),
+      );
+      return;
+    }
+
+    if (code.length != 8) {
+      _resetLoadingState();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid 8-digit code.')),
+      );
+      return;
+    }
+
+    try {
+      final response = await Supabase.instance.client.auth.verifyOTP(
+        email: email,
+        token: code,
+        type: OtpType.signup,
+      );
+
+      if (mounted) {
+        if (response.session != null) {
+          context.go('/home');
+        } else {
+          _resetLoadingState();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Email confirmation failed. Please try again.'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _resetLoadingState();
+        if (e.toString().toLowerCase().contains('otp_expired')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Verification code has expired or is invalid.'),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error confirming email: $e')));
+        }
+      }
+    }
+  }
+
+  void _resetLoadingState() {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _resendCode() async {
+    try {
+      await Supabase.instance.client.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification code resent. Please check your email.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error resending code: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
   }
 }

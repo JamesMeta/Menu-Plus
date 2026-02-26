@@ -19,6 +19,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _isLoading = false;
+  bool _isGoogleLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -130,7 +133,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: _handleSignIn,
+                                    onPressed: () async {
+                                      if (_isLoading) return;
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+                                      await _handleSignIn();
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    },
                                     style: ButtonStyle(
                                       backgroundColor: WidgetStatePropertyAll(
                                         Colors.white,
@@ -144,72 +156,93 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Sign In",
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          color: Colors.green,
-                                        ),
-                                      ),
-                                    ),
+                                    child:
+                                        _isLoading
+                                            ? CircularProgressIndicator()
+                                            : Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: Text(
+                                                "Sign In",
+                                                style: TextStyle(
+                                                  fontSize: 24,
+                                                  color: Colors.green,
+                                                ),
+                                              ),
+                                            ),
                                   ),
                                 ),
 
                                 SizedBox(height: 4),
 
-                                ElevatedButton(
-                                  onPressed: _handleSignInWithGoogle,
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                      Colors.white,
-                                    ),
-                                    padding: WidgetStatePropertyAll(
-                                      EdgeInsets.zero,
-                                    ),
-                                    shape: WidgetStatePropertyAll(
-                                      RoundedRectangleBorder(
-                                        side: BorderSide(color: Colors.black),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(4),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      setState(() {
+                                        _isGoogleLoading = true;
+                                      });
+                                      await _handleSignInWithGoogle();
+                                      setState(() {
+                                        _isGoogleLoading = false;
+                                      });
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        Colors.white,
+                                      ),
+                                      padding: WidgetStatePropertyAll(
+                                        EdgeInsets.zero,
+                                      ),
+                                      shape: WidgetStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                          side: BorderSide(color: Colors.black),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(4),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: IntrinsicHeight(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Flexible(
-                                            flex: 2,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                    "https://cdn-icons-png.flaticon.com/512/2702/2702602.png",
-                                                  ),
+                                    child:
+                                        _isGoogleLoading
+                                            ? CircularProgressIndicator()
+                                            : Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: IntrinsicHeight(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Flexible(
+                                                      flex: 2,
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          image: DecorationImage(
+                                                            image: NetworkImage(
+                                                              "https://cdn-icons-png.flaticon.com/512/2702/2702602.png",
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    Flexible(
+                                                      flex: 10,
+                                                      child: Text(
+                                                        "Continue With Google",
+                                                        style: TextStyle(
+                                                          fontSize: 24,
+                                                          color: Colors.green,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
-                                          ),
-
-                                          Flexible(
-                                            flex: 10,
-                                            child: Text(
-                                              "Continue With Google",
-                                              style: TextStyle(
-                                                fontSize: 24,
-                                                color: Colors.green,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   ),
                                 ),
                                 TextButton(
@@ -249,38 +282,78 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text;
     final password = _passwordController.text;
 
-    final response = await SupabaseHelper.authSigninWithPassword(
-      email,
-      password,
-    );
+    try {
+      final response = await SupabaseHelper.authSigninWithPassword(
+        email,
+        password,
+      );
 
-    if (mounted) {
-      if (response.user?.role == "authenticated") {
-        context.go('/home');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Error: Unable to sign in with provided credentials',
+      if (mounted) {
+        if (response.user?.role == "authenticated") {
+          context.go('/home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Error: Unable to sign in with provided credentials',
+              ),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
             ),
-            behavior: SnackBarBehavior.floating, // Recommended for modern UI
-          ),
-        );
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        if (e.toString().toLowerCase().contains("email not confirmed")) {
+          context.push(
+            "/login/create-account/confirm-email",
+            extra: [email, password],
+          );
+          return;
+        }
+
+        if (e.toString().toLowerCase().contains("invalid login credentials")) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Error: Invalid email or password'),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+          return;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e}'),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+        }
       }
     }
   }
 
   Future<void> _handleSignInWithGoogle() async {
-    final signInResponse = await signInWithGoogle();
-    if (mounted) {
-      if (signInResponse?.user?.role == "authenticated") {
-        context.go('/home');
-      } else {
+    try {
+      final signInResponse = await signInWithGoogle();
+      if (mounted) {
+        if (signInResponse?.user?.role == "authenticated") {
+          context.go('/home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Error: Unable to sign in with Google at this time',
+              ),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Error: Unable to sign in with Google at this time',
-            ),
+            content: Text('Error: ${e.toString().split("code: ").last}'),
             behavior: SnackBarBehavior.floating, // Recommended for modern UI
           ),
         );

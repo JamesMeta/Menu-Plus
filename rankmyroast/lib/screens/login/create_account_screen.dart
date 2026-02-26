@@ -21,6 +21,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  bool _isGoogleLoading = false;
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -146,7 +149,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: _handleCreateAccount,
+                                    onPressed: () async {
+                                      if (_isLoading) return;
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+                                      await _handleCreateAccount();
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    },
                                     style: ButtonStyle(
                                       backgroundColor: WidgetStatePropertyAll(
                                         Colors.white,
@@ -160,72 +172,94 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                         ),
                                       ),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Create Account",
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          color: Colors.green,
-                                        ),
-                                      ),
-                                    ),
+                                    child:
+                                        _isLoading
+                                            ? CircularProgressIndicator()
+                                            : Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: Text(
+                                                "Create Account",
+                                                style: TextStyle(
+                                                  fontSize: 24,
+                                                  color: Colors.green,
+                                                ),
+                                              ),
+                                            ),
                                   ),
                                 ),
 
                                 SizedBox(height: 4),
 
-                                ElevatedButton(
-                                  onPressed: _handleSignInWithGoogle,
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                      Colors.white,
-                                    ),
-                                    padding: WidgetStatePropertyAll(
-                                      EdgeInsets.zero,
-                                    ),
-                                    shape: WidgetStatePropertyAll(
-                                      RoundedRectangleBorder(
-                                        side: BorderSide(color: Colors.black),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(4),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      if (_isGoogleLoading) return;
+                                      setState(() {
+                                        _isGoogleLoading = true;
+                                      });
+                                      await _handleSignInWithGoogle();
+                                      setState(() {
+                                        _isGoogleLoading = false;
+                                      });
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        Colors.white,
+                                      ),
+                                      padding: WidgetStatePropertyAll(
+                                        EdgeInsets.zero,
+                                      ),
+                                      shape: WidgetStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                          side: BorderSide(color: Colors.black),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(4),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: IntrinsicHeight(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Flexible(
-                                            flex: 2,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                    "https://cdn-icons-png.flaticon.com/512/2702/2702602.png",
-                                                  ),
+                                    child:
+                                        _isGoogleLoading
+                                            ? CircularProgressIndicator()
+                                            : Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: IntrinsicHeight(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Flexible(
+                                                      flex: 2,
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          image: DecorationImage(
+                                                            image: NetworkImage(
+                                                              "https://cdn-icons-png.flaticon.com/512/2702/2702602.png",
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    Flexible(
+                                                      flex: 10,
+                                                      child: Text(
+                                                        "Continue With Google",
+                                                        style: TextStyle(
+                                                          fontSize: 24,
+                                                          color: Colors.green,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
-                                          ),
-
-                                          Flexible(
-                                            flex: 10,
-                                            child: Text(
-                                              "Continue With Google",
-                                              style: TextStyle(
-                                                fontSize: 24,
-                                                color: Colors.green,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   ),
                                 ),
                                 SizedBox(height: 10),
@@ -250,6 +284,40 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
+    if (password.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Error: Password must be at least 8 characters'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Error: Password must contain at least one uppercase letter',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Error: Password must contain at least one number',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -260,24 +328,57 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       return;
     }
 
-    final response = await SupabaseHelper.authSignupWithPassword(
-      email,
-      password,
-    );
+    try {
+      final response = await SupabaseHelper.authSignupWithPassword(
+        email,
+        password,
+      );
 
-    if (mounted) {
-      if (response.user != null) {
-        context.push(
-          '/login/create-account/confirm-email',
-          extra: [email, password],
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Error: Unable to create account at this time'),
-            behavior: SnackBarBehavior.floating, // Recommended for modern UI
-          ),
-        );
+      if (mounted) {
+        if (response.user != null) {
+          context.push(
+            '/login/create-account/confirm-email',
+            extra: [email, password],
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Error: Unable to create account at this time',
+              ),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        if (e.toString().toLowerCase().contains("email not confirmed")) {
+          context.push(
+            "/login/create-account/confirm-email",
+            extra: [email, password],
+          );
+          return;
+        }
+
+        if (e.toString().toLowerCase().contains("user already registered")) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Error: An account with this email already exists',
+              ),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+          return;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error creating account: ${e.toString()}'),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+        }
       }
     }
   }
@@ -319,11 +420,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       return null;
     }
 
-    final response = SupabaseHelper.authSigninWithIdToken(
-      idToken,
-      OAuthProvider.google,
-    );
-
-    return response;
+    try {
+      final response = SupabaseHelper.authSigninWithIdToken(
+        idToken,
+        OAuthProvider.google,
+      );
+      return response;
+    } on Exception catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error signing in with Google: ${e.toString().split('Code: ').last}',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return null;
+    }
   }
 }
