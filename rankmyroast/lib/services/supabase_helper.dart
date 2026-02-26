@@ -14,4 +14,32 @@ class SupabaseHelper {
 
     return response;
   }
+
+  static Future<AuthResponse> authSigninWithPassword(
+    String email,
+    String password,
+  ) async {
+    final response = await _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+
+    return response;
+  }
+
+  static Future<AuthResponse> authSignupWithPassword(
+    String email,
+    String password,
+  ) async {
+    final response = await _client.auth.signUp(
+      email: email,
+      password: password,
+    );
+
+    return response;
+  }
+
+  static Future<void> authSignOut() async {
+    await _client.auth.signOut();
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/home/home_screen.dart';
+import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,10 +32,23 @@ final GoRouter _router = GoRouter(
         return const HomeScreen();
       },
     ),
-    GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
     GoRoute(
-      path: '/create-account',
-      builder: (context, state) => CreateAccountScreen(),
+      path: '/login',
+      builder: (context, state) => LoginScreen(),
+      routes: [
+        GoRoute(
+          path: '/create-account',
+          builder: (context, state) => CreateAccountScreen(),
+          routes: [
+            GoRoute(
+              path: '/confirm-email',
+              builder:
+                  (context, state) =>
+                      ConfirmEmailScreen(extra: state.extra as List<String>),
+            ),
+          ],
+        ),
+      ],
     ),
   ],
   redirect: (context, state) async {
@@ -46,8 +60,14 @@ final GoRouter _router = GoRouter(
     final isCreatingAccount = state.matchedLocation.startsWith(
       '/create-account',
     );
+    final isConfirmingEmail = state.matchedLocation.startsWith(
+      '/confirm-email',
+    );
 
-    if (session == null && !isLoggingIn && !isCreatingAccount) {
+    if (session == null &&
+        !isLoggingIn &&
+        !isCreatingAccount &&
+        !isConfirmingEmail) {
       return '/login';
     }
 
