@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -72,7 +73,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                           _buildHeaderSection(),
                           const SizedBox(height: 28),
                           _buildCodeInputSection(),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 12),
                           _buildVerifyButton(),
                           const SizedBox(height: 12),
                           _buildResendButton(),
@@ -141,27 +142,9 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
             fontWeight: FontWeight.w500,
           ),
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.black12),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.black12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.green, width: 2),
-            ),
-            hintText: '00000000',
-            hintStyle: TextStyle(color: Colors.grey[400], letterSpacing: 4),
-            counterText: '',
-            filled: true,
-            fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            hintText: "00000000",
+
+            border: OutlineInputBorder(),
           ),
         ),
       ],
@@ -172,12 +155,17 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 2,
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(Colors.white),
+          padding: WidgetStatePropertyAll(EdgeInsets.zero),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              side: BorderSide(color: Colors.black),
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+            ),
+          ),
+          maximumSize: WidgetStatePropertyAll(Size(double.infinity, 50.h)),
+          minimumSize: WidgetStatePropertyAll(Size(double.infinity, 50.h)),
         ),
         onPressed: _isLoading ? null : _handleVerifyPressed,
         child:
@@ -190,12 +178,13 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                     valueColor: AlwaysStoppedAnimation(Colors.white),
                   ),
                 )
-                : const Text(
+                : Text(
                   'Verify Email',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 18.sp,
+
                     letterSpacing: 0.5,
+                    color: Colors.green,
                   ),
                 ),
       ),

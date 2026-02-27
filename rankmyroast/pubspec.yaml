@@ -15,6 +15,7 @@ dependencies:
   go_router_builder: any
   google_sign_in: any
   gap: any
+  flutter_screenutil: any
 
 dev_dependencies:
   flutter_test:

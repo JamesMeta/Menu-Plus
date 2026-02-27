@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
@@ -33,248 +34,322 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       extendBody: true,
       extendBodyBehindAppBar: true,
       appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: Stack(
-        children: [
-          Center(
-            child: Container(decoration: BoxDecoration(color: Colors.green)),
-          ),
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
+          children: [
+            Center(
+              child: Container(decoration: BoxDecoration(color: Colors.green)),
+            ),
 
-          Center(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipPath(
-                    clipper: ClippedContainer(),
-                    child: Container(
-                      decoration: BoxDecoration(color: Colors.white),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.05,
-                          vertical: screenHeight * 0.075,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Rank My Roast",
-                                        style: TextStyle(
-                                          fontSize: 48,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      Text(
-                                        "Created By James Mata",
-                                        style: TextStyle(
-                                          fontSize: 8,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(
-                              child: Image.asset(
-                                "assets/images/rankmyroast_icon4.png",
-                                width: screenWidth,
-                              ),
-                            ),
-
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Create Account",
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                SizedBox(height: 1),
-
-                                TextField(
-                                  controller: _emailController,
-                                  decoration: InputDecoration(
-                                    labelText: "Email",
-
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-
-                                SizedBox(height: 2),
-
-                                TextField(
-                                  controller: _passwordController,
-                                  decoration: InputDecoration(
-                                    labelText: "Password",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  obscureText: true,
-                                ),
-
-                                SizedBox(height: 2),
-
-                                TextField(
-                                  controller: _confirmPasswordController,
-                                  decoration: InputDecoration(
-                                    labelText: "Confirm Password",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  obscureText: true,
-                                ),
-
-                                SizedBox(height: 4),
-
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      if (_isLoading) return;
-                                      setState(() {
-                                        _isLoading = true;
-                                      });
-                                      await _handleCreateAccount();
-                                      setState(() {
-                                        _isLoading = false;
-                                      });
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: WidgetStatePropertyAll(
-                                        Colors.white,
-                                      ),
-                                      shape: WidgetStatePropertyAll(
-                                        RoundedRectangleBorder(
-                                          side: BorderSide(color: Colors.black),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(4),
+            Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipPath(
+                      clipper: ClippedContainer(),
+                      child: Container(
+                        decoration: BoxDecoration(color: Colors.white),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05,
+                            vertical: screenHeight * 0.080,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Rank My Roast",
+                                          style: TextStyle(
+                                            fontSize: 40.sp,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
+                                        Text(
+                                          "Created By James Mata",
+                                          style: TextStyle(
+                                            fontSize: 8.spMin,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              SizedBox(
+                                child: Image.asset(
+                                  "assets/images/rankmyroast_icon4.png",
+                                  width: screenWidth * 0.5,
+                                ),
+                              ),
+
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Create Account",
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 30.spMax,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 1),
+
+                                  Container(
+                                    height: 50.h,
+                                    width: double.infinity,
+                                    alignment:
+                                        Alignment
+                                            .center, // Vertically centers the "collapsed" field
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: TextField(
+                                      controller: _emailController,
+                                      decoration: InputDecoration(
+                                        labelText: "Email",
+                                        labelStyle: TextStyle(fontSize: 18),
+                                        isCollapsed: true,
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        border: InputBorder.none,
                                       ),
                                     ),
-                                    child:
-                                        _isLoading
-                                            ? CircularProgressIndicator()
-                                            : Padding(
-                                              padding: const EdgeInsets.all(
-                                                8.0,
-                                              ),
-                                              child: Text(
-                                                "Create Account",
-                                                style: TextStyle(
-                                                  fontSize: 24,
-                                                  color: Colors.green,
+                                  ),
+
+                                  SizedBox(height: 2),
+
+                                  Container(
+                                    height: 50.h,
+                                    width: double.infinity,
+                                    alignment:
+                                        Alignment
+                                            .center, // Vertically centers the "collapsed" field
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: TextField(
+                                      controller: _passwordController,
+                                      decoration: InputDecoration(
+                                        labelText: "Password",
+                                        labelStyle: TextStyle(fontSize: 18),
+                                        isCollapsed: true,
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        border: InputBorder.none,
+                                      ),
+                                      obscureText: true,
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 2),
+
+                                  Container(
+                                    height: 50.h,
+                                    width: double.infinity,
+                                    alignment:
+                                        Alignment
+                                            .center, // Vertically centers the "collapsed" field
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: TextField(
+                                      controller: _confirmPasswordController,
+                                      decoration: InputDecoration(
+                                        labelText: "Confirm Password",
+                                        labelStyle: TextStyle(fontSize: 18),
+                                        isCollapsed: true,
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        border: InputBorder.none,
+                                      ),
+                                      obscureText: true,
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 2),
+
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (_isLoading) return;
+                                        setState(() {
+                                          _isLoading = true;
+                                        });
+                                        await _handleCreateAccount();
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                          Colors.white,
+                                        ),
+                                        shape: WidgetStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color: Colors.black,
+                                            ),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(4),
+                                            ),
+                                          ),
+                                        ),
+                                        maximumSize: WidgetStatePropertyAll(
+                                          Size(double.infinity, 50.h),
+                                        ),
+                                        minimumSize: WidgetStatePropertyAll(
+                                          Size(double.infinity, 50.h),
+                                        ),
+                                      ),
+                                      child:
+                                          _isLoading
+                                              ? CircularProgressIndicator()
+                                              : Padding(
+                                                padding: const EdgeInsets.all(
+                                                  8.0,
+                                                ),
+                                                child: Text(
+                                                  "Create Account",
+                                                  style: TextStyle(
+                                                    fontSize: 18.sp,
+                                                    color: Colors.green,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
+                                    ),
                                   ),
-                                ),
 
-                                SizedBox(height: 4),
+                                  SizedBox(height: 2),
 
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      if (_isGoogleLoading) return;
-                                      setState(() {
-                                        _isGoogleLoading = true;
-                                      });
-                                      await _handleSignInWithGoogle();
-                                      setState(() {
-                                        _isGoogleLoading = false;
-                                      });
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: WidgetStatePropertyAll(
-                                        Colors.white,
-                                      ),
-                                      padding: WidgetStatePropertyAll(
-                                        EdgeInsets.zero,
-                                      ),
-                                      shape: WidgetStatePropertyAll(
-                                        RoundedRectangleBorder(
-                                          side: BorderSide(color: Colors.black),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(4),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (_isGoogleLoading) return;
+                                        setState(() {
+                                          _isGoogleLoading = true;
+                                        });
+                                        await _handleSignInWithGoogle();
+                                        setState(() {
+                                          _isGoogleLoading = false;
+                                        });
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                          Colors.white,
+                                        ),
+                                        padding: WidgetStatePropertyAll(
+                                          EdgeInsets.zero,
+                                        ),
+                                        shape: WidgetStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color: Colors.black,
+                                            ),
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(4),
+                                            ),
                                           ),
                                         ),
+                                        maximumSize: WidgetStatePropertyAll(
+                                          Size(double.infinity, 50.h),
+                                        ),
+                                        minimumSize: WidgetStatePropertyAll(
+                                          Size(double.infinity, 50.h),
+                                        ),
                                       ),
-                                    ),
-                                    child:
-                                        _isGoogleLoading
-                                            ? CircularProgressIndicator()
-                                            : Padding(
-                                              padding: const EdgeInsets.all(
-                                                8.0,
-                                              ),
-                                              child: IntrinsicHeight(
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    Flexible(
-                                                      flex: 2,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          image: DecorationImage(
-                                                            image: NetworkImage(
-                                                              "https://cdn-icons-png.flaticon.com/512/2702/2702602.png",
+                                      child:
+                                          _isGoogleLoading
+                                              ? CircularProgressIndicator()
+                                              : Padding(
+                                                padding: const EdgeInsets.all(
+                                                  8.0,
+                                                ),
+                                                child: IntrinsicHeight(
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Flexible(
+                                                        flex: 2,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                            image: DecorationImage(
+                                                              image: NetworkImage(
+                                                                "https://cdn-icons-png.flaticon.com/512/2702/2702602.png",
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
 
-                                                    Flexible(
-                                                      flex: 10,
-                                                      child: Text(
-                                                        "Continue With Google",
-                                                        style: TextStyle(
-                                                          fontSize: 24,
-                                                          color: Colors.green,
+                                                      Flexible(
+                                                        flex: 10,
+                                                        child: Text(
+                                                          "Continue With Google",
+                                                          style: TextStyle(
+                                                            fontSize: 18.sp,
+                                                            color: Colors.green,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 10),
-                              ],
-                            ),
-                          ],
+                                  SizedBox(height: 10),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/home/home_screen.dart';
 import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
@@ -84,11 +85,19 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'MenuPlus',
-      routerConfig: _router,
-      theme: ThemeData(brightness: Brightness.light, fontFamily: "opensans"),
-      darkTheme: ThemeData(),
+    return ScreenUtilInit(
+      designSize: const Size(360, 800),
+      minTextAdapt: true,
+      builder:
+          (context, child) => MaterialApp.router(
+            title: 'MenuPlus',
+            routerConfig: _router,
+            theme: ThemeData(
+              brightness: Brightness.light,
+              fontFamily: "opensans",
+            ),
+            darkTheme: ThemeData(),
+          ),
     );
   }
 }
