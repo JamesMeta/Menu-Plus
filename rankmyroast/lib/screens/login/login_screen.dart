@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
+import 'package:rankmyroast/screens/login/classes/login_screen_theme.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -51,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: BoxDecoration(color: Colors.white),
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: (screenWidth * 0.05),
+                            horizontal: (screenWidth * 0.1),
                             vertical: (screenHeight * 0.080),
                           ),
                           child: Column(
@@ -69,20 +70,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                       children: [
                                         Text(
                                           "Rank My Roast",
-                                          style: TextStyle(
-                                            fontSize: 40.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style:
+                                              LoginScreenTheme.titleTextStyle,
                                           textAlign: TextAlign.center,
                                         ),
                                         Text(
                                           "Created By James Mata",
-                                          style: TextStyle(
-                                            fontSize: 8.spMin,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style:
+                                              LoginScreenTheme.creditTextStyle,
                                           textAlign: TextAlign.start,
                                         ),
                                       ],
@@ -98,79 +93,80 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
 
+                              SizedBox(
+                                height: LoginScreenTheme.sizeBoxSpacingHeight,
+                              ),
+
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
                                     "Sign In",
-                                    textAlign: TextAlign.start,
-                                    style: TextStyle(
-                                      fontSize: 30.spMax,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    textAlign: TextAlign.center,
+                                    style: LoginScreenTheme.sectionTitleStyle,
                                   ),
 
-                                  SizedBox(height: 1),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   Container(
-                                    height: 50.h,
-                                    width: double.infinity,
+                                    height:
+                                        LoginScreenTheme
+                                            .textFieldContainerHeight,
+                                    width:
+                                        LoginScreenTheme
+                                            .textFieldContainerWidth,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+                                    decoration:
+                                        LoginScreenTheme
+                                            .textFieldContainerDecoration,
                                     child: TextField(
                                       controller: _emailController,
 
-                                      decoration: InputDecoration(
-                                        labelText: "Email",
-                                        labelStyle: TextStyle(fontSize: 18),
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        isCollapsed: true,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
+                                      decoration:
+                                          LoginScreenTheme.textfieldInputDecoration(
+                                            "Email",
+                                          ),
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   Container(
-                                    height: 50.h,
-                                    width: double.infinity,
+                                    height:
+                                        LoginScreenTheme
+                                            .textFieldContainerHeight,
+                                    width:
+                                        LoginScreenTheme
+                                            .textFieldContainerWidth,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+                                    decoration:
+                                        LoginScreenTheme
+                                            .textFieldContainerDecoration,
                                     child: TextField(
                                       controller: _passwordController,
 
-                                      decoration: InputDecoration(
-                                        labelText: "Password",
-                                        labelStyle: TextStyle(fontSize: 18),
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-
-                                        isCollapsed: true,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
+                                      decoration:
+                                          LoginScreenTheme.textfieldInputDecoration(
+                                            "Password",
+                                          ),
                                       obscureText: true,
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   SizedBox(
                                     width: double.infinity,
@@ -185,27 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           _isLoading = false;
                                         });
                                       },
-                                      style: ButtonStyle(
-                                        backgroundColor: WidgetStatePropertyAll(
-                                          Colors.white,
-                                        ),
-                                        shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: Colors.black,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(4),
-                                            ),
-                                          ),
-                                        ),
-                                        maximumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                        minimumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                      ),
+                                      style:
+                                          LoginScreenTheme.elevatedButtonStyle,
                                       child:
                                           _isLoading
                                               ? CircularProgressIndicator()
@@ -217,14 +194,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   "Sign In",
                                                   style: TextStyle(
                                                     fontSize: 18.sp,
-                                                    color: Colors.green,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   SizedBox(
                                     width: double.infinity,
@@ -238,30 +219,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                           _isGoogleLoading = false;
                                         });
                                       },
-                                      style: ButtonStyle(
-                                        backgroundColor: WidgetStatePropertyAll(
-                                          Colors.white,
-                                        ),
-                                        padding: WidgetStatePropertyAll(
-                                          EdgeInsets.zero,
-                                        ),
-                                        shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: Colors.black,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(4),
-                                            ),
-                                          ),
-                                        ),
-                                        maximumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                        minimumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                      ),
+                                      style:
+                                          LoginScreenTheme
+                                              .elevatedGoogleButtonStyle,
                                       child:
                                           _isGoogleLoading
                                               ? CircularProgressIndicator()
@@ -294,7 +254,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                           "Continue With Google",
                                                           style: TextStyle(
                                                             fontSize: 18.sp,
-                                                            color: Colors.green,
+                                                            color: Colors.black,
+                                                            fontWeight:
+                                                                FontWeight.bold,
                                                           ),
                                                         ),
                                                       ),
@@ -305,20 +267,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   TextButton(
-                                    style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(
-                                        EdgeInsets.zero,
-                                      ),
-                                    ),
+                                    style: LoginScreenTheme.textButtonStyle,
+
                                     onPressed: () {
                                       context.push("/login/create-account");
                                     },
                                     child: Text(
                                       "Don't have an account? Sign Up",
-                                      style: TextStyle(
-                                        decoration: TextDecoration.underline,
-                                        color: Colors.black,
-                                      ),
+                                      style:
+                                          LoginScreenTheme.textButtonTextStyle,
                                     ),
                                   ),
                                 ],

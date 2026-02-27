@@ -93,8 +93,24 @@ class MainApp extends StatelessWidget {
             title: 'MenuPlus',
             routerConfig: _router,
             theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+              useMaterial3: true,
               brightness: Brightness.light,
               fontFamily: "opensans",
+              textTheme: TextTheme(
+                titleLarge: TextStyle(
+                  fontSize: 40.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+                titleMedium: TextStyle(
+                  fontSize: 28.spMax,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              ),
             ),
             darkTheme: ThemeData(),
           ),
