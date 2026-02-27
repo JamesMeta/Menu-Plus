@@ -99,28 +99,28 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
 
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
                                     "Sign In",
-                                    textAlign: TextAlign.start,
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 30.spMax,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
 
-                                  SizedBox(height: 1),
+                                  SizedBox(height: 8),
 
                                   Container(
                                     height: 50.h,
-                                    width: double.infinity,
+                                    width: screenWidth * 0.75,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
                                     decoration: BoxDecoration(
                                       border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(25),
                                     ),
                                     child: TextField(
                                       controller: _emailController,
@@ -132,24 +132,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                             FloatingLabelBehavior.never,
                                         isCollapsed: true,
                                         contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
+                                          horizontal: 20,
                                         ),
                                         border: InputBorder.none,
                                       ),
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(height: 8),
 
                                   Container(
                                     height: 50.h,
-                                    width: double.infinity,
+                                    width: screenWidth * 0.75,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
                                     decoration: BoxDecoration(
                                       border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(25),
                                     ),
                                     child: TextField(
                                       controller: _passwordController,
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                         isCollapsed: true,
                                         contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
+                                          horizontal: 20,
                                         ),
                                         border: InputBorder.none,
                                       ),
@@ -170,10 +170,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(height: 12),
 
                                   SizedBox(
-                                    width: double.infinity,
+                                    width: screenWidth * 0.75,
                                     child: ElevatedButton(
                                       onPressed: () async {
                                         if (_isLoading) return;
@@ -187,18 +187,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       },
                                       style: ButtonStyle(
                                         backgroundColor: WidgetStatePropertyAll(
-                                          Colors.white,
+                                          Colors.green,
                                         ),
                                         shape: WidgetStatePropertyAll(
                                           RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: Colors.black,
-                                            ),
                                             borderRadius: BorderRadius.all(
-                                              Radius.circular(4),
+                                              Radius.circular(25),
                                             ),
                                           ),
                                         ),
+                                        elevation: WidgetStatePropertyAll(2),
                                         maximumSize: WidgetStatePropertyAll(
                                           Size(double.infinity, 50.h),
                                         ),
@@ -208,7 +206,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       child:
                                           _isLoading
-                                              ? CircularProgressIndicator()
+                                              ? CircularProgressIndicator(
+                                                color: Colors.white,
+                                              )
                                               : Padding(
                                                 padding: const EdgeInsets.all(
                                                   8.0,
@@ -217,17 +217,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   "Sign In",
                                                   style: TextStyle(
                                                     fontSize: 18.sp,
-                                                    color: Colors.green,
+                                                    color: Colors.white,
                                                   ),
                                                 ),
                                               ),
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(height: 8),
 
                                   SizedBox(
-                                    width: double.infinity,
+                                    width: screenWidth * 0.75,
                                     child: ElevatedButton(
                                       onPressed: () async {
                                         setState(() {
@@ -248,10 +248,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         shape: WidgetStatePropertyAll(
                                           RoundedRectangleBorder(
                                             side: BorderSide(
-                                              color: Colors.black,
+                                              color: Colors.grey.shade400,
                                             ),
                                             borderRadius: BorderRadius.all(
-                                              Radius.circular(4),
+                                              Radius.circular(25),
                                             ),
                                           ),
                                         ),
@@ -261,10 +261,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                         minimumSize: WidgetStatePropertyAll(
                                           Size(double.infinity, 50.h),
                                         ),
+                                        elevation: WidgetStatePropertyAll(1),
                                       ),
                                       child:
                                           _isGoogleLoading
-                                              ? CircularProgressIndicator()
+                                              ? CircularProgressIndicator(
+                                                color: Colors.green,
+                                              )
                                               : Padding(
                                                 padding: const EdgeInsets.all(
                                                   8.0,
@@ -287,14 +290,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                                           ),
                                                         ),
                                                       ),
-
+                                                      SizedBox(width: 8),
                                                       Flexible(
                                                         flex: 10,
                                                         child: Text(
                                                           "Continue With Google",
                                                           style: TextStyle(
-                                                            fontSize: 18.sp,
-                                                            color: Colors.green,
+                                                            fontSize: 16.sp,
+                                                            color:
+                                                                Colors.black87,
+                                                            fontWeight:
+                                                                FontWeight.w600,
                                                           ),
                                                         ),
                                                       ),
@@ -304,6 +310,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                     ),
                                   ),
+
+                                  SizedBox(height: 8),
+
                                   TextButton(
                                     style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(
@@ -317,8 +326,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       "Don't have an account? Sign Up",
                                       style: TextStyle(
                                         decoration: TextDecoration.underline,
+                                        decorationColor: Colors.black,
+                                        decorationThickness: 1.5,
                                         color: Colors.black,
+                                        fontWeight: FontWeight.w500,
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ],
