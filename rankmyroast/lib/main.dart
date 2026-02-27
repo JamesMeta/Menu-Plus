@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rankmyroast/screens/home/home_screen.dart';
+import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
+import 'package:rankmyroast/screens/login/create_account_screen.dart';
+import 'package:rankmyroast/screens/login/login_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+const supabaseUrl = "https://ozmzpnayygajicxafxfm.supabase.co";
+const supabaseKey = "sb_publishable_zTr-mF2b6CCWgssJZEgMjQ_vUwB62oJ";
+const supabaseFunctionsVersion = 1.0;
+const sqliteTableVersion = 1.0;
+
+void main() async {
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
+  );
+
+  runApp(const MainApp());
+}
+
+final GoRouter _router = GoRouter(
+  routes: <RouteBase>[
+    GoRoute(path: '/', redirect: (_, __) => '/home'),
+    GoRoute(
+      path: '/home',
+      builder: (BuildContext context, GoRouterState state) {
+        return const HomeScreen();
+      },
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => LoginScreen(),
+      routes: [
+        GoRoute(
+          path: '/create-account',
+          builder: (context, state) => CreateAccountScreen(),
+          routes: [
+            GoRoute(
+              path: '/confirm-email',
+              builder:
+                  (context, state) =>
+                      ConfirmEmailScreen(extra: state.extra as List<String>),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+  redirect: (context, state) async {
+    //TODO
+    // Add a versioning check
+
+    final session = Supabase.instance.client.auth.currentSession;
+    final isLoggingIn = state.matchedLocation.startsWith('/login');
+    final isCreatingAccount = state.matchedLocation.startsWith(
+      '/create-account',
+    );
+    final isConfirmingEmail = state.matchedLocation.startsWith(
+      '/confirm-email',
+    );
+
+    if (session == null &&
+        !isLoggingIn &&
+        !isCreatingAccount &&
+        !isConfirmingEmail) {
+      return '/login';
+    }
+
+    if (session != null && isLoggingIn) {
+      return '/home';
+    }
+
+    return null;
+  },
+);
+
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ScreenUtilInit(
+      designSize: const Size(360, 800),
+      minTextAdapt: true,
+      builder:
+          (context, child) => MaterialApp.router(
+            title: 'MenuPlus',
+            routerConfig: _router,
+            theme: ThemeData(
+              brightness: Brightness.light,
+              fontFamily: "opensans",
+            ),
+            darkTheme: ThemeData(),
+          ),
+    );
+  }
+}
