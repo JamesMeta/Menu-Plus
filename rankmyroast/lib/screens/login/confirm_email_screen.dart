@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ConfirmEmailScreen extends StatefulWidget {
@@ -261,7 +262,8 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
 
       if (mounted) {
         if (response.session != null) {
-          context.go('/home');
+          await SupabaseHelper.addUser();
+          if (mounted) context.go('/home');
         } else {
           _resetLoadingState();
           ScaffoldMessenger.of(context).showSnackBar(

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
+import 'package:rankmyroast/screens/login/classes/login_screen_theme.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -74,21 +75,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                       children: [
                                         Text(
                                           "Rank My Roast",
-                                          style: TextStyle(
-                                            fontSize: 40.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style:
+                                              LoginScreenTheme.titleTextStyle,
                                           textAlign: TextAlign.center,
                                         ),
                                         Text(
                                           "Created By James Mata",
-                                          style: TextStyle(
-                                            fontSize: 8.spMin,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.start,
+                                          style:
+                                              LoginScreenTheme.creditTextStyle,
+                                          textAlign: TextAlign.center,
                                         ),
                                       ],
                                     ),
@@ -103,105 +98,106 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 ),
                               ),
 
+                              SizedBox(
+                                height: LoginScreenTheme.sizeBoxSpacingHeight,
+                              ),
+
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
                                     "Create Account",
                                     textAlign: TextAlign.start,
-                                    style: TextStyle(
-                                      fontSize: 30.spMax,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: LoginScreenTheme.sectionTitleStyle,
                                   ),
 
-                                  SizedBox(height: 1),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   Container(
-                                    height: 50.h,
-                                    width: double.infinity,
+                                    height:
+                                        LoginScreenTheme
+                                            .textFieldContainerHeight,
+                                    width:
+                                        LoginScreenTheme
+                                            .textFieldContainerWidth,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+                                    decoration:
+                                        LoginScreenTheme
+                                            .textFieldContainerDecoration,
                                     child: TextField(
                                       controller: _emailController,
-                                      decoration: InputDecoration(
-                                        labelText: "Email",
-                                        labelStyle: TextStyle(fontSize: 18),
-                                        isCollapsed: true,
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
+                                      decoration:
+                                          LoginScreenTheme.textfieldInputDecoration(
+                                            "Email",
+                                          ),
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   Container(
-                                    height: 50.h,
-                                    width: double.infinity,
+                                    height:
+                                        LoginScreenTheme
+                                            .textFieldContainerHeight,
+                                    width:
+                                        LoginScreenTheme
+                                            .textFieldContainerWidth,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+                                    decoration:
+                                        LoginScreenTheme
+                                            .textFieldContainerDecoration,
                                     child: TextField(
                                       controller: _passwordController,
-                                      decoration: InputDecoration(
-                                        labelText: "Password",
-                                        labelStyle: TextStyle(fontSize: 18),
-                                        isCollapsed: true,
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
+                                      decoration:
+                                          LoginScreenTheme.textfieldInputDecoration(
+                                            "Password",
+                                          ),
                                       obscureText: true,
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   Container(
-                                    height: 50.h,
-                                    width: double.infinity,
+                                    height:
+                                        LoginScreenTheme
+                                            .textFieldContainerHeight,
+                                    width:
+                                        LoginScreenTheme
+                                            .textFieldContainerWidth,
                                     alignment:
                                         Alignment
                                             .center, // Vertically centers the "collapsed" field
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+                                    decoration:
+                                        LoginScreenTheme
+                                            .textFieldContainerDecoration,
                                     child: TextField(
                                       controller: _confirmPasswordController,
-                                      decoration: InputDecoration(
-                                        labelText: "Confirm Password",
-                                        labelStyle: TextStyle(fontSize: 18),
-                                        isCollapsed: true,
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
+                                      decoration:
+                                          LoginScreenTheme.textfieldInputDecoration(
+                                            "Confirm Password",
+                                          ),
                                       obscureText: true,
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   SizedBox(
                                     width: double.infinity,
@@ -216,27 +212,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                           _isLoading = false;
                                         });
                                       },
-                                      style: ButtonStyle(
-                                        backgroundColor: WidgetStatePropertyAll(
-                                          Colors.white,
-                                        ),
-                                        shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: Colors.black,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(4),
-                                            ),
-                                          ),
-                                        ),
-                                        maximumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                        minimumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                      ),
+                                      style:
+                                          LoginScreenTheme.elevatedButtonStyle,
                                       child:
                                           _isLoading
                                               ? CircularProgressIndicator()
@@ -248,14 +225,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                                   "Create Account",
                                                   style: TextStyle(
                                                     fontSize: 18.sp,
-                                                    color: Colors.green,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
                                     ),
                                   ),
 
-                                  SizedBox(height: 2),
+                                  SizedBox(
+                                    height:
+                                        LoginScreenTheme.sizeBoxSpacingHeight,
+                                  ),
 
                                   SizedBox(
                                     width: double.infinity,
@@ -270,30 +251,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                           _isGoogleLoading = false;
                                         });
                                       },
-                                      style: ButtonStyle(
-                                        backgroundColor: WidgetStatePropertyAll(
-                                          Colors.white,
-                                        ),
-                                        padding: WidgetStatePropertyAll(
-                                          EdgeInsets.zero,
-                                        ),
-                                        shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: Colors.black,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(4),
-                                            ),
-                                          ),
-                                        ),
-                                        maximumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                        minimumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 50.h),
-                                        ),
-                                      ),
+                                      style:
+                                          LoginScreenTheme
+                                              .elevatedGoogleButtonStyle,
                                       child:
                                           _isGoogleLoading
                                               ? CircularProgressIndicator()
@@ -326,7 +286,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                                           "Continue With Google",
                                                           style: TextStyle(
                                                             fontSize: 18.sp,
-                                                            color: Colors.green,
+                                                            color: Colors.black,
+                                                            fontWeight:
+                                                                FontWeight.bold,
                                                           ),
                                                         ),
                                                       ),
@@ -462,7 +424,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final signInResponse = await signInWithGoogle();
     if (mounted) {
       if (signInResponse?.user?.role == "authenticated") {
-        context.go('/home');
+        await SupabaseHelper.addUser();
+        if (mounted) context.go('/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
