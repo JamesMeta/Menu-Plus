@@ -8,7 +8,7 @@ class LoginScreenTheme {
   //
 
   static final titleTextStyle = TextStyle(
-    fontSize: 40.sp,
+    fontSize: 38.sp,
     color: Colors.black,
     fontWeight: FontWeight.bold,
   );
@@ -35,6 +35,7 @@ class LoginScreenTheme {
     return InputDecoration(
       labelText: labelText,
       labelStyle: TextStyle(fontSize: 18),
+      floatingLabelBehavior: FloatingLabelBehavior.never,
 
       isCollapsed: true,
       contentPadding: EdgeInsets.symmetric(horizontal: 12),

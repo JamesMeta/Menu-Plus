@@ -42,4 +42,16 @@ class SupabaseHelper {
   static Future<void> authSignOut() async {
     await _client.auth.signOut();
   }
+
+  static Future<void> addUser() async {
+    final authId = _client.auth.currentUser?.id;
+
+    if (authId != null) {
+      try {
+        final response = await _client.from("user").insert({"auth_id": authId});
+      } on Exception catch (e) {
+        print(e);
+      }
+    }
+  }
 }

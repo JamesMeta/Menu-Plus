@@ -424,7 +424,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final signInResponse = await signInWithGoogle();
     if (mounted) {
       if (signInResponse?.user?.role == "authenticated") {
-        context.go('/home');
+        await SupabaseHelper.addUser();
+        if (mounted) context.go('/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
