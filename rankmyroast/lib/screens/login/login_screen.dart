@@ -307,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (mounted) {
         if (response.user?.role == "authenticated") {
-          context.go('/home');
+          context.go('/base');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -355,7 +355,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         if (signInResponse?.user?.role == "authenticated") {
           await SupabaseHelper.addUser();
-          if (mounted) context.go('/home');
+          if (mounted) context.go('/base');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

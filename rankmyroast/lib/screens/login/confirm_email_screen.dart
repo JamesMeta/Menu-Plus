@@ -263,7 +263,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
       if (mounted) {
         if (response.session != null) {
           await SupabaseHelper.addUser();
-          if (mounted) context.go('/home');
+          if (mounted) context.go('/base');
         } else {
           _resetLoadingState();
           ScaffoldMessenger.of(context).showSnackBar(

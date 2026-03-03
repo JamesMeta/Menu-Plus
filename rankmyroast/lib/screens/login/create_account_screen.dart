@@ -425,7 +425,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     if (mounted) {
       if (signInResponse?.user?.role == "authenticated") {
         await SupabaseHelper.addUser();
-        if (mounted) context.go('/home');
+        if (mounted) context.go('/base');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
