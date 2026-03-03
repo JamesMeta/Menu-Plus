@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rankmyroast/screens/home/home_screen.dart';
 import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/navigational_base_screen.dart';
+import 'package:rankmyroast/screens/settings/settings_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const supabaseUrl = "https://ozmzpnayygajicxafxfm.supabase.co";
@@ -26,11 +27,11 @@ void main() async {
 
 final GoRouter _router = GoRouter(
   routes: <RouteBase>[
-    GoRoute(path: '/', redirect: (_, __) => '/home'),
+    GoRoute(path: '/', redirect: (_, __) => '/base'),
     GoRoute(
-      path: '/home',
+      path: '/base',
       builder: (BuildContext context, GoRouterState state) {
-        return const HomeScreen();
+        return const NavigationalBaseScreen();
       },
     ),
     GoRoute(
@@ -50,6 +51,12 @@ final GoRouter _router = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (BuildContext context, GoRouterState state) {
+        return const SettingsScreen();
+      },
     ),
   ],
   redirect: (context, state) async {
@@ -73,7 +80,7 @@ final GoRouter _router = GoRouter(
     }
 
     if (session != null && isLoggingIn) {
-      return '/home';
+      return '/base';
     }
 
     return null;
