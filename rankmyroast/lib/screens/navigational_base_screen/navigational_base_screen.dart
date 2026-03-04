@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/calendar/calendar_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/groups_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/home/home_view.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/widgets/create_username_dialog_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/widgets/sign_out_dialog_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -38,6 +40,12 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
   ];
 
   @override
+  void initState() {
+    _handleUsername();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -48,7 +56,11 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
             icon: Icon(Icons.settings, color: Colors.white),
           ),
           IconButton(
-            onPressed: _signOutDialog,
+            onPressed:
+                () => showDialog(
+                  context: context,
+                  builder: (BuildContext context) => SignOutDialogWidget(),
+                ),
             icon: Icon(Icons.logout, color: Colors.white),
           ),
         ],
@@ -72,38 +84,20 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
     );
   }
 
-  void _signOutDialog() async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Logout"),
-          content: Text("Are you sure you want to logout?"),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await _signOut();
-              },
-              child: Text("Log Out"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _signOut() async {
-    await SupabaseHelper.authSignOut();
-    context.go('/login');
-  }
-
   void _goToSettings() {
     context.push("/settings");
+  }
+
+  Future<void> _handleUsername() async {
+    final hasUsername = await SupabaseHelper.checkForUsername();
+
+    if (hasUsername) {
+      return;
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => CreateUsernameDialogWidget(),
+      );
+    }
   }
 }

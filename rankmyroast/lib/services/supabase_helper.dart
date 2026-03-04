@@ -54,4 +54,75 @@ class SupabaseHelper {
       }
     }
   }
+
+  static Future<bool> checkForUsername() async {
+    final authId = _client.auth.currentUser?.id;
+    if (authId != null) {
+      try {
+        final response = await _client
+            .from("user")
+            .select("username")
+            .eq("auth_id", authId)
+            .single()
+            .limit(1);
+        final username = response["username"];
+        if (username == null) {
+          return false;
+        } else {
+          return true;
+        }
+      } on Exception catch (e) {
+        print(e);
+        return false;
+      }
+    }
+    throw Exception("User not logged in");
+  }
+
+  static Future<bool> checkUsernameUniqueness(final String username) async {
+    final authId = _client.auth.currentUser?.id;
+    if (authId != null) {
+      try {
+        final response = await _client
+            .from("user")
+            .select("username")
+            .eq("auth_id", authId)
+            .single()
+            .limit(1);
+
+        if (response["username"] != null) {
+          return false;
+        }
+        return true;
+      } on Exception catch (e) {
+        print(e);
+        return false;
+      }
+    }
+    throw Exception("User not logged in");
+  }
+
+  static Future<bool> setUsername(final String username) async {
+    final authId = _client.auth.currentUser?.id;
+    if (authId != null) {
+      try {
+        final response =
+            await _client
+                .from("user")
+                .update({"username": username})
+                .eq("auth_id", authId)
+                .select()
+                .single();
+
+        if (response["username"] != null) {
+          return true;
+        }
+        return false;
+      } on Exception catch (e) {
+        print(e);
+        return false;
+      }
+    }
+    throw Exception("User not logged in");
+  }
 }
