@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/calendar/calendar_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/groups_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/home/home_view.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/widgets/create_username_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/widgets/sign_out_dialog_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -95,49 +96,8 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
     } else {
       showDialog(
         context: context,
-        builder: (BuildContext context) {
-          return _createUsernameWidget(context);
-        },
+        builder: (BuildContext context) => CreateUsernameDialogWidget(),
       );
     }
-  }
-
-  Widget _createUsernameWidget(BuildContext context) {
-    final TextEditingController usernameController = TextEditingController();
-
-    return AlertDialog(
-      title: Text("Create Username"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "In order to collaborate on Rank My Roast you must first make a username",
-          ),
-          TextField(controller: usernameController),
-          ElevatedButton(
-            onPressed: () async {
-              final usernameSet = await _setUsername(usernameController.text);
-              if (usernameSet) {
-                Navigator.of(context).pop();
-              }
-            },
-            child: Text("Set Username"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _setUsername(final String username) async {
-    final validUsername = await SupabaseHelper.checkUsernameUniqueness(
-      username,
-    );
-
-    if (validUsername) {
-      final usernameUpdated = await SupabaseHelper.setUsername(username);
-      return usernameUpdated;
-    }
-
-    return false;
   }
 }
