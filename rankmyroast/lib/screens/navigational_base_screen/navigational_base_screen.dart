@@ -39,6 +39,12 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
   ];
 
   @override
+  void initState() {
+    _handleUsername();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -79,5 +85,59 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
 
   void _goToSettings() {
     context.push("/settings");
+  }
+
+  Future<void> _handleUsername() async {
+    final hasUsername = await SupabaseHelper.checkForUsername();
+
+    if (hasUsername) {
+      return;
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return _createUsernameWidget(context);
+        },
+      );
+    }
+  }
+
+  Widget _createUsernameWidget(BuildContext context) {
+    final TextEditingController usernameController = TextEditingController();
+
+    return AlertDialog(
+      title: Text("Create Username"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "In order to collaborate on Rank My Roast you must first make a username",
+          ),
+          TextField(controller: usernameController),
+          ElevatedButton(
+            onPressed: () async {
+              final usernameSet = await _setUsername(usernameController.text);
+              if (usernameSet) {
+                Navigator.of(context).pop();
+              }
+            },
+            child: Text("Set Username"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _setUsername(final String username) async {
+    final validUsername = await SupabaseHelper.checkUsernameUniqueness(
+      username,
+    );
+
+    if (validUsername) {
+      final usernameUpdated = await SupabaseHelper.setUsername(username);
+      return usernameUpdated;
+    }
+
+    return false;
   }
 }
