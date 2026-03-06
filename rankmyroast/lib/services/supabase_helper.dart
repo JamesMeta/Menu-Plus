@@ -1,3 +1,4 @@
+import 'package:rankmyroast/models/group.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseHelper {
@@ -47,6 +48,17 @@ class SupabaseHelper {
     final authId = _client.auth.currentUser?.id;
 
     if (authId != null) {
+      final existingUser =
+          await _client
+              .from("user")
+              .select("*")
+              .eq("auth_id", authId)
+              .maybeSingle();
+
+      if (existingUser?["auth_id"] != null) {
+        return;
+      }
+
       try {
         final response = await _client.from("user").insert({"auth_id": authId});
       } on Exception catch (e) {
@@ -59,13 +71,13 @@ class SupabaseHelper {
     final authId = _client.auth.currentUser?.id;
     if (authId != null) {
       try {
-        final response = await _client
-            .from("user")
-            .select("username")
-            .eq("auth_id", authId)
-            .single()
-            .limit(1);
-        final username = response["username"];
+        final response =
+            await _client
+                .from("user")
+                .select("username")
+                .eq("auth_id", authId)
+                .maybeSingle();
+        final username = response?["username"];
         if (username == null) {
           return false;
         } else {
@@ -83,14 +95,14 @@ class SupabaseHelper {
     final authId = _client.auth.currentUser?.id;
     if (authId != null) {
       try {
-        final response = await _client
-            .from("user")
-            .select("username")
-            .eq("auth_id", authId)
-            .single()
-            .limit(1);
+        final response =
+            await _client
+                .from("user")
+                .select("username")
+                .eq("auth_id", authId)
+                .maybeSingle();
 
-        if (response["username"] != null) {
+        if (response?["username"] != null) {
           return false;
         }
         return true;
@@ -121,6 +133,102 @@ class SupabaseHelper {
       } on Exception catch (e) {
         print(e);
         return false;
+      }
+    }
+    throw Exception("User not logged in");
+  }
+
+  static Future<String?> getPublicId() async {
+    final authId = _client.auth.currentUser?.id;
+    if (authId != null) {
+      try {
+        final response = await _client
+            .from("user")
+            .select("public_id")
+            .eq("auth_id", authId)
+            .single()
+            .limit(1);
+        return response["public_id"];
+      } on Exception catch (e) {
+        print(e);
+        return null;
+      }
+    }
+    throw Exception("User not logged in");
+  }
+
+  static Future<bool?> createPersonalGroup() async {
+    final authId = _client.auth.currentUser?.id;
+    final publicId = await getPublicId();
+    if (authId != null && publicId != null) {
+      try {
+        final existingGroup =
+            await _client
+                .from("group")
+                .select("*")
+                .eq("user_id", publicId)
+                .eq("is_personal_group", true)
+                .maybeSingle();
+
+        if (existingGroup?["id"] != null) {
+          return true;
+        }
+
+        final response =
+            await _client
+                .from("group")
+                .insert({
+                  "name": "Personal Group",
+                  "grade_visible": false,
+                  "use_rating": false,
+                  "is_personal_group": true,
+                  "user_id": publicId,
+                })
+                .select()
+                .single();
+
+        if (response["id"] != null) {
+          return true;
+        }
+        return false;
+      } on Exception catch (e) {
+        print(e);
+        return false;
+      }
+    }
+    throw Exception("User not logged in");
+  }
+
+  static Future<List<Group>?> getGroupsForUser() async {
+    final authId = _client.auth.currentUser?.id;
+    final publicId = await getPublicId();
+    if (publicId != null) {
+      try {
+        final response = await _client
+            .from("user_group")
+            .select(
+              "*, group_id:group(id, created_at, name, grade_visible, use_rating, is_personal_group, user_id)",
+            )
+            .eq("user_id", publicId);
+
+        final groups =
+            (response as List).map((group) {
+              final groupData = group["group_id"];
+              return Group(
+                id: groupData["id"],
+                created_at: groupData["created_at"],
+                name: groupData["name"],
+                grade_visible: groupData["grade_visible"],
+                use_rating: groupData["use_rating"],
+                is_personal_group: groupData["is_personal_group"],
+                user_id: groupData["user_id"],
+              );
+            }).toList();
+
+        return groups;
+      } on Exception catch (e) {
+        print(e);
+        return null;
       }
     }
     throw Exception("User not logged in");

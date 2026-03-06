@@ -263,6 +263,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
       if (mounted) {
         if (response.session != null) {
           await SupabaseHelper.addUser();
+          await SupabaseHelper.createPersonalGroup();
           if (mounted) context.go('/base');
         } else {
           _resetLoadingState();

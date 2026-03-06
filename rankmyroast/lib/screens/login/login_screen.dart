@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
 import 'package:rankmyroast/screens/login/classes/login_screen_theme.dart';
+import 'package:rankmyroast/screens/login/classes/sign_in_with_google.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -214,7 +215,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                         setState(() {
                                           _isGoogleLoading = true;
                                         });
-                                        await _handleSignInWithGoogle();
+                                        await SignInWithGoogle.handleSignInWithGoogle(
+                                          context,
+                                        );
                                         setState(() {
                                           _isGoogleLoading = false;
                                         });
@@ -347,63 +350,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     }
-  }
-
-  Future<void> _handleSignInWithGoogle() async {
-    try {
-      final signInResponse = await signInWithGoogle();
-      if (mounted) {
-        if (signInResponse?.user?.role == "authenticated") {
-          await SupabaseHelper.addUser();
-          if (mounted) context.go('/base');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'Error: Unable to sign in with Google at this time',
-              ),
-              behavior: SnackBarBehavior.floating, // Recommended for modern UI
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString().split("code: ").last}'),
-            behavior: SnackBarBehavior.floating, // Recommended for modern UI
-          ),
-        );
-      }
-    }
-  }
-
-  Future<AuthResponse?> signInWithGoogle() async {
-    final GoogleSignIn signIn = GoogleSignIn.instance;
-
-    await signIn.initialize(serverClientId: serverClientId);
-
-    final GoogleSignInAccount googleUser;
-    try {
-      googleUser = await GoogleSignIn.instance.authenticate();
-    } catch (e) {
-      return null;
-    }
-
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-    final idToken = googleAuth.idToken;
-
-    if (idToken == null) {
-      return null;
-    }
-
-    final response = SupabaseHelper.authSigninWithIdToken(
-      idToken,
-      OAuthProvider.google,
-    );
-
-    return response;
   }
 
   @override
