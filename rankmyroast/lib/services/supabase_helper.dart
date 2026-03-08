@@ -187,10 +187,25 @@ class SupabaseHelper {
                 .select()
                 .single();
 
-        if (response["id"] != null) {
-          return true;
+        if (response["id"] == null) {
+          return false;
         }
-        return false;
+
+        final userGroupResponse =
+            await _client
+                .from("user_group")
+                .insert({
+                  "user_id": publicId,
+                  "group_id": response["id"],
+                  "permission_level": 3,
+                })
+                .select()
+                .single();
+        if (userGroupResponse["id"] == null) {
+          return false;
+        }
+
+        return true;
       } on Exception catch (e) {
         print(e);
         return false;

@@ -72,15 +72,21 @@ final GoRouter _router = GoRouter(
       '/confirm-email',
     );
 
-    if (session == null &&
-        !isLoggingIn &&
-        !isCreatingAccount &&
-        !isConfirmingEmail) {
-      return '/login';
+    if (session?.refreshToken != null) {
+      try {
+        final response = await Supabase.instance.client.auth.refreshSession(
+          session?.refreshToken,
+        );
+        if (response.session != null) {
+          return '/base';
+        }
+      } on Exception catch (e) {
+        return '/login';
+      }
     }
 
-    if (session != null && isLoggingIn) {
-      return '/base';
+    if (!isLoggingIn && !isCreatingAccount && !isConfirmingEmail) {
+      return '/login';
     }
 
     return null;
