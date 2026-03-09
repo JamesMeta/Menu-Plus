@@ -35,7 +35,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
       body: SafeArea(
         top: false,
         bottom: false,

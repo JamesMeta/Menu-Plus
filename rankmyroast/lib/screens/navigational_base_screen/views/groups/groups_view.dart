@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/group_tile_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
@@ -25,7 +26,7 @@ class _GroupsViewState extends State<GroupsView> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -51,14 +52,13 @@ class _GroupsViewState extends State<GroupsView> {
                     ),
                     Expanded(child: SizedBox()),
                     IconButton(
-                      onPressed: () {
-                        //TODO
-                      },
+                      onPressed: createGroup,
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
+                          side: BorderSide(color: Colors.black, width: 1),
                         ),
                       ),
                     ),
@@ -94,14 +94,13 @@ class _GroupsViewState extends State<GroupsView> {
                     ),
                     Expanded(child: SizedBox()),
                     IconButton(
-                      onPressed: () {
-                        //TODO
-                      },
+                      onPressed: createGroup,
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
+                          side: BorderSide(color: Colors.black, width: 1),
                         ),
                       ),
                     ),
@@ -110,6 +109,7 @@ class _GroupsViewState extends State<GroupsView> {
               }
             },
           ),
+          SizedBox(height: 16.h),
           FutureBuilder(
             future: _groups,
             builder: (context, snapshot) {
@@ -132,9 +132,7 @@ class _GroupsViewState extends State<GroupsView> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        //TODO
-                      },
+                      onPressed: createGroup,
                       child: Text("Create Group"),
                     ),
                   ],
@@ -168,6 +166,10 @@ class _GroupsViewState extends State<GroupsView> {
         ],
       ),
     );
+  }
+
+  void createGroup() {
+    context.push("/base/create-group");
   }
 
   Future<List<Group>> _fetchGroups() async {

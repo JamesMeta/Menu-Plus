@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/models/group.dart';
 
 class GroupTileWidget extends StatelessWidget {
@@ -10,10 +11,31 @@ class GroupTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(group.name),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      tileColor: Colors.white24,
-      trailing: IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+      title: Text(
+        group.name,
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text(
+        "${group.number_of_members} members | ${group.number_of_recipes} recipes",
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.black, width: 1),
+      ),
+      tileColor: Colors.green,
+      trailing: IconButton(
+        onPressed: () {},
+        icon: Icon(Icons.more_vert, color: Colors.white, size: 20.sp),
+      ),
     );
   }
 }

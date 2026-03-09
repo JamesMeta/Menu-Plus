@@ -221,14 +221,27 @@ class SupabaseHelper {
       try {
         final response = await _client
             .from("user_group")
-            .select(
-              "*, group_id:group(id, created_at, name, grade_visible, use_rating, is_personal_group, user_id)",
-            )
+            .select('''
+      *,
+      group:group_id (
+        id, 
+        created_at, 
+        name, 
+        grade_visible, 
+        use_rating, 
+        is_personal_group, 
+        user_id,
+        recipe_count:recipe_group(count),
+        member_count:user_group(count)
+      )
+    ''')
             .eq("user_id", publicId);
 
         final groups =
             (response as List).map((group) {
-              final groupData = group["group_id"];
+              final groupData = group["group"];
+              final memberCount = groupData["member_count"][0]["count"];
+              final recipeCount = groupData["recipe_count"][0]["count"];
               return Group(
                 id: groupData["id"],
                 created_at: groupData["created_at"],
@@ -237,6 +250,8 @@ class SupabaseHelper {
                 use_rating: groupData["use_rating"],
                 is_personal_group: groupData["is_personal_group"],
                 user_id: groupData["user_id"],
+                number_of_members: memberCount,
+                number_of_recipes: recipeCount,
               );
             }).toList();
 
