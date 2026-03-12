@@ -12,14 +12,9 @@ class CreateGroupScreen extends StatefulWidget {
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final TextEditingController _groupNameController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
 
-  final users = [
-    "John Doe",
-    "Jane Smith",
-    "Alice Johnson",
-    "Bob Brown",
-    "Charlie Davis",
-  ];
+  final _users = [];
 
   bool _isCreatingGroup = false;
   bool _isUsingRating = false;
@@ -36,6 +31,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         centerTitle: true,
+
         foregroundColor: Colors.white,
         title: Text(
           "Create Group",
@@ -48,105 +44,101 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       ),
 
       extendBody: true,
-      body: Container(
-        decoration: BoxDecoration(color: Colors.white),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _groupNameController,
-                decoration: InputDecoration(
-                  labelText: "Group Name",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
+      body: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(color: Colors.green),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Group Name"),
 
-              Container(
-                width: 100,
-                height: 100,
-                child: Row(
+                TextField(
+                  controller: _groupNameController,
+                  decoration: InputDecoration(
+                    labelText: "Group Name",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                SwitchListTile(
+                  title: Text("Show Rankings"),
+                  subtitle: Text(
+                    "Display recipe rankings to group members",
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  ),
+                  value: _showRatings,
+                  onChanged: (value) {
+                    setState(() {
+                      _showRatings = value;
+                    });
+                  },
+                ),
+
+                SwitchListTile(
+                  title: Text("Use Ratings"),
+                  subtitle: Text(
+                    "Use a rating system instead of a ranking system",
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  ),
+                  value: _isUsingRating,
+                  onChanged: (value) {
+                    setState(() {
+                      _isUsingRating = value;
+                    });
+                  },
+                ),
+
+                SizedBox(height: 16),
+                Text("Group Members"),
+                ListView(
+                  shrinkWrap: true,
+
+                  children:
+                      _users
+                          .map(
+                            (user) => CheckboxListTile(
+                              title: Text(user),
+                              value: false,
+                              onChanged: (value) {
+                                // Handle user selection
+                              },
+                            ),
+                          )
+                          .toList(),
+                ),
+
+                Row(
                   children: [
-                    SwitchListTile(
-                      title: Text("Show Rankings"),
-                      value: _showRatings,
-                      onChanged: (value) {
+                    Expanded(child: TextField(controller: _userNameController)),
+                    IconButton(
+                      onPressed: () {
                         setState(() {
-                          _isUsingRating = value;
+                          _users.add(_userNameController.text);
                         });
                       },
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: const Icon(
-                        Icons.info_outline,
-                        size: 18,
-                        color: Colors.grey,
+                      icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          side: BorderSide(color: Colors.black, width: 1),
+                        ),
                       ),
-                      onPressed: () {
-                        _showRankingInfoDialog(context);
-                      },
                     ),
                   ],
                 ),
-              ),
 
-              Container(
-                width: 100,
-                height: 100,
-                child: Row(
-                  children: [
-                    SwitchListTile(
-                      title: Text("Use Ratings"),
-                      value: _isUsingRating,
-                      onChanged: (value) {
-                        setState(() {
-                          _isUsingRating = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: const Icon(
-                        Icons.info_outline,
-                        size: 18,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        _showRatingInfoDialog(context);
-                      },
-                    ),
-                  ],
+                ElevatedButton(
+                  onPressed: () {
+                    //TODO
+                  },
+                  child: Text("Create Group"),
                 ),
-              ),
-              SizedBox(height: 16),
-              ListView(
-                shrinkWrap: true,
-                children:
-                    users
-                        .map(
-                          (user) => CheckboxListTile(
-                            title: Text(user),
-                            value: false,
-                            onChanged: (value) {
-                              // Handle user selection
-                            },
-                          ),
-                        )
-                        .toList(),
-              ),
-
-              ElevatedButton(
-                onPressed: () {
-                  //TODO
-                },
-                child: Text("Create Group"),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
