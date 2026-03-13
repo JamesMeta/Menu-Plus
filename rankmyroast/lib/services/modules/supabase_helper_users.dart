@@ -3,6 +3,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseHelperUsers {
   static final _client = Supabase.instance.client;
 
+  String getAuthId() {
+    final authId = _client.auth.currentUser?.id;
+
+    if (authId == null) {
+      throw Exception("User not logged in");
+    }
+    return authId;
+  }
+
   Future<void> addUser() async {
     final authId = _client.auth.currentUser?.id;
 
@@ -58,7 +67,7 @@ class SupabaseHelperUsers {
             await _client
                 .from("user")
                 .select("username")
-                .eq("auth_id", authId)
+                .eq("username", username)
                 .maybeSingle();
 
         if (response?["username"] != null) {
@@ -92,25 +101,6 @@ class SupabaseHelperUsers {
       } on Exception catch (e) {
         print(e);
         return false;
-      }
-    }
-    throw Exception("User not logged in");
-  }
-
-  Future<String?> getPublicId() async {
-    final authId = _client.auth.currentUser?.id;
-    if (authId != null) {
-      try {
-        final response = await _client
-            .from("user")
-            .select("public_id")
-            .eq("auth_id", authId)
-            .single()
-            .limit(1);
-        return response["public_id"];
-      } on Exception catch (e) {
-        print(e);
-        return null;
       }
     }
     throw Exception("User not logged in");

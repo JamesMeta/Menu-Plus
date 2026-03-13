@@ -20,7 +20,7 @@ class GroupTileWidget extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        "${group.number_of_members} members | ${group.number_of_recipes} recipes",
+        "${group.groupMembers.length} members | ${group.recipes.length} recipes",
         style: TextStyle(
           fontSize: 12.sp,
           color: Colors.white,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rankmyroast/models/group_member.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
 
 class GroupMemberListTile extends StatefulWidget {
   final GroupMember groupMember;
@@ -25,15 +26,18 @@ class _GroupMemberListTileState extends State<GroupMemberListTile> {
     3: "Read, Write & Modify",
   };
 
+  late Future<bool> isValid;
+
   @override
   void initState() {
     super.initState();
+    isValid = _isUsernameReal();
   }
 
   @override
   void didUpdateWidget(covariant GroupMemberListTile oldWidget) {
-    if (oldWidget.groupMember.securityLevel !=
-        widget.groupMember.securityLevel) {
+    if (oldWidget.groupMember.permissionLevel !=
+        widget.groupMember.permissionLevel) {
       setState(() {});
     }
     super.didUpdateWidget(oldWidget);
@@ -43,6 +47,24 @@ class _GroupMemberListTileState extends State<GroupMemberListTile> {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        FutureBuilder(
+          future: isValid,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.error != null) {
+              return Icon(Icons.dangerous_outlined);
+            } else {
+              print(snapshot.data);
+              if (snapshot.data == true) {
+                return Icon(Icons.check_box);
+              } else {
+                return Icon(Icons.dangerous_outlined);
+              }
+            }
+          },
+        ),
         Text(widget.groupMember.username),
         Expanded(child: SizedBox()),
 
@@ -54,7 +76,7 @@ class _GroupMemberListTileState extends State<GroupMemberListTile> {
                         DropdownMenuEntry(value: entry.key, label: entry.value),
                   )
                   .toList(),
-          initialSelection: widget.groupMember.securityLevel,
+          initialSelection: widget.groupMember.permissionLevel,
           onSelected: (value) {
             widget.modifySecurityLevelCallBack(widget.groupMember, value ?? 1);
           },
@@ -65,6 +87,12 @@ class _GroupMemberListTileState extends State<GroupMemberListTile> {
           icon: Icon(Icons.delete),
         ),
       ],
+    );
+  }
+
+  Future<bool> _isUsernameReal() async {
+    return !await SupabaseHelper.users.checkUsernameUniqueness(
+      widget.groupMember.username,
     );
   }
 }

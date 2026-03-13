@@ -1,5 +1,6 @@
 import 'package:rankmyroast/models/create_group_response.dart';
 import 'package:rankmyroast/models/group.dart';
+import 'package:rankmyroast/models/group_member.dart';
 import 'package:rankmyroast/services/modules/supabase_helper_users.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,14 +10,13 @@ class SupabaseHelperGroups {
 
   Future<bool?> createPersonalGroup() async {
     final authId = _client.auth.currentUser?.id;
-    final publicId = await SupabaseHelper.users.getPublicId();
-    if (authId != null && publicId != null) {
+    if (authId != null) {
       try {
         final existingGroup =
             await _client
                 .from("group")
                 .select("*")
-                .eq("user_id", publicId)
+                .eq("user_id", authId)
                 .eq("is_personal_group", true)
                 .maybeSingle();
 
@@ -32,7 +32,7 @@ class SupabaseHelperGroups {
                   "grade_visible": false,
                   "use_rating": false,
                   "is_personal_group": true,
-                  "user_id": publicId,
+                  "user_id": authId,
                 })
                 .select()
                 .single();
@@ -45,7 +45,7 @@ class SupabaseHelperGroups {
             await _client
                 .from("user_group")
                 .insert({
-                  "user_id": publicId,
+                  "user_id": authId,
                   "group_id": response["id"],
                   "permission_level": 3,
                 })
@@ -66,44 +66,14 @@ class SupabaseHelperGroups {
 
   Future<List<Group>?> getGroupsForUser() async {
     final authId = _client.auth.currentUser?.id;
-    final publicId = await SupabaseHelper.users.getPublicId();
-    if (publicId != null) {
+    if (authId != null) {
       try {
-        final response = await _client
-            .from("user_group")
-            .select('''
-      *,
-      group:group_id (
-        id, 
-        created_at, 
-        name, 
-        grade_visible, 
-        use_rating, 
-        is_personal_group, 
-        user_id,
-        recipes:recipe_group(id, created_at, recipe_id, group_id, recipe:recipe(id, created_at, name, avatar_url, ingredients, instructions, is_public, user_id)),
-        members:user_group(id, created_at, group_id, user_id, permission_level, user:user(id, created_at, auth_id, public_id, username, is_public))
-      ),
-    ''')
-            .eq("user_id", publicId);
+        // Not sure if this is the best way to do this,
+        // in theory it should work because RLS should only return groups the user is a member of
+        final response = await _client.from("full_group_details").select();
 
-        final groups =
-            (response as List).map((group) {
-              final groupData = group["group"];
-              final memberCount = groupData["member_count"][0]["count"];
-              final recipeCount = groupData["recipe_count"][0]["count"];
-              return Group(
-                id: groupData["id"],
-                created_at: groupData["created_at"],
-                name: groupData["name"],
-                grade_visible: groupData["grade_visible"],
-                use_rating: groupData["use_rating"],
-                is_personal_group: groupData["is_personal_group"],
-                user_id: groupData["user_id"],
-                number_of_members: memberCount,
-                number_of_recipes: recipeCount,
-              );
-            }).toList();
+        final List<Group> groups =
+            (response as List).map((data) => Group.fromMap(data)).toList();
 
         return groups;
       } on Exception catch (e) {
@@ -116,39 +86,84 @@ class SupabaseHelperGroups {
 
   Future<CreateGroupResponse> createGroup(Group group) async {
     final authId = _client.auth.currentUser?.id;
-    final publicId = await SupabaseHelper.users.getPublicId();
 
-    if (authId != null && publicId != null) {
+    if (authId != null) {
       try {
+        // Add the group to the database
+
         final response =
             await _client
                 .from("group")
                 .insert({
                   "name": group.name,
-                  "grade_visible": group.grade_visible,
-                  "use_rating": group.use_rating,
+                  "grade_visible": group.gradeVisible,
+                  "use_rating": group.useRating,
                   "is_personal_group": false,
-                  "user_id": publicId,
+                  "user_id": authId,
                 })
                 .select()
                 .single();
 
         if (response["id"] == null) {
-          return CreateGroupResponse(
-            success: false,
-          );
+          return CreateGroupResponse(success: false);
         }
 
-        for(final groupMember in group.)
+        // Add self to group
 
+        final selfAddResponse =
+            await _client
+                .from("user_group")
+                .insert({
+                  "group_id": response["id"],
+                  "user_id": authId,
+                  "permission_level": 3,
+                })
+                .select()
+                .single();
 
+        if (selfAddResponse["id"] == null) {
+          await _client.from("group").delete().eq("group_id", response["id"]);
 
+          return CreateGroupResponse(success: false);
+        }
+
+        // Add the users to group
+
+        final List<GroupMember> failedAdditions = [];
+
+        for (var user in group.groupMembers) {
+          final userAuthId =
+              await _client
+                  .from("user")
+                  .select("auth_id")
+                  .eq("username", user.username)
+                  .limit(1)
+                  .single();
+          final userGroupResponse =
+              await _client
+                  .from("user_group")
+                  .insert({
+                    "group_id": response["id"],
+                    "user_id": userAuthId["auth_id"],
+                    "permission_level": user.permissionLevel,
+                  })
+                  .select()
+                  .single();
+
+          if (userGroupResponse["id"] == null) {
+            failedAdditions.add(user);
+          }
+        }
+
+        return CreateGroupResponse(
+          success: true,
+          failedToAddMembers: failedAdditions,
+        );
       } on Exception catch (e) {
         print(e);
-        return CreateGroupResponse(
-            success: false,
-          );
+        return CreateGroupResponse(success: false);
       }
     }
+    throw Exception("User not logged in");
   }
 }

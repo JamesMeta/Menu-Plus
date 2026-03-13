@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/group_member.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_member_list_tile.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/show_ranking_info_dialog.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/show_rating_info_dialog.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
@@ -148,7 +150,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   void _addNameToGroupMembers(String name) {
     setState(() {
-      _users.add(GroupMember(username: name, securityLevel: 1));
+      _users.add(GroupMember(username: name, permissionLevel: 1));
       _userNameController.clear();
     });
   }
@@ -172,7 +174,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     int newSecurityLevel,
   ) {
     setState(() {
-      groupMember.securityLevel = newSecurityLevel;
+      groupMember.permissionLevel = newSecurityLevel;
     });
   }
 
@@ -181,14 +183,44 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       _isCreatingGroup = true;
     });
 
-    await Future.delayed(Duration(seconds: 2));
+    final group = Group(
+      id: "NA",
+      createdAt: "NA",
+      name: _groupNameController.text,
+      gradeVisible: _showRatings,
+      useRating: _isUsingRating,
+      isPersonalGroup: false,
+      userId: SupabaseHelper.users.getAuthId(),
+      groupMembers: _users,
+      recipes: [],
+    );
+
+    final response = await SupabaseHelper.groups.createGroup(group);
 
     setState(() {
       _isCreatingGroup = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Group '${_groupNameController.text}' created!")),
-    );
+    if (response.success) {
+      final failedMembers = response.failedToAddMembers;
+
+      if (failedMembers != null) {
+        for (var failedMember in failedMembers) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to add ${failedMember.username}")),
+          );
+        }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Group '${_groupNameController.text}' created!"),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to create group")));
+    }
   }
 }
