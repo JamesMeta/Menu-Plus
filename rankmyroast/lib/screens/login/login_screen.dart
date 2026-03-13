@@ -303,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     try {
-      final response = await SupabaseHelper.authSigninWithPassword(
+      final response = await SupabaseHelper.auth.authSigninWithPassword(
         email,
         password,
       );

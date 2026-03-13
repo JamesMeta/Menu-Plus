@@ -1,5 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:rankmyroast/models/group_member.dart';
+import 'package:rankmyroast/models/recipe.dart';
+
 class Group {
   final String id;
   final String created_at;
@@ -8,8 +11,8 @@ class Group {
   final bool grade_visible;
   final bool use_rating;
   final bool is_personal_group;
-  final int number_of_members;
-  final int number_of_recipes;
+  final List<GroupMember> groupMembers;
+  final List<Recipe> recipes;
 
   Group({
     required this.id,
@@ -19,7 +22,7 @@ class Group {
     required this.use_rating,
     required this.is_personal_group,
     required this.user_id,
-    required this.number_of_members,
-    required this.number_of_recipes,
+    required this.groupMembers,
+    required this.recipes,
   });
 }

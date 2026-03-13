@@ -173,7 +173,7 @@ class _GroupsViewState extends State<GroupsView> {
   }
 
   Future<List<Group>> _fetchGroups() async {
-    final groups = await SupabaseHelper.getGroupsForUser();
+    final groups = await SupabaseHelper.groups.getGroupsForUser();
 
     if (groups == null) {
       return [];

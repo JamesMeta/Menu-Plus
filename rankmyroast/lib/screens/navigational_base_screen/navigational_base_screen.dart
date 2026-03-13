@@ -113,7 +113,7 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
   }
 
   Future<void> _handleUsername() async {
-    final hasUsername = await SupabaseHelper.checkForUsername();
+    final hasUsername = await SupabaseHelper.users.checkForUsername();
 
     if (hasUsername) {
       return;

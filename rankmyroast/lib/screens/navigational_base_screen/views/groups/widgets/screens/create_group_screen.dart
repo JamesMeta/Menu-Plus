@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rankmyroast/models/group_member.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_member_list_tile.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/show_ranking_info_dialog.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/show_rating_info_dialog.dart';
 
@@ -14,7 +16,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final TextEditingController _groupNameController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
 
-  final _users = [];
+  final List<GroupMember> _users = [];
 
   bool _isCreatingGroup = false;
   bool _isUsingRating = false;
@@ -99,12 +101,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   children:
                       _users
                           .map(
-                            (user) => CheckboxListTile(
-                              title: Text(user),
-                              value: false,
-                              onChanged: (value) {
-                                // Handle user selection
-                              },
+                            (user) => GroupMemberListTile(
+                              groupMember: user,
+                              deleteTileCallBack: _deleteGroupMember,
+                              modifySecurityLevelCallBack:
+                                  _modifyGroupMemberSecurityLevel,
                             ),
                           )
                           .toList(),
@@ -115,9 +116,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     Expanded(child: TextField(controller: _userNameController)),
                     IconButton(
                       onPressed: () {
-                        setState(() {
-                          _users.add(_userNameController.text);
-                        });
+                        if (_userNameController.text.isNotEmpty) {
+                          _addNameToGroupMembers(_userNameController.text);
+                        }
                       },
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
                       style: IconButton.styleFrom(
@@ -133,7 +134,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
                 ElevatedButton(
                   onPressed: () {
-                    //TODO
+                    _createGroup();
                   },
                   child: Text("Create Group"),
                 ),
@@ -145,11 +146,49 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
+  void _addNameToGroupMembers(String name) {
+    setState(() {
+      _users.add(GroupMember(username: name, securityLevel: 1));
+      _userNameController.clear();
+    });
+  }
+
+  void _deleteGroupMember(GroupMember groupMember) {
+    setState(() {
+      _users.remove(groupMember);
+    });
+  }
+
   void _showRankingInfoDialog(BuildContext context) {
     showDialog(context: context, builder: (context) => ShowRankingInfoDialog());
   }
 
   void _showRatingInfoDialog(BuildContext context) {
     showDialog(context: context, builder: (context) => ShowRatingInfoDialog());
+  }
+
+  void _modifyGroupMemberSecurityLevel(
+    GroupMember groupMember,
+    int newSecurityLevel,
+  ) {
+    setState(() {
+      groupMember.securityLevel = newSecurityLevel;
+    });
+  }
+
+  Future<void> _createGroup() async {
+    setState(() {
+      _isCreatingGroup = true;
+    });
+
+    await Future.delayed(Duration(seconds: 2));
+
+    setState(() {
+      _isCreatingGroup = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Group '${_groupNameController.text}' created!")),
+    );
   }
 }

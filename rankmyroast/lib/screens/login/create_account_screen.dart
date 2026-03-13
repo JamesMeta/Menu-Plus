@@ -373,7 +373,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
 
     try {
-      final response = await SupabaseHelper.authSignupWithPassword(
+      final response = await SupabaseHelper.auth.authSignupWithPassword(
         email,
         password,
       );

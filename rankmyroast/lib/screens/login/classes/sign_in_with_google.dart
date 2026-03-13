@@ -14,8 +14,8 @@ class SignInWithGoogle {
       final signInResponse = await signInWithGoogle();
       if (context.mounted) {
         if (signInResponse?.user?.role == "authenticated") {
-          await SupabaseHelper.addUser();
-          await SupabaseHelper.createPersonalGroup();
+          await SupabaseHelper.users.addUser();
+          await SupabaseHelper.groups.createPersonalGroup();
           if (context.mounted) context.go('/base');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +59,7 @@ class SignInWithGoogle {
       return null;
     }
 
-    final response = SupabaseHelper.authSigninWithIdToken(
+    final response = SupabaseHelper.auth.authSigninWithIdToken(
       idToken,
       OAuthProvider.google,
     );

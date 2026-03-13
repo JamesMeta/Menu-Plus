@@ -81,7 +81,7 @@ class _CreateUsernameDialogWidgetState
 
   Future<bool> _isUsernameValid(final String username) async {
     final usernameRegex = RegExp(r'^[a-zA-Z0-9_]+$');
-    final validUsername = await SupabaseHelper.checkUsernameUniqueness(
+    final validUsername = await SupabaseHelper.users.checkUsernameUniqueness(
       username,
     );
 
@@ -93,7 +93,7 @@ class _CreateUsernameDialogWidgetState
       return false;
     }
 
-    final usernameUpdated = await SupabaseHelper.setUsername(username);
+    final usernameUpdated = await SupabaseHelper.users.setUsername(username);
     return usernameUpdated;
   }
 }

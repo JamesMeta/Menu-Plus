@@ -31,7 +31,7 @@ class SignOutDialogWidget extends StatelessWidget {
   }
 
   Future<void> _signOut(BuildContext context) async {
-    await SupabaseHelper.authSignOut();
+    await SupabaseHelper.auth.authSignOut();
     context.go("/login");
   }
 }
