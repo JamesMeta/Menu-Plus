@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+const serverClientId =
+    "474584121880-5f7qh4hd4eonbpirt35mnddrlmahma9n.apps.googleusercontent.com";
+
+class SignInWithGoogle {
+  static Future<void> handleSignInWithGoogle(BuildContext context) async {
+    try {
+      final signInResponse = await signInWithGoogle();
+      if (context.mounted) {
+        if (signInResponse?.user?.role == "authenticated") {
+          await SupabaseHelper.users.addUser();
+          await SupabaseHelper.groups.createPersonalGroup();
+          if (context.mounted) context.go('/base');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Error: Unable to sign in with Google at this time',
+              ),
+              behavior: SnackBarBehavior.floating, // Recommended for modern UI
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString().split("code: ").last}'),
+            behavior: SnackBarBehavior.floating, // Recommended for modern UI
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<AuthResponse?> signInWithGoogle() async {
+    final GoogleSignIn signIn = GoogleSignIn.instance;
+
+    await signIn.initialize(serverClientId: serverClientId);
+
+    final GoogleSignInAccount googleUser;
+    try {
+      googleUser = await GoogleSignIn.instance.authenticate();
+    } catch (e) {
+      return null;
+    }
+
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+    final idToken = googleAuth.idToken;
+
+    if (idToken == null) {
+      return null;
+    }
+
+    final response = SupabaseHelper.auth.authSigninWithIdToken(
+      idToken,
+      OAuthProvider.google,
+    );
+
+    return response;
+  }
+}

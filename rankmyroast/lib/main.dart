@@ -5,6 +5,7 @@ import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/navigational_base_screen.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/create_group_screen.dart';
 import 'package:rankmyroast/screens/settings/settings_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -33,6 +34,12 @@ final GoRouter _router = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return const NavigationalBaseScreen();
       },
+      routes: [
+        GoRoute(
+          path: '/create-group',
+          builder: (context, state) => const CreateGroupScreen(),
+        ),
+      ],
     ),
     GoRoute(
       path: '/login',
@@ -72,15 +79,23 @@ final GoRouter _router = GoRouter(
       '/confirm-email',
     );
 
-    if (session == null &&
-        !isLoggingIn &&
-        !isCreatingAccount &&
-        !isConfirmingEmail) {
-      return '/login';
+    if (session?.refreshToken != null) {
+      try {
+        final response = await Supabase.instance.client.auth.refreshSession(
+          session?.refreshToken,
+        );
+        if (response.session != null && isLoggingIn) {
+          return '/base';
+        } else {
+          return null;
+        }
+      } on Exception catch (e) {
+        return '/login';
+      }
     }
 
-    if (session != null && isLoggingIn) {
-      return '/base';
+    if (!isLoggingIn && !isCreatingAccount && !isConfirmingEmail) {
+      return '/login';
     }
 
     return null;

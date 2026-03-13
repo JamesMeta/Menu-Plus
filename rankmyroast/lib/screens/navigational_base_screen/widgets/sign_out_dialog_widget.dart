@@ -10,25 +10,28 @@ class SignOutDialogWidget extends StatelessWidget {
     return AlertDialog(
       title: Text("Logout"),
       content: Text("Are you sure you want to logout?"),
+      actionsAlignment: MainAxisAlignment.center,
       actions: [
         ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
           onPressed: () {
             Navigator.of(context).pop();
           },
           child: Text("Cancel"),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
           onPressed: () async {
             await _signOut(context);
           },
-          child: Text("Log Out"),
+          child: Text("Log Out", style: TextStyle(color: Colors.white)),
         ),
       ],
     );
   }
 
   Future<void> _signOut(BuildContext context) async {
-    await SupabaseHelper.authSignOut();
+    await SupabaseHelper.auth.authSignOut();
     context.go("/login");
   }
 }
