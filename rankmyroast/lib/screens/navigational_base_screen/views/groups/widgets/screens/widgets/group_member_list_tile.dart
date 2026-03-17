@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/models/group_member.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
@@ -45,48 +46,63 @@ class _GroupMemberListTileState extends State<GroupMemberListTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        FutureBuilder(
-          future: isValid,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.error != null) {
-              return Icon(Icons.dangerous_outlined);
-            } else {
-              print(snapshot.data);
-              if (snapshot.data == true) {
-                return Icon(Icons.check_box);
-              } else {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+
+      child: Row(
+        children: [
+          FutureBuilder(
+            future: isValid,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.error != null) {
                 return Icon(Icons.dangerous_outlined);
+              } else {
+                if (snapshot.data == true) {
+                  return Icon(Icons.check_box);
+                } else {
+                  return Icon(Icons.dangerous_outlined);
+                }
               }
-            }
-          },
-        ),
-        Text(widget.groupMember.username),
-        Expanded(child: SizedBox()),
+            },
+          ),
+          Text(widget.groupMember.username),
+          Expanded(child: SizedBox()),
 
-        DropdownMenu(
-          dropdownMenuEntries:
-              securityLevelToRole.entries
-                  .map(
-                    (entry) =>
-                        DropdownMenuEntry(value: entry.key, label: entry.value),
-                  )
-                  .toList(),
-          initialSelection: widget.groupMember.permissionLevel,
-          onSelected: (value) {
-            widget.modifySecurityLevelCallBack(widget.groupMember, value ?? 1);
-          },
-        ),
+          DropdownMenu(
+            width: 195.w,
+            textStyle: TextStyle(fontSize: 14, overflow: TextOverflow.ellipsis),
+            inputDecorationTheme: const InputDecorationTheme(
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+            ),
+            dropdownMenuEntries:
+                securityLevelToRole.entries
+                    .map(
+                      (entry) => DropdownMenuEntry(
+                        value: entry.key,
+                        label: entry.value,
+                      ),
+                    )
+                    .toList(),
+            initialSelection: widget.groupMember.permissionLevel,
+            onSelected: (value) {
+              widget.modifySecurityLevelCallBack(
+                widget.groupMember,
+                value ?? 1,
+              );
+            },
+          ),
 
-        IconButton(
-          onPressed: () => widget.deleteTileCallBack(widget.groupMember),
-          icon: Icon(Icons.delete),
-        ),
-      ],
+          IconButton(
+            onPressed: () => widget.deleteTileCallBack(widget.groupMember),
+            icon: Icon(Icons.delete),
+          ),
+        ],
+      ),
     );
   }
 

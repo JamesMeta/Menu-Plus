@@ -10,31 +10,34 @@ class GroupTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(
-        group.name,
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+      child: ListTile(
+        title: Text(
+          group.name,
+          style: TextStyle(
+            fontSize: 16.sp,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      subtitle: Text(
-        "${group.groupMembers.length} members | ${group.recipes.length} recipes",
-        style: TextStyle(
-          fontSize: 12.sp,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+        subtitle: Text(
+          "${group.groupMembers.length} members | ${group.recipes.length} recipes",
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.black, width: 1),
-      ),
-      tileColor: Colors.green,
-      trailing: IconButton(
-        onPressed: () {},
-        icon: Icon(Icons.more_vert, color: Colors.white, size: 20.sp),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.black, width: 1),
+        ),
+        tileColor: Colors.green,
+        trailing: IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.more_vert, color: Colors.white, size: 20.sp),
+        ),
       ),
     );
   }
