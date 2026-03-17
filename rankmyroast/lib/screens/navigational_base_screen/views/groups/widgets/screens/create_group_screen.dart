@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/group_member.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_member_list_tile.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/show_ranking_info_dialog.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/show_rating_info_dialog.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class CreateGroupScreen extends StatefulWidget {
@@ -143,72 +141,100 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   ),
                 ),
                 SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              "Username",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 16.w),
-
-                            Text(
-                              "Permission Level",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Expanded(child: SizedBox()),
-                            Text(
-                              "Remove",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                _users.isEmpty
+                    ? SizedBox()
+                    : Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      ListView(
-                        shrinkWrap: true,
-                        padding:
-                            _users.isEmpty
-                                ? EdgeInsets.all(8)
-                                : EdgeInsets.zero,
-
-                        children:
-                            _users
-                                .map(
-                                  (user) => GroupMemberListTile(
-                                    groupMember: user,
-                                    deleteTileCallBack: _deleteGroupMember,
-                                    modifySecurityLevelCallBack:
-                                        _modifyGroupMemberSecurityLevel,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    "Valid",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                )
-                                .toList(),
-                      ),
-                    ],
-                  ),
-                ),
+                                ),
 
-                SizedBox(height: 24),
+                                Expanded(
+                                  flex: 8,
+                                  child: Text(
+                                    "Username",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+
+                                Expanded(
+                                  flex: 6,
+                                  child: Text(
+                                    "Permissions",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+
+                                Expanded(flex: 3, child: SizedBox()),
+                              ],
+                            ),
+                          ),
+                          Divider(color: Colors.black, height: 1),
+                          Container(
+                            constraints: BoxConstraints(
+                              minHeight: 20.h,
+                              maxHeight: 150.h,
+                            ),
+                            child: ListView(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+
+                              children:
+                                  _users
+                                      .map(
+                                        (user) => GroupMemberListTile(
+                                          groupMember: user,
+                                          deleteTileCallBack:
+                                              _deleteGroupMember,
+                                          modifySecurityLevelCallBack:
+                                              _modifyGroupMemberSecurityLevel,
+                                        ),
+                                      )
+                                      .toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                SizedBox(height: 12),
 
                 Row(
                   children: [
                     Expanded(
+                      flex: 17,
                       child: Container(
                         height: 42.h,
                         alignment: Alignment.center,
@@ -234,18 +260,26 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        if (_userNameController.text.isNotEmpty) {
-                          _addNameToGroupMembers(_userNameController.text);
-                        }
-                      },
-                      icon: Icon(Icons.add, color: Colors.white, size: 26.sp),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                          side: BorderSide(color: Colors.black, width: 1),
+                    Expanded(
+                      flex: 3,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+
+                        onPressed: () {
+                          if (_userNameController.text.isNotEmpty) {
+                            _addNameToGroupMembers(_userNameController.text);
+                          }
+                        },
+                        icon: Icon(Icons.add, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size(0, 42.h),
+
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            side: BorderSide(color: Colors.black, width: 1),
+                          ),
                         ),
                       ),
                     ),
@@ -296,14 +330,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     setState(() {
       _users.remove(groupMember);
     });
-  }
-
-  void _showRankingInfoDialog(BuildContext context) {
-    showDialog(context: context, builder: (context) => ShowRankingInfoDialog());
-  }
-
-  void _showRatingInfoDialog(BuildContext context) {
-    showDialog(context: context, builder: (context) => ShowRatingInfoDialog());
   }
 
   void _modifyGroupMemberSecurityLevel(
