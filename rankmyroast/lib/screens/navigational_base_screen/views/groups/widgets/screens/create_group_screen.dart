@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/group_member.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_member_list_tile.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_security_informational_dialog.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class CreateGroupScreen extends StatefulWidget {
@@ -103,6 +105,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     children: [
                       SwitchListTile(
                         title: Text("Show Rankings"),
+                        activeColor: Colors.green,
                         subtitle: Text(
                           "Display recipe rankings to group members",
                           style: TextStyle(fontSize: 12.sp, color: Colors.grey),
@@ -117,6 +120,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
                       SwitchListTile(
                         title: Text("Use Ratings"),
+                        activeColor: Colors.green,
                         subtitle: Text(
                           "Use a rating system instead of a ranking system",
                           style: TextStyle(fontSize: 12.sp, color: Colors.grey),
@@ -133,12 +137,27 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
 
                 SizedBox(height: 40),
-                Text(
-                  "Group Members",
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Group Members",
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => _showGroupSecurityInformationalDialog(),
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(Icons.info_outline),
+                      padding: EdgeInsets.zero,
+                      alignment: Alignment.bottomCenter,
+                      iconSize: 20.sp,
+                      constraints: BoxConstraints(),
+                      style: IconButton.styleFrom(padding: EdgeInsets.zero),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 8),
                 _users.isEmpty
@@ -229,7 +248,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                     ),
 
-                SizedBox(height: 12),
+                _users.isEmpty ? SizedBox() : SizedBox(height: 12),
 
                 Row(
                   children: [
@@ -287,29 +306,42 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
 
                 SizedBox(height: 24),
-
                 ElevatedButton(
-                  onPressed: () {
-                    _createGroup();
+                  onPressed: () async {
+                    if (_isCreatingGroup) return;
+                    setState(() {
+                      _isCreatingGroup = true;
+                    });
+                    final response = await _createGroup();
+                    setState(() {
+                      _isCreatingGroup = false;
+                    });
+
+                    if (response == true && context.mounted) {
+                      context.pop();
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(color: Colors.black),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     maximumSize: Size(double.infinity, 50.h),
                     minimumSize: Size(double.infinity, 50.h),
                   ),
-                  child: Text(
-                    "Create Group",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child:
+                      _isCreatingGroup
+                          ? CircularProgressIndicator()
+                          : Text(
+                            "Create Group",
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                 ),
               ],
             ),
@@ -321,7 +353,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   void _addNameToGroupMembers(String name) {
     setState(() {
-      _users.add(GroupMember(username: name, permissionLevel: 1));
+      _users.add(GroupMember(username: name, permissionLevel: 2));
       _userNameController.clear();
     });
   }
@@ -341,10 +373,29 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     });
   }
 
-  Future<void> _createGroup() async {
-    setState(() {
-      _isCreatingGroup = true;
-    });
+  void _showGroupSecurityInformationalDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => GroupSecurityInformationalDialog(),
+    );
+  }
+
+  Future<bool?> _createGroup() async {
+    if (_groupNameController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Group name cannot be empty")));
+      return false;
+    }
+
+    if (_groupNameController.text.length > 20) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Group name cannot be longer than 20 characters"),
+        ),
+      );
+      return false;
+    }
 
     final group = Group(
       id: "NA",
@@ -360,11 +411,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
     final response = await SupabaseHelper.groups.createGroup(group);
 
-    setState(() {
-      _isCreatingGroup = false;
-    });
-
-    if (response.success) {
+    if (response.success && mounted) {
       final failedMembers = response.failedToAddMembers;
 
       if (failedMembers != null) {
@@ -380,10 +427,31 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           content: Text("Group '${_groupNameController.text}' created!"),
         ),
       );
+
+      if (response.failedToAddMembers != null) {
+        final failedMembers = response.failedToAddMembers!;
+        if (failedMembers.isNotEmpty) {
+          for (var failedMember in failedMembers) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to add ${failedMember.username}")),
+            );
+          }
+        }
+      }
+      return true;
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Failed to create group")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Failed to create group")));
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    _groupNameController.dispose();
+    super.dispose();
   }
 }

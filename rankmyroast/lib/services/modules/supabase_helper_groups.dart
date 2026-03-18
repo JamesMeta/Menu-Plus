@@ -139,6 +139,16 @@ class SupabaseHelperGroups {
                   .eq("username", user.username)
                   .limit(1)
                   .single();
+
+          if (userAuthId["auth_id"] == null) {
+            failedAdditions.add(user);
+            continue;
+          }
+
+          if (userAuthId["auth_id"] == selfAddResponse["id"]) {
+            continue;
+          }
+
           final userGroupResponse =
               await _client
                   .from("user_group")
