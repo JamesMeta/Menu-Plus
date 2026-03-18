@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/models/group.dart';
 
 class GroupTileWidget extends StatelessWidget {
@@ -35,8 +36,10 @@ class GroupTileWidget extends StatelessWidget {
         ),
         tileColor: Colors.green,
         trailing: IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.more_vert, color: Colors.white, size: 20.sp),
+          onPressed: () {
+            context.push('/base/create-group', extra: group);
+          },
+          icon: Icon(Icons.edit, color: Colors.white, size: 20.sp),
         ),
       ),
     );

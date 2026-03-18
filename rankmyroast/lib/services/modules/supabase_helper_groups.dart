@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:rankmyroast/models/create_group_response.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/group_member.dart';
@@ -105,7 +106,11 @@ class SupabaseHelperGroups {
                 .single();
 
         if (response["id"] == null) {
-          return CreateGroupResponse(success: false);
+          return CreateGroupResponse(
+            success: false,
+            error: true,
+            errorMessage: "Failed to create group, Database Rejected Insert",
+          );
         }
 
         // Add self to group
@@ -124,7 +129,11 @@ class SupabaseHelperGroups {
         if (selfAddResponse["id"] == null) {
           await _client.from("group").delete().eq("group_id", response["id"]);
 
-          return CreateGroupResponse(success: false);
+          return CreateGroupResponse(
+            success: false,
+            error: true,
+            errorMessage: "Failed to add creator to group",
+          );
         }
 
         // Add the users to group
@@ -171,9 +180,121 @@ class SupabaseHelperGroups {
         );
       } on Exception catch (e) {
         print(e);
-        return CreateGroupResponse(success: false);
+        return CreateGroupResponse(
+          success: false,
+          error: true,
+          errorMessage: e.toString(),
+        );
       }
     }
     throw Exception("User not logged in");
+  }
+
+  Future<CreateGroupResponse> editGroup(Group group) async {
+    final authId = _client.auth.currentUser?.id;
+
+    if (authId != null) {
+      try {
+        // Update the group in the database
+
+        if (group.isPersonalGroup) {
+          return CreateGroupResponse(
+            success: false,
+            error: true,
+            errorMessage: "Personal groups cannot be edited",
+          );
+        }
+
+        final response =
+            await _client
+                .from("group")
+                .update({
+                  "name": group.name,
+                  "grade_visible": group.gradeVisible,
+                  "use_rating": group.useRating,
+                })
+                .eq("id", group.id)
+                .select()
+                .single();
+
+        if (response["id"] == null) {
+          return CreateGroupResponse(
+            success: false,
+            error: true,
+            errorMessage: "Failed to update group, Database Rejected Update",
+          );
+        }
+
+        final List<GroupMember> failedToAddMembers = [];
+
+        for (var member in group.groupMembers) {
+          final userAuthId =
+              await _client
+                  .from("user")
+                  .select("auth_id")
+                  .eq("username", member.username)
+                  .limit(1)
+                  .single();
+
+          if (userAuthId["auth_id"] == null) {
+            continue;
+          }
+
+          failedToAddMembers.add(member);
+
+          final userGroupResponse =
+              await _client
+                  .from("user_group")
+                  .upsert({
+                    "group_id": group.id,
+                    "user_id": userAuthId["auth_id"],
+                    "permission_level": member.permissionLevel,
+                  })
+                  .eq("group_id", group.id)
+                  .eq("user_id", userAuthId["auth_id"])
+                  .select()
+                  .single();
+
+          if (userGroupResponse["id"] == null) {
+            continue;
+          }
+        }
+
+        return CreateGroupResponse(
+          success: true,
+          failedToAddMembers: failedToAddMembers,
+        );
+      } on Exception catch (e) {
+        print(e);
+        return CreateGroupResponse(
+          success: false,
+          error: true,
+          errorMessage: e.toString(),
+        );
+      }
+    }
+    throw Exception("User not logged in");
+  }
+
+  Future<bool> deleteGroup(String groupId) async {
+    final authId = _client.auth.currentUser?.id;
+
+    if (authId != null) {
+      try {
+        final response = await _client
+            .from("group")
+            .delete()
+            .eq("id", groupId)
+            .eq("user_id", authId);
+
+        if (response == null || response.isEmpty) {
+          return false;
+        }
+      } on Exception catch (e) {
+        print(e);
+        return false;
+      }
+    }
+    return false;
   }
 }

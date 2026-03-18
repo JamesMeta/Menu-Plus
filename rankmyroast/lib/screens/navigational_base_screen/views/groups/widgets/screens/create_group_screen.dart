@@ -3,12 +3,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/group_member.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/delete_group_confirmation_dialog.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_member_list_tile.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/widgets/group_security_informational_dialog.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class CreateGroupScreen extends StatefulWidget {
-  const CreateGroupScreen({super.key});
+  final Group? groupToEdit;
+
+  const CreateGroupScreen({super.key, this.groupToEdit});
 
   @override
   State<CreateGroupScreen> createState() => _CreateGroupScreenState();
@@ -24,8 +27,19 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   bool _isUsingRating = false;
   bool _showRatings = true;
 
+  late String _labelText;
+
   @override
   void initState() {
+    if (widget.groupToEdit != null) {
+      _groupNameController.text = widget.groupToEdit!.name;
+      _isUsingRating = widget.groupToEdit!.useRating;
+      _showRatings = widget.groupToEdit!.gradeVisible;
+      _users.addAll(widget.groupToEdit!.groupMembers);
+      _labelText = "Edit Group";
+    } else {
+      _labelText = "Create Group";
+    }
     super.initState();
   }
 
@@ -38,13 +52,20 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
         foregroundColor: Colors.white,
         title: Text(
-          "Create Group",
+          _labelText,
           style: TextStyle(
             color: Colors.white,
             fontSize: 28.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          if (widget.groupToEdit != null)
+            IconButton(
+              onPressed: () => _deleteGroup(),
+              icon: Icon(Icons.delete, color: Colors.white),
+            ),
+        ],
       ),
 
       extendBody: true,
@@ -136,7 +157,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   ),
                 ),
 
-                SizedBox(height: 40),
+                SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -312,7 +333,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     setState(() {
                       _isCreatingGroup = true;
                     });
-                    final response = await _createGroup();
+
+                    late final bool? response;
+                    if (widget.groupToEdit != null) {
+                      response = await _updateGroup();
+                    } else {
+                      response = await _createGroup();
+                    }
                     setState(() {
                       _isCreatingGroup = false;
                     });
@@ -335,7 +362,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       _isCreatingGroup
                           ? CircularProgressIndicator()
                           : Text(
-                            "Create Group",
+                            _labelText,
                             style: TextStyle(
                               fontSize: 18.sp,
                               color: Colors.white,
@@ -378,6 +405,79 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       context: context,
       builder: (context) => GroupSecurityInformationalDialog(),
     );
+  }
+
+  Future<bool?> _updateGroup() async {
+    if (_groupNameController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Group name cannot be empty")));
+      return false;
+    }
+
+    if (_groupNameController.text.length > 20) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Group name cannot be longer than 20 characters"),
+        ),
+      );
+      return false;
+    }
+
+    final group = Group(
+      id: widget.groupToEdit!.id,
+      createdAt: widget.groupToEdit!.createdAt,
+      name: _groupNameController.text,
+      gradeVisible: _showRatings,
+      useRating: _isUsingRating,
+      isPersonalGroup: false,
+      userId: SupabaseHelper.users.getAuthId(),
+      groupMembers: _users,
+      recipes: [],
+    );
+
+    final response = await SupabaseHelper.groups.editGroup(group);
+
+    if (response.success && mounted) {
+      final failedMembers = response.failedToAddMembers;
+
+      if (failedMembers != null) {
+        for (var failedMember in failedMembers) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to update ${failedMember.username}"),
+            ),
+          );
+        }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Group '${_groupNameController.text}' Updated!"),
+        ),
+      );
+
+      if (response.failedToAddMembers != null) {
+        final failedMembers = response.failedToAddMembers!;
+        if (failedMembers.isNotEmpty) {
+          for (var failedMember in failedMembers) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to add ${failedMember.username}")),
+            );
+          }
+        }
+      }
+      return true;
+    } else {
+      if (mounted && response.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.errorMessage ?? "Failed to update group"),
+          ),
+        );
+      }
+      return false;
+    }
   }
 
   Future<bool?> _createGroup() async {
@@ -440,11 +540,43 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       }
       return true;
     } else {
+      if (mounted && response.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.errorMessage ?? "Failed to create group"),
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<bool?> _deleteGroup() async {
+    final deleteConfirmation = await showDialog<bool>(
+      context: context,
+      builder: (context) => DeleteGroupConfirmationDialog(),
+    );
+
+    if (deleteConfirmation != true) {
+      return false;
+    }
+
+    final response = await SupabaseHelper.groups.deleteGroup(
+      widget.groupToEdit!.id,
+    );
+
+    if (response && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Group '${widget.groupToEdit!.name}' deleted!")),
+      );
+      return true;
+    } else {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Failed to create group")));
+        ).showSnackBar(SnackBar(content: Text("Failed to delete group")));
       }
+      return false;
     }
   }
 

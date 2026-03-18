@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';
@@ -37,7 +38,14 @@ final GoRouter _router = GoRouter(
       routes: [
         GoRoute(
           path: '/create-group',
-          builder: (context, state) => const CreateGroupScreen(),
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra != null && extra is Group) {
+              return CreateGroupScreen(groupToEdit: extra);
+            }
+
+            return const CreateGroupScreen(groupToEdit: null);
+          },
         ),
       ],
     ),
