@@ -62,7 +62,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         actions: [
           if (widget.groupToEdit != null)
             IconButton(
-              onPressed: () => _deleteGroup(),
+              onPressed: () async {
+                final response = await _deleteGroup();
+                if (response == true && context.mounted) {
+                  context.pop(true);
+                }
+              },
               icon: Icon(Icons.delete, color: Colors.white),
             ),
         ],
@@ -345,7 +350,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     });
 
                     if (response == true && context.mounted) {
-                      context.pop();
+                      context.pop(true);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -436,7 +441,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       recipes: [],
     );
 
-    final response = await SupabaseHelper.groups.editGroup(group);
+    final response = await SupabaseHelper.groups.updateGroup(group);
 
     if (response.success && mounted) {
       final failedMembers = response.failedToAddMembers;
@@ -508,6 +513,21 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       groupMembers: _users,
       recipes: [],
     );
+
+    final ownerUsername = await SupabaseHelper.users.getUsername();
+
+    if (ownerUsername == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to create group, try again later")),
+      );
+      return false;
+    }
+
+    group.groupMembers.add(
+      GroupMember(username: ownerUsername, permissionLevel: 3),
+    );
+
+    group.filterDuplicateMembers();
 
     final response = await SupabaseHelper.groups.createGroup(group);
 

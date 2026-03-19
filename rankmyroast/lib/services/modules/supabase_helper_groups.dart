@@ -113,29 +113,6 @@ class SupabaseHelperGroups {
           );
         }
 
-        // Add self to group
-
-        final selfAddResponse =
-            await _client
-                .from("user_group")
-                .insert({
-                  "group_id": response["id"],
-                  "user_id": authId,
-                  "permission_level": 3,
-                })
-                .select()
-                .single();
-
-        if (selfAddResponse["id"] == null) {
-          await _client.from("group").delete().eq("group_id", response["id"]);
-
-          return CreateGroupResponse(
-            success: false,
-            error: true,
-            errorMessage: "Failed to add creator to group",
-          );
-        }
-
         // Add the users to group
 
         final List<GroupMember> failedAdditions = [];
@@ -151,10 +128,6 @@ class SupabaseHelperGroups {
 
           if (userAuthId["auth_id"] == null) {
             failedAdditions.add(user);
-            continue;
-          }
-
-          if (userAuthId["auth_id"] == selfAddResponse["id"]) {
             continue;
           }
 
@@ -190,7 +163,7 @@ class SupabaseHelperGroups {
     throw Exception("User not logged in");
   }
 
-  Future<CreateGroupResponse> editGroup(Group group) async {
+  Future<CreateGroupResponse> updateGroup(Group group) async {
     final authId = _client.auth.currentUser?.id;
 
     if (authId != null) {
@@ -249,7 +222,7 @@ class SupabaseHelperGroups {
                     "group_id": group.id,
                     "user_id": userAuthId["auth_id"],
                     "permission_level": member.permissionLevel,
-                  })
+                  }, onConflict: "group_id, user_id")
                   .eq("group_id", group.id)
                   .eq("user_id", userAuthId["auth_id"])
                   .select()
@@ -287,9 +260,17 @@ class SupabaseHelperGroups {
             .eq("id", groupId)
             .eq("user_id", authId);
 
-        if (response == null || response.isEmpty) {
-          return false;
+        final confirmDelete =
+            await _client
+                .from("group")
+                .select("id")
+                .eq("id", groupId)
+                .maybeSingle();
+
+        if (confirmDelete == null) {
+          return true;
         }
+        return false;
       } on Exception catch (e) {
         print(e);
         return false;

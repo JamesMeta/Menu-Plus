@@ -154,7 +154,10 @@ class _GroupsViewState extends State<GroupsView> {
                         shrinkWrap: true,
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
-                          return GroupTileWidget(group: snapshot.data![index]);
+                          return GroupTileWidget(
+                            group: snapshot.data![index],
+                            editGroupCallback: editGroupCallback,
+                          );
                         },
                       ),
                     ),
@@ -168,8 +171,20 @@ class _GroupsViewState extends State<GroupsView> {
     );
   }
 
-  void createGroup() {
-    context.push("/base/create-group");
+  void createGroup() async {
+    final refresh = await context.push("/base/create-group");
+
+    if (refresh == true) {
+      setState(() {
+        _groups = _fetchGroups();
+      });
+    }
+  }
+
+  void editGroupCallback() {
+    setState(() {
+      _groups = _fetchGroups();
+    });
   }
 
   Future<List<Group>> _fetchGroups() async {

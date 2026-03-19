@@ -24,6 +24,11 @@ class Group {
     required this.recipes,
   });
 
+  void filterDuplicateMembers() {
+    final uniqueMembers = <String>{};
+    groupMembers.retainWhere((member) => uniqueMembers.add(member.username));
+  }
+
   factory Group.fromMap(Map<String, dynamic> map) {
     return Group(
       id: map['id'] ?? '',

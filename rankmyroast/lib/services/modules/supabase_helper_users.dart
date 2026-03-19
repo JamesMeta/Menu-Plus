@@ -105,4 +105,24 @@ class SupabaseHelperUsers {
     }
     throw Exception("User not logged in");
   }
+
+  Future<String?> getUsername() async {
+    final authId = _client.auth.currentUser?.id;
+    if (authId != null) {
+      try {
+        final response =
+            await _client
+                .from("user")
+                .select("username")
+                .eq("auth_id", authId)
+                .maybeSingle();
+
+        return response?["username"];
+      } on Exception catch (e) {
+        print(e);
+        return null;
+      }
+    }
+    throw Exception("User not logged in");
+  }
 }

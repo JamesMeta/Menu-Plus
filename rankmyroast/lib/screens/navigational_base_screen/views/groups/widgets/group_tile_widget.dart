@@ -6,8 +6,13 @@ import 'package:rankmyroast/models/group.dart';
 
 class GroupTileWidget extends StatelessWidget {
   final Group group;
+  final VoidCallback? editGroupCallback;
 
-  const GroupTileWidget({super.key, required this.group});
+  const GroupTileWidget({
+    super.key,
+    required this.group,
+    this.editGroupCallback,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +41,14 @@ class GroupTileWidget extends StatelessWidget {
         ),
         tileColor: Colors.green,
         trailing: IconButton(
-          onPressed: () {
-            context.push('/base/create-group', extra: group);
+          onPressed: () async {
+            final refresh = await context.push(
+              '/base/create-group',
+              extra: group,
+            );
+            if (refresh == true && editGroupCallback != null) {
+              editGroupCallback!();
+            }
           },
           icon: Icon(Icons.edit, color: Colors.white, size: 20.sp),
         ),
