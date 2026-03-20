@@ -24,33 +24,10 @@ class NavigationalBaseScreen extends StatefulWidget {
 class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
   int navigationalIndex = 1;
 
-  final List<BottomNavigationBarItem> _bottomNavigationalItems = [
-    BottomNavigationBarItem(
-      label: "Group",
-      icon: Icon(Icons.group_outlined),
-      activeIcon: Icon(Icons.group),
-    ),
-    BottomNavigationBarItem(
-      label: "Home",
-      icon: Icon(Icons.home_outlined),
-      activeIcon: Icon(Icons.home),
-    ),
-    BottomNavigationBarItem(
-      label: "Calendar",
-      icon: Icon(Icons.calendar_month_outlined),
-      activeIcon: Icon(Icons.calendar_month),
-    ),
-    BottomNavigationBarItem(
-      label: "Recipe",
-      icon: Icon(Icons.kitchen_outlined),
-      activeIcon: Icon(Icons.kitchen),
-    ),
-  ];
-
   final List<Widget> navigationalViews = [
-    GroupsView(),
-    HomeView(),
     CalendarView(),
+    HomeView(),
+    GroupsView(),
     RecipeView(),
   ];
 
@@ -99,16 +76,6 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
               (index) => setState(() => navigationalIndex = index),
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.group_outlined, size: UNSELECTED_ICON_SIZE),
-              selectedIcon: Icon(Icons.group, size: SELECTED_ICON_SIZE),
-              label: 'Group',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined, size: UNSELECTED_ICON_SIZE),
-              selectedIcon: Icon(Icons.home, size: SELECTED_ICON_SIZE),
-              label: 'Home',
-            ),
-            NavigationDestination(
               icon: Icon(
                 Icons.calendar_month_outlined,
                 size: UNSELECTED_ICON_SIZE,
@@ -118,6 +85,17 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
                 size: SELECTED_ICON_SIZE,
               ),
               label: 'Calendar',
+            ),
+
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined, size: UNSELECTED_ICON_SIZE),
+              selectedIcon: Icon(Icons.home, size: SELECTED_ICON_SIZE),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.group_outlined, size: UNSELECTED_ICON_SIZE),
+              selectedIcon: Icon(Icons.group, size: SELECTED_ICON_SIZE),
+              label: 'Group',
             ),
             NavigationDestination(
               icon: Icon(Icons.kitchen_outlined, size: UNSELECTED_ICON_SIZE),
@@ -135,7 +113,7 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
   }
 
   Future<void> _handleUsername() async {
-    final hasUsername = await SupabaseHelper.checkForUsername();
+    final hasUsername = await SupabaseHelper.users.checkForUsername();
 
     if (hasUsername) {
       return;

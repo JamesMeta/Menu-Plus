@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
 import 'package:rankmyroast/screens/login/classes/login_screen_theme.dart';
+import 'package:rankmyroast/screens/login/classes/sign_in_with_google.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -34,7 +35,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
       body: SafeArea(
         top: false,
         bottom: false,
@@ -246,7 +251,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                         setState(() {
                                           _isGoogleLoading = true;
                                         });
-                                        await _handleSignInWithGoogle();
+                                        await SignInWithGoogle.handleSignInWithGoogle(
+                                          context,
+                                        );
                                         setState(() {
                                           _isGoogleLoading = false;
                                         });
@@ -366,7 +373,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
 
     try {
-      final response = await SupabaseHelper.authSignupWithPassword(
+      final response = await SupabaseHelper.auth.authSignupWithPassword(
         email,
         password,
       );
@@ -420,60 +427,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
   }
 
-  Future<void> _handleSignInWithGoogle() async {
-    final signInResponse = await signInWithGoogle();
-    if (mounted) {
-      if (signInResponse?.user?.role == "authenticated") {
-        await SupabaseHelper.addUser();
-        if (mounted) context.go('/base');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Error: Unable to sign in with Google at this time',
-            ),
-            behavior: SnackBarBehavior.floating, // Recommended for modern UI
-          ),
-        );
-      }
-    }
-  }
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
 
-  Future<AuthResponse?> signInWithGoogle() async {
-    final GoogleSignIn signIn = GoogleSignIn.instance;
-
-    await signIn.initialize(serverClientId: serverClientId);
-
-    final GoogleSignInAccount googleUser;
-    try {
-      googleUser = await GoogleSignIn.instance.authenticate();
-    } catch (e) {
-      return null;
-    }
-
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-    final idToken = googleAuth.idToken;
-
-    if (idToken == null) {
-      return null;
-    }
-
-    try {
-      final response = SupabaseHelper.authSigninWithIdToken(
-        idToken,
-        OAuthProvider.google,
-      );
-      return response;
-    } on Exception catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error signing in with Google: ${e.toString().split('Code: ').last}',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return null;
-    }
+    super.dispose();
   }
 }
