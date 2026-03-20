@@ -210,10 +210,9 @@ class SupabaseHelperGroups {
                   .single();
 
           if (userAuthId["auth_id"] == null) {
+            failedToAddMembers.add(member);
             continue;
           }
-
-          failedToAddMembers.add(member);
 
           final userGroupResponse =
               await _client
@@ -229,6 +228,7 @@ class SupabaseHelperGroups {
                   .single();
 
           if (userGroupResponse["id"] == null) {
+            failedToAddMembers.add(member);
             continue;
           }
         }

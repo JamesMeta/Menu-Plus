@@ -189,68 +189,84 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 _users.isEmpty
                     ? SizedBox()
                     : Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: Column(
                         children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                              ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Text(
-                                    "Valid",
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      overflow: TextOverflow.ellipsis,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      "Valid",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.ellipsis,
+                                        color: Colors.white,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
-                                ),
 
-                                Expanded(
-                                  flex: 8,
-                                  child: Text(
-                                    "Username",
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      overflow: TextOverflow.ellipsis,
+                                  Expanded(
+                                    flex: 8,
+                                    child: Text(
+                                      "Username",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.ellipsis,
+                                        color: Colors.white,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
-                                ),
 
-                                Expanded(
-                                  flex: 6,
-                                  child: Text(
-                                    "Permissions",
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      overflow: TextOverflow.ellipsis,
+                                  Expanded(
+                                    flex: 6,
+                                    child: Text(
+                                      "Permissions",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.ellipsis,
+                                        color: Colors.white,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
-                                ),
 
-                                Expanded(flex: 3, child: SizedBox()),
-                              ],
+                                  Expanded(flex: 3, child: SizedBox()),
+                                ],
+                              ),
                             ),
                           ),
-                          Divider(color: Colors.black, height: 1),
+
                           Container(
                             constraints: BoxConstraints(
                               minHeight: 20.h,
                               maxHeight: 150.h,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(12),
+                                bottomRight: Radius.circular(12),
+                              ),
                             ),
                             child: ListView(
                               shrinkWrap: true,
