@@ -16,6 +16,8 @@ dependencies:
   google_sign_in: any
   gap: any
   flutter_screenutil: any
+  permission_handler: any
+  image_picker: any
 
 dev_dependencies:
   flutter_test:
