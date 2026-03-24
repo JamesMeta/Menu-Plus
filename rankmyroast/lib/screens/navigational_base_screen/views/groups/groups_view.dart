@@ -71,10 +71,7 @@ class _GroupsViewState extends State<GroupsView> {
               }
 
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text(
-                  "No active groups found.",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                );
+                return SizedBox();
               } else {
                 return Row(
                   children: [
@@ -123,17 +120,35 @@ class _GroupsViewState extends State<GroupsView> {
 
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Create your first group.",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(height: 220.h),
+                    Center(
+                      child: Text(
+                        "Create your first group.",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+                    SizedBox(height: 10.h),
                     ElevatedButton(
                       onPressed: createGroup,
-                      child: Text("Create Group"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.black),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        maximumSize: Size(100.w, 40.h),
+                        minimumSize: Size(100.w, 40.h),
+                      ),
+                      child: Text(
+                        "Create Group",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 );
