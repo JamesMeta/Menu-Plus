@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:rankmyroast/models/create_recipe_extra.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
@@ -16,6 +18,7 @@ class RecipeView extends StatefulWidget {
 
 class _RecipeViewState extends State<RecipeView> {
   bool groupRecipes = true;
+  Group? _selectedGroup;
 
   late final Future<List<Group>?> _groupsList;
 
@@ -27,67 +30,171 @@ class _RecipeViewState extends State<RecipeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            FutureBuilder(
-              future: _groupsList,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.connectionState == ConnectionState.done) {
-                  final groups = snapshot.data;
-
-                  if (groups != null) {
-                    return DropdownMenu(
-                      dropdownMenuEntries:
-                          groups
-                              .map(
-                                (group) => DropdownMenuEntry(
-                                  value: group,
-                                  label: group.name,
-                                ),
-                              )
-                              .toList(),
-                    );
-                  } else {
-                    return Center(child: Text("The Data is null"));
-                  }
-                } else {
-                  return Center(child: Text("The Data is never coming"));
-                }
-              },
-            ),
-          ],
-        ),
-
-        SizedBox(height: 8.h),
-
-        FutureBuilder(
-          future: _groupsList,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.connectionState == ConnectionState.done) {
-              final groups = snapshot.data;
-
-              if (groups != null) {
-                return Center(child: Text("Data has arrived"));
-              } else {
-                return Center(child: Text("The Data is null"));
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          FutureBuilder(
+            future: _groupsList,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Row(
+                  children: [
+                    Text(
+                      "Recipes ",
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "(0)",
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Expanded(child: SizedBox()),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          side: BorderSide(color: Colors.black, width: 1),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
               }
-            } else {
-              return Center(child: Text("The Data is never coming"));
-            }
-          },
-        ),
-      ],
+
+              if (snapshot.hasError) {
+                return Text("Error: ${snapshot.error}");
+              }
+
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return SizedBox();
+              } else {
+                final groups = snapshot.data ?? [];
+
+                return Row(
+                  children: [
+                    Text(
+                      "Recipes ",
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "(${_selectedGroup != null ? _selectedGroup!.recipes.length : 0})",
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Expanded(child: SizedBox()),
+                    IconButton(
+                      onPressed: () async {
+                        _navigateToCreateRecipeScreen(groups, null);
+                      },
+                      icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          side: BorderSide(color: Colors.black, width: 1),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
+          ),
+
+          Row(
+            children: [
+              FutureBuilder(
+                future: _groupsList,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.connectionState == ConnectionState.done) {
+                    final groups = snapshot.data;
+
+                    if (groups != null) {
+                      return DropdownMenu(
+                        initialSelection: _selectedGroup,
+                        dropdownMenuEntries:
+                            groups
+                                .map(
+                                  (group) => DropdownMenuEntry(
+                                    value: group,
+                                    label: group.name,
+                                  ),
+                                )
+                                .toList(),
+                      );
+                    } else {
+                      return Center(child: Text("The Data is null"));
+                    }
+                  } else {
+                    return Center(child: Text("The Data is never coming"));
+                  }
+                },
+              ),
+            ],
+          ),
+
+          SizedBox(height: 8.h),
+
+          FutureBuilder(
+            future: _groupsList,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                final groups = snapshot.data;
+
+                if (groups != null) {
+                  return Center(child: Text("Data has arrived"));
+                } else {
+                  return Center(child: Text("The Data is null"));
+                }
+              } else {
+                return Center(child: Text("The Data is never coming"));
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _navigateToCreateRecipeScreen(
+    List<Group> groups,
+    Recipe? recipe,
+  ) async {
+    final newRecipe = await context.push(
+      "/base/create-recipe",
+      extra: CreateRecipeExtra(
+        groups: groups,
+        selectedGroup: _selectedGroup,
+        recipeToEdit: recipe,
+      ),
     );
   }
 
   Future<void> _loadData() async {
     _groupsList = SupabaseHelper.groups.getGroupsForUser();
+    try {
+      _selectedGroup = (await _groupsList)?.first;
+    } on Exception {
+      _selectedGroup = null;
+    }
   }
 
   // Future<File?> _takePhoto() async {

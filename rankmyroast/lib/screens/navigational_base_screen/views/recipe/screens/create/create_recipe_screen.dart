@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:rankmyroast/models/group.dart';
+import 'package:rankmyroast/models/recipe.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
-  const CreateRecipeScreen({super.key});
+  final Recipe? recipeToEdit;
+  final Group? selectedGroup;
+  final List<Group> groups;
+
+  const CreateRecipeScreen({
+    super.key,
+    this.recipeToEdit,
+    this.selectedGroup,
+    required this.groups,
+  });
 
   @override
   State<CreateRecipeScreen> createState() => _CreateRecipeScreenState();
