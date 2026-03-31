@@ -7,7 +7,7 @@ import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/navigational_base_screen.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/create_group_screen.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/create_group_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/create_recipe_screen.dart';
 import 'package:rankmyroast/screens/settings/settings_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
