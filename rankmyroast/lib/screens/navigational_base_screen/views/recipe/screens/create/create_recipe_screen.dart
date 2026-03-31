@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/add_to_groups_dialog_widget.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   final Recipe? recipeToEdit;
@@ -25,6 +26,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _isPublic = false;
   bool _isCreatingRecipe = false;
   bool _canSubmit = false;
+
+  List<Group> _selectedGroups = [];
 
   @override
   void initState() {
@@ -205,6 +208,75 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           contentPadding: EdgeInsets.symmetric(horizontal: 12),
                           border: InputBorder.none,
                         ),
+                      ),
+                    ),
+
+                    SizedBox(height: 16),
+
+                    Text(
+                      "Add to Groups",
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    GestureDetector(
+                      onTap: () async {
+                        final List<Group>? result = await showDialog(
+                          context: context,
+                          builder:
+                              (context) => AddToGroupsDialogWidget(
+                                groups: widget.groups,
+                                selectedGroups: _selectedGroups,
+                              ),
+                        );
+
+                        if (result != null) {
+                          setState(() {
+                            _selectedGroups = result;
+                          });
+                        }
+                      },
+                      child: Container(
+                        height: 42.h,
+                        alignment:
+                            _selectedGroups.isEmpty
+                                ? Alignment.center
+                                : Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child:
+                            _selectedGroups.isEmpty
+                                ? Text("Click to Add Groups")
+                                : Padding(
+                                  padding: const EdgeInsets.all(8.0),
+
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children:
+                                        _selectedGroups
+                                            .map(
+                                              (group) => Container(
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(),
+                                                  borderRadius:
+                                                      BorderRadius.circular(32),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    8.0,
+                                                  ),
+                                                  child: Text(group.name),
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                  ),
+                                ),
                       ),
                     ),
 
