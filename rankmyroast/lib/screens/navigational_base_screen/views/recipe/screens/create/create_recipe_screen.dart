@@ -27,6 +27,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _isCreatingRecipe = false;
   bool _canSubmit = false;
 
+  final TextEditingController _recipeNameController = TextEditingController();
+  final TextEditingController _ingredientsController = TextEditingController();
+  final TextEditingController _instructionsController = TextEditingController();
+  final TextEditingController _groceryItemsController = TextEditingController();
+
   List<Group> _selectedGroups = [];
 
   @override
