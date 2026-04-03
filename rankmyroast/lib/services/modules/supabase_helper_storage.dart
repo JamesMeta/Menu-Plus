@@ -7,36 +7,57 @@ class SupabaseHelperStorage {
   static final _client = Supabase.instance.client;
   static final ImagePicker _picker = ImagePicker();
 
-  Future<File?> pickImage(ImageSource source) async {
-    // 1. Determine which permission to check
-    Permission permission =
-        (source == ImageSource.camera)
-            ? Permission.camera
-            : (Platform.isIOS ? Permission.photos : Permission.storage);
-
-    // 2. Request/Check Permission
-    PermissionStatus status = await permission.request();
+  Future<File?> pickImageFromCamera() async {
+    // 1. Specifically check for Camera permission
+    PermissionStatus status = await Permission.camera.request();
 
     if (status.isGranted) {
-      // 3. Pick the Image
+      // 2. Launch the Camera UI
       final XFile? pickedFile = await _picker.pickImage(
-        source: source,
-        imageQuality: 80, // Integrated compression
-        maxWidth: 1024, // Resize on the fly
+        source: ImageSource.camera, // Hard-coded to camera
+        imageQuality: 80,
+        maxWidth: 1024,
       );
 
       if (pickedFile != null) {
         return File(pickedFile.path);
       }
     } else if (status.isPermanentlyDenied) {
-      // User rejected multiple times; they must go to settings manually
+      // If the user denied it previously, send them to settings
       await openAppSettings();
     }
 
     return null;
   }
 
-  Future<void> uploadFileToFolder({
+  Future<File?> pickImageFromGallery() async {
+    // 1. Determine Permission (Gallery specific)
+    // Note: On Android 13+, Permission.photos is often preferred over Permission.storage
+    Permission permission = Permission.photos;
+
+    // 2. Request/Check Permission
+    PermissionStatus status = await permission.request();
+
+    if (status.isGranted || status.isLimited) {
+      // Added isLimited for iOS 14+ support
+      // 3. Pick the Image from the Gallery
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery, // Switched to gallery
+        imageQuality: 80,
+        maxWidth: 1024,
+      );
+
+      if (pickedFile != null) {
+        return File(pickedFile.path);
+      }
+    } else if (status.isPermanentlyDenied) {
+      await openAppSettings();
+    }
+
+    return null;
+  }
+
+  Future<String?> uploadFileToFolder({
     required String bucketName,
     required String folderName,
     required File file,
@@ -56,6 +77,7 @@ class SupabaseHelperStorage {
             fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
           );
       print('Upload successful to $bucketName/$path');
+      return path;
     } on StorageException catch (error) {
       print('Storage Error: ${error.message}');
     } catch (error) {

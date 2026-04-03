@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/add_to_groups_dialog_widget.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   final Recipe? recipeToEdit;
@@ -23,6 +28,9 @@ class CreateRecipeScreen extends StatefulWidget {
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   late final String _labelText;
+
+  File? _recipeImage;
+
   bool _isPublic = false;
   bool _isCreatingRecipe = false;
   bool _canSubmit = false;
@@ -33,6 +41,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final TextEditingController _groceryItemsController = TextEditingController();
 
   List<Group> _selectedGroups = [];
+  Group? _selectedGroup;
 
   @override
   void initState() {
@@ -88,7 +97,31 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         SizedBox(
                           width: 128.w,
                           height: 128.w,
-                          child: Placeholder(),
+                          child:
+                              _recipeImage == null
+                                  ? Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(32),
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.camera_alt, size: 48),
+                                      onPressed:
+                                          () async =>
+                                              await _updateRecipeImage(),
+                                    ),
+                                  )
+                                  : GestureDetector(
+                                    onTap:
+                                        () async => await _updateRecipeImage(),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(32),
+                                      child: Image.file(
+                                        _recipeImage!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
                         ),
                         Expanded(
                           child: Column(
@@ -145,7 +178,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       ),
                       child: TextField(
                         decoration: InputDecoration(
-                          labelText: "Add member by username",
+                          labelText: "Add Ingredients...",
                           labelStyle: TextStyle(fontSize: 18),
                           floatingLabelBehavior: FloatingLabelBehavior.never,
 
@@ -175,7 +208,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       ),
                       child: TextField(
                         decoration: InputDecoration(
-                          labelText: "Add member by username",
+                          labelText: "Add Recipe Instructions...",
                           labelStyle: TextStyle(fontSize: 18),
                           floatingLabelBehavior: FloatingLabelBehavior.never,
 
@@ -205,7 +238,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       ),
                       child: TextField(
                         decoration: InputDecoration(
-                          labelText: "Add member by username",
+                          labelText: "Add items to purchase at store...",
                           labelStyle: TextStyle(fontSize: 18),
                           floatingLabelBehavior: FloatingLabelBehavior.never,
 
@@ -356,5 +389,49 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         ),
       ),
     );
+  }
+
+  Future<File?> _updateRecipeImage() async {
+    File? file = await showModalBottomSheet(
+      context: context,
+      builder: (context) => TakePhotoBottomModalWidget(),
+    );
+
+    if (file != null) {
+      setState(() {
+        _recipeImage = file;
+      });
+    }
+  }
+
+  Future<String?> _handleImageUploadProcedure(File file) async {
+    String folderName = SupabaseHelper.users.getAuthId();
+
+    if (_selectedGroup != null) {
+      folderName = _selectedGroup!.name;
+    }
+
+    final String fileName = DateTime.now().toString();
+
+    try {
+      final path = await SupabaseHelper.storage.uploadFileToFolder(
+        bucketName: "recipe_image",
+        folderName: folderName,
+        file: file,
+        fileName: fileName,
+      );
+
+      return path;
+    } on Exception catch (e) {
+      print("Something went wrong when uploading file");
+    }
+  }
+
+  @override
+  void dispose() {
+    _groceryItemsController.dispose();
+    _ingredientsController.dispose();
+    _instructionsController.dispose();
+    super.dispose();
   }
 }
