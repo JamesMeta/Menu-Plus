@@ -57,7 +57,7 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
           ),
         ],
       ),
-      body: navigationalViews[navigationalIndex],
+      body: Container(child: navigationalViews[navigationalIndex]),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           indicatorColor: const Color.fromARGB(255, 49, 119, 51),

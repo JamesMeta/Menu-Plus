@@ -15,8 +15,6 @@ class GroupsView extends StatefulWidget {
 class _GroupsViewState extends State<GroupsView> {
   late Future<List<Group>> _groups;
 
-  double _yOffset = 0;
-
   @override
   void initState() {
     _groups = _fetchGroups();
