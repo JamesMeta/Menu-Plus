@@ -53,6 +53,8 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
       _itemsList.remove(item);
     });
     widget.deleteForParentList(item);
+
+    print("breakpoint");
   }
 
   @override

@@ -40,13 +40,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final TextEditingController _ingredientsController = TextEditingController();
   final TextEditingController _instructionsController = TextEditingController();
   final TextEditingController _groceryItemsController = TextEditingController();
+  final TextEditingController _groupsController = TextEditingController();
 
   final List<String> _ingredientsList = [];
   final List<String> _instructionsList = [];
   final List<String> _groceryList = [];
 
   List<Group> _selectedGroups = [];
-  Group? _selectedGroup;
 
   @override
   void initState() {
@@ -173,346 +173,34 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                       if (_ingredientsList.isNotEmpty) SizedBox(height: 8),
 
-                      ExpansionTile(
-                        title: Text(
-                          "Ingredients",
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(maxHeight: 150.h),
-                            child: ItemListViewWidget(
-                              items: _ingredientsList,
-                              deleteForParentList:
-                                  (String item) =>
-                                      _ingredientsList.remove(item),
-                              updatePositionForParentList: (
-                                int oldIndex,
-                                int newIndex,
-                              ) {
-                                if (newIndex > oldIndex) newIndex -= 1;
-                                final item = _ingredientsList.removeAt(
-                                  oldIndex,
-                                );
-                                _ingredientsList.insert(newIndex, item);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (_ingredientsList.isNotEmpty) SizedBox(height: 8),
-
-                      Container(
-                        height: 42.h,
-                        alignment: Alignment.center,
-
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 17,
-                              child: Container(
-                                height: 42.h,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: TextField(
-                                  controller: _ingredientsController,
-
-                                  decoration: InputDecoration(
-                                    labelText: "Add ingredients...",
-                                    labelStyle: TextStyle(fontSize: 18),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-
-                                    isCollapsed: true,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              flex: 3,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-
-                                onPressed: () {
-                                  if (_ingredientsController.text.isEmpty)
-                                    return;
-                                  setState(() {
-                                    _ingredientsList.add(
-                                      _ingredientsController.text.trim(),
-                                    );
-                                    _ingredientsController.text = "";
-                                  });
-                                },
-                                icon: Icon(Icons.add, color: Colors.white),
-                                style: IconButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size(0, 42.h),
-
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(12),
-                                    ),
-                                    side: BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      _buildFormSection(
+                        header: "Ingredients",
+                        subtitle: "Add ingredients...",
+                        controller: _ingredientsController,
+                        itemsList: _ingredientsList,
                       ),
 
                       SizedBox(height: 16),
 
-                      Text(
-                        "Instructions",
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      Container(
-                        height: 42.h,
-                        alignment: Alignment.center,
-
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 17,
-                              child: Container(
-                                height: 42.h,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: TextField(
-                                  controller: _instructionsController,
-
-                                  decoration: InputDecoration(
-                                    labelText: "Add instructions...",
-                                    labelStyle: TextStyle(fontSize: 18),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-
-                                    isCollapsed: true,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              flex: 3,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-
-                                onPressed: () {},
-                                icon: Icon(Icons.add, color: Colors.white),
-                                style: IconButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size(0, 42.h),
-
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(12),
-                                    ),
-                                    side: BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      _buildFormSection(
+                        header: "Instructions",
+                        subtitle: "Add instructions...",
+                        controller: _instructionsController,
+                        itemsList: _instructionsList,
                       ),
 
                       SizedBox(height: 16),
 
-                      Text(
-                        "Grocery Items",
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      Container(
-                        height: 42.h,
-                        alignment: Alignment.center,
-
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 17,
-                              child: Container(
-                                height: 42.h,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: TextField(
-                                  controller: _groceryItemsController,
-
-                                  decoration: InputDecoration(
-                                    labelText: "Add items to purchase...",
-                                    labelStyle: TextStyle(fontSize: 18),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-
-                                    isCollapsed: true,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              flex: 3,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-
-                                onPressed: () {},
-                                icon: Icon(Icons.add, color: Colors.white),
-                                style: IconButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size(0, 42.h),
-
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(12),
-                                    ),
-                                    side: BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      _buildFormSection(
+                        header: "Grocery Items",
+                        subtitle: "Add items to purchase...",
+                        controller: _groceryItemsController,
+                        itemsList: _groceryList,
                       ),
 
                       SizedBox(height: 16),
 
-                      Text(
-                        "Add to Groups",
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      GestureDetector(
-                        onTap: () async {
-                          final List<Group>? result = await showDialog(
-                            context: context,
-                            builder:
-                                (context) => AddToGroupsDialogWidget(
-                                  groups: widget.groups,
-                                  selectedGroups: _selectedGroups,
-                                ),
-                          );
-
-                          if (result != null) {
-                            setState(() {
-                              _selectedGroups = result;
-                            });
-                          }
-                        },
-                        child: Container(
-                          height: 42.h,
-                          alignment:
-                              _selectedGroups.isEmpty
-                                  ? Alignment.center
-                                  : Alignment.centerLeft,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child:
-                              _selectedGroups.isEmpty
-                                  ? Text(
-                                    "Click to Add Groups...",
-                                    style: TextStyle(fontSize: 18),
-                                  )
-                                  : Padding(
-                                    padding: const EdgeInsets.all(8.0),
-
-                                    child: Wrap(
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      children:
-                                          _selectedGroups
-                                              .map(
-                                                (group) => Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 1,
-                                                      ),
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                            255,
-                                                            171,
-                                                            233,
-                                                            173,
-                                                          ),
-                                                      border: Border.all(),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            8,
-                                                          ),
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                            8.0,
-                                                          ),
-                                                      child: Text(
-                                                        group.name,
-                                                        style: TextStyle(
-                                                          fontSize: 10,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
-                                    ),
-                                  ),
-                        ),
-                      ),
+                      _buildGroupsFormSection(),
 
                       Row(
                         children: [
@@ -588,6 +276,214 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
   }
 
+  Widget _buildGroupsFormSection() {
+    return Column(
+      children: [
+        ExpansionTile(
+          title: Text(
+            "Add to Groups",
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 150.h),
+              child: ItemListViewWidget(
+                items: _selectedGroups.map((group) => group.name).toList(),
+                deleteForParentList:
+                    (String item) => _selectedGroups.removeWhere(
+                      (group) => group.name == item,
+                    ),
+                updatePositionForParentList: (int oldIndex, int newIndex) {},
+              ),
+            ),
+          ],
+        ),
+
+        if (_selectedGroups.isNotEmpty) SizedBox(height: 8),
+
+        Container(
+          height: 42.h,
+          alignment: Alignment.center,
+
+          child: Row(
+            children: [
+              Expanded(
+                flex: 17,
+                child: Container(
+                  height: 42.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final List<Group>? result = await showDialog(
+                        context: context,
+                        builder:
+                            (context) => AddToGroupsDialogWidget(
+                              groups: widget.groups,
+                              selectedGroups: _selectedGroups,
+                            ),
+                      );
+
+                      if (result != null) {
+                        _groupsController.text = result
+                            .map((group) => group.name)
+                            .join(", ");
+                      }
+                    },
+                    child: TextField(
+                      controller: _groupsController,
+
+                      decoration: InputDecoration(
+                        labelText: "Click to add groups...",
+                        labelStyle: TextStyle(fontSize: 18),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+
+                        isCollapsed: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                        border: InputBorder.none,
+                        enabled: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+
+                  onPressed: () {
+                    if (_groupsController.text.isEmpty) return;
+                    final groupNames = _groupsController.text.split(", ");
+                    setState(() {
+                      _selectedGroups.addAll(
+                        widget.groups.where(
+                          (group) => groupNames.contains(group.name),
+                        ),
+                      );
+                      _groupsController.text = "";
+                    });
+                  },
+                  icon: Icon(Icons.add, color: Colors.white),
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(0, 42.h),
+
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      side: BorderSide(color: Colors.black, width: 1),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFormSection({
+    required String header,
+    required String subtitle,
+    required TextEditingController controller,
+    required List<String> itemsList,
+  }) {
+    return Column(
+      children: [
+        ExpansionTile(
+          title: Text(
+            header,
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 150.h),
+              child: ItemListViewWidget(
+                items: itemsList,
+                deleteForParentList: (String item) => itemsList.remove(item),
+                updatePositionForParentList: (int oldIndex, int newIndex) {
+                  if (newIndex > oldIndex) newIndex -= 1;
+                  final item = itemsList.removeAt(oldIndex);
+                  itemsList.insert(newIndex, item);
+                },
+              ),
+            ),
+          ],
+        ),
+
+        if (itemsList.isNotEmpty) SizedBox(height: 8),
+
+        Container(
+          height: 42.h,
+          alignment: Alignment.center,
+
+          child: Row(
+            children: [
+              Expanded(
+                flex: 17,
+                child: Container(
+                  height: 42.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: controller,
+
+                    decoration: InputDecoration(
+                      labelText: subtitle,
+                      labelStyle: TextStyle(fontSize: 18),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+
+                      isCollapsed: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+
+                  onPressed: () {
+                    if (controller.text.isEmpty) return;
+                    setState(() {
+                      itemsList.add(controller.text.trim());
+                      controller.text = "";
+                    });
+                  },
+                  icon: Icon(Icons.add, color: Colors.white),
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(0, 42.h),
+
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      side: BorderSide(color: Colors.black, width: 1),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<File?> _updateRecipeImage() async {
     File? file = await showModalBottomSheet(
       context: context,
@@ -601,12 +497,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
   }
 
+  //TODO
+  // MAKE THIS WORK AS INTENDED
   Future<String?> _handleImageUploadProcedure(File file) async {
     String folderName = SupabaseHelper.users.getAuthId();
-
-    if (_selectedGroup != null) {
-      folderName = _selectedGroup!.name;
-    }
 
     final String fileName = DateTime.now().toString();
 
