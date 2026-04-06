@@ -35,6 +35,14 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _isPublic = false;
   bool _isCreatingRecipe = false;
   bool _canSubmit = false;
+  bool _includeIngredients = false;
+  bool _includeInstructions = false;
+  bool _includeGroceryItems = false;
+  bool _includeGroups = false;
+  bool _hideIngredients = false;
+  bool _hideInstructions = false;
+  bool _hideGroceryItems = false;
+  bool _hideGroups = false;
 
   final TextEditingController _recipeNameController = TextEditingController();
   final TextEditingController _ingredientsController = TextEditingController();
@@ -79,6 +87,23 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               onPressed: () async {},
               icon: Icon(Icons.delete, color: Colors.white),
             ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+
+            onSelected: (String result) {
+              if (result == 'Option 1') {
+                _showHiddenFields();
+              }
+            },
+
+            itemBuilder:
+                (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'Option 1',
+                    child: Text('Show Hidden Items'),
+                  ),
+                ],
+          ),
         ],
       ),
       backgroundColor: Colors.green,
@@ -176,8 +201,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       _buildFormSection(
                         header: "Ingredients",
                         subtitle: "Add ingredients...",
+                        isNumericalList: false,
                         controller: _ingredientsController,
                         itemsList: _ingredientsList,
+                        includeSection: _includeIngredients,
+                        includeSectionText: "Include Ingredients?",
+                        onModify:
+                            () => setState(() {
+                              _includeIngredients = !_includeIngredients;
+                            }),
+                        isHidden: _hideIngredients,
+                        onHide:
+                            () => setState(() {
+                              _hideIngredients = true;
+                            }),
                       ),
 
                       SizedBox(height: 16),
@@ -185,8 +222,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       _buildFormSection(
                         header: "Instructions",
                         subtitle: "Add instructions...",
+                        isNumericalList: true,
                         controller: _instructionsController,
                         itemsList: _instructionsList,
+                        includeSection: _includeInstructions,
+                        includeSectionText: "Include Instructions?",
+                        onModify:
+                            () => setState(() {
+                              _includeInstructions = !_includeInstructions;
+                            }),
+                        isHidden: _hideInstructions,
+                        onHide:
+                            () => setState(() {
+                              _hideInstructions = true;
+                            }),
                       ),
 
                       SizedBox(height: 16),
@@ -194,29 +243,40 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       _buildFormSection(
                         header: "Grocery Items",
                         subtitle: "Add items to purchase...",
+                        isNumericalList: false,
                         controller: _groceryItemsController,
                         itemsList: _groceryList,
+                        includeSection: _includeGroceryItems,
+                        includeSectionText: "Include Grocery Items?",
+                        onModify:
+                            () => setState(() {
+                              _includeGroceryItems = !_includeGroceryItems;
+                            }),
+                        isHidden: _hideGroceryItems,
+                        onHide:
+                            () => setState(() {
+                              _hideGroceryItems = true;
+                            }),
                       ),
 
                       SizedBox(height: 16),
 
                       _buildGroupsFormSection(),
 
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _isPublic,
-                            onChanged: (value) {
-                              setState(() {
-                                _isPublic = !_isPublic;
-                              });
-                            },
-                            semanticLabel: "Make Recipe Public",
-                          ),
-                          Text("Make Recipe Public"),
-                        ],
-                      ),
-
+                      // Row(
+                      //   children: [
+                      //     Checkbox(
+                      //       value: _isPublic,
+                      //       onChanged: (value) {
+                      //         setState(() {
+                      //           _isPublic = !_isPublic;
+                      //         });
+                      //       },
+                      //       semanticLabel: "Make Recipe Public",
+                      //     ),
+                      //     Text("Make Recipe Public"),
+                      //   ],
+                      // ),
                       SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () async {
@@ -277,211 +337,413 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Widget _buildGroupsFormSection() {
-    return Column(
-      children: [
-        ExpansionTile(
-          title: Text(
-            "Add to Groups",
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          children: [
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 150.h),
-              child: ItemListViewWidget(
-                items: _selectedGroups.map((group) => group.name).toList(),
-                deleteForParentList:
-                    (String item) => _selectedGroups.removeWhere(
-                      (group) => group.name == item,
-                    ),
-                updatePositionForParentList: (int oldIndex, int newIndex) {},
-              ),
-            ),
-          ],
-        ),
-
-        if (_selectedGroups.isNotEmpty) SizedBox(height: 8),
-
-        Container(
-          height: 42.h,
-          alignment: Alignment.center,
-
-          child: Row(
-            children: [
-              Expanded(
-                flex: 17,
-                child: Container(
-                  height: 42.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12),
+    return !_hideGroups
+        ? _includeGroups
+            ? Column(
+              children: [
+                ExpansionTile(
+                  tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
+                  initiallyExpanded: true,
+                  shape: Border.all(color: Colors.transparent),
+                  leading: IconButton(
+                    onPressed:
+                        () => setState(() {
+                          _includeGroups = false;
+                        }),
+                    icon: Icon(Icons.close),
+                    padding: EdgeInsets.zero,
                   ),
-                  child: GestureDetector(
-                    onTap: () async {
-                      final List<Group>? result = await showDialog(
-                        context: context,
-                        builder:
-                            (context) => AddToGroupsDialogWidget(
-                              groups: widget.groups,
-                              selectedGroups: _selectedGroups,
+
+                  title: Text(
+                    "Add to Groups",
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 150.h),
+                      child: ItemListViewWidget(
+                        items:
+                            _selectedGroups.map((group) => group.name).toList(),
+                        isNumericalList: false,
+                        deleteForParentList:
+                            (String item) => _selectedGroups.removeWhere(
+                              (group) => group.name == item,
                             ),
-                      );
-
-                      if (result != null) {
-                        _groupsController.text = result
-                            .map((group) => group.name)
-                            .join(", ");
-                      }
-                    },
-                    child: TextField(
-                      controller: _groupsController,
-
-                      decoration: InputDecoration(
-                        labelText: "Click to add groups...",
-                        labelStyle: TextStyle(fontSize: 18),
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-
-                        isCollapsed: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                        border: InputBorder.none,
-                        enabled: false,
+                        updatePositionForParentList:
+                            (int oldIndex, int newIndex) {},
                       ),
                     ),
+                  ],
+                ),
+
+                if (_selectedGroups.isNotEmpty) SizedBox(height: 8),
+
+                Container(
+                  height: 42.h,
+                  alignment: Alignment.center,
+
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 17,
+                        child: Container(
+                          height: 42.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: GestureDetector(
+                            onTap: () async {
+                              final List<Group>? result = await showDialog(
+                                context: context,
+                                builder:
+                                    (context) => AddToGroupsDialogWidget(
+                                      groups: widget.groups,
+                                      selectedGroups: _selectedGroups,
+                                    ),
+                              );
+
+                              if (result != null) {
+                                _groupsController.text = result
+                                    .map((group) => group.name)
+                                    .join(", ");
+                              }
+                            },
+                            child: TextField(
+                              controller: _groupsController,
+
+                              decoration: InputDecoration(
+                                labelText: "Click to add groups...",
+                                labelStyle: TextStyle(fontSize: 18),
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+
+                                isCollapsed: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                border: InputBorder.none,
+                                enabled: false,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        flex: 3,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+
+                          onPressed: () {
+                            if (_groupsController.text.isEmpty) return;
+                            final groupNames = _groupsController.text.split(
+                              ", ",
+                            );
+                            setState(() {
+                              _selectedGroups.addAll(
+                                widget.groups.where(
+                                  (group) => groupNames.contains(group.name),
+                                ),
+                              );
+                              _groupsController.text = "";
+                            });
+                          },
+                          icon: Icon(Icons.add, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size(0, 42.h),
+
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                              side: BorderSide(color: Colors.black, width: 1),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                flex: 3,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-
-                  onPressed: () {
-                    if (_groupsController.text.isEmpty) return;
-                    final groupNames = _groupsController.text.split(", ");
-                    setState(() {
-                      _selectedGroups.addAll(
-                        widget.groups.where(
-                          (group) => groupNames.contains(group.name),
-                        ),
-                      );
-                      _groupsController.text = "";
-                    });
-                  },
-                  icon: Icon(Icons.add, color: Colors.white),
-                  style: IconButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size(0, 42.h),
-
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                      side: BorderSide(color: Colors.black, width: 1),
+              ],
+            )
+            : Center(
+              child: Column(
+                children: [
+                  Text(
+                    "Add to your Groups?",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                  SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxHeight: 40.w,
+                          maxWidth: 40.w,
+                        ),
+                        padding: EdgeInsets.all(1),
+                        margin: EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 150, 150, 150),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 25,
+                          onPressed:
+                              () => setState(() {
+                                _hideGroups = true;
+                              }),
+                          icon: Icon(
+                            Icons.close,
+                            color: const Color.fromARGB(255, 150, 150, 150),
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxHeight: 40.w,
+                          maxWidth: 40.w,
+                        ),
+                        padding: EdgeInsets.zero,
+                        margin: EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.green, width: 2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          onPressed:
+                              () => setState(() {
+                                _includeGroups = true;
+                              }),
+                          iconSize: 25,
+                          icon: Icon(Icons.check, color: Colors.green),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
-    );
+            )
+        : SizedBox();
   }
 
   Widget _buildFormSection({
     required String header,
     required String subtitle,
+    required bool isNumericalList,
     required TextEditingController controller,
     required List<String> itemsList,
+    required bool includeSection,
+    required VoidCallback onModify,
+    required bool isHidden,
+    required VoidCallback onHide,
+    required String includeSectionText,
   }) {
-    return Column(
-      children: [
-        ExpansionTile(
-          title: Text(
-            header,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          children: [
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 150.h),
-              child: ItemListViewWidget(
-                items: itemsList,
-                deleteForParentList: (String item) => itemsList.remove(item),
-                updatePositionForParentList: (int oldIndex, int newIndex) {
-                  if (newIndex > oldIndex) newIndex -= 1;
-                  final item = itemsList.removeAt(oldIndex);
-                  itemsList.insert(newIndex, item);
-                },
-              ),
-            ),
-          ],
-        ),
+    return !isHidden
+        ? includeSection
+            ? Column(
+              children: [
+                ExpansionTile(
+                  tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
+                  initiallyExpanded: true,
+                  shape: Border.all(color: Colors.transparent),
+                  leading: IconButton(
+                    onPressed: onModify,
+                    icon: Icon(Icons.close),
+                    padding: EdgeInsets.zero,
+                  ),
+                  title: Text(
+                    header,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 800.h),
+                      child: ItemListViewWidget(
+                        items: itemsList,
+                        isNumericalList: isNumericalList,
+                        deleteForParentList:
+                            (String item) => itemsList.remove(item),
+                        updatePositionForParentList: (
+                          int oldIndex,
+                          int newIndex,
+                        ) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = itemsList.removeAt(oldIndex);
+                          itemsList.insert(newIndex, item);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
 
-        if (itemsList.isNotEmpty) SizedBox(height: 8),
+                if (itemsList.isNotEmpty) SizedBox(height: 8),
 
-        Container(
-          height: 42.h,
-          alignment: Alignment.center,
-
-          child: Row(
-            children: [
-              Expanded(
-                flex: 17,
-                child: Container(
+                Container(
                   height: 42.h,
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: TextField(
-                    controller: controller,
 
-                    decoration: InputDecoration(
-                      labelText: subtitle,
-                      labelStyle: TextStyle(fontSize: 18),
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 17,
+                        child: Container(
+                          height: 42.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: TextField(
+                            controller: controller,
 
-                      isCollapsed: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      border: InputBorder.none,
-                    ),
+                            decoration: InputDecoration(
+                              labelText: subtitle,
+                              labelStyle: TextStyle(fontSize: 18),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+
+                              isCollapsed: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        flex: 3,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+
+                          onPressed: () {
+                            if (controller.text.isEmpty) return;
+                            setState(() {
+                              itemsList.add(controller.text.trim());
+                              controller.text = "";
+                            });
+                          },
+                          icon: Icon(Icons.add, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size(0, 42.h),
+
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                              side: BorderSide(color: Colors.black, width: 1),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                flex: 3,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-
-                  onPressed: () {
-                    if (controller.text.isEmpty) return;
-                    setState(() {
-                      itemsList.add(controller.text.trim());
-                      controller.text = "";
-                    });
-                  },
-                  icon: Icon(Icons.add, color: Colors.white),
-                  style: IconButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size(0, 42.h),
-
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                      side: BorderSide(color: Colors.black, width: 1),
+              ],
+            )
+            : Center(
+              child: Column(
+                children: [
+                  Text(
+                    includeSectionText,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                  SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxHeight: 40.w,
+                          maxWidth: 40.w,
+                        ),
+                        padding: EdgeInsets.all(1),
+                        margin: EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 150, 150, 150),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 25,
+                          onPressed: onHide,
+                          icon: Icon(
+                            Icons.close,
+                            color: const Color.fromARGB(255, 150, 150, 150),
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxHeight: 40.w,
+                          maxWidth: 40.w,
+                        ),
+                        padding: EdgeInsets.zero,
+                        margin: EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.green, width: 2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          onPressed: onModify,
+                          iconSize: 25,
+                          icon: Icon(Icons.check, color: Colors.green),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
-    );
+            )
+        : SizedBox();
   }
 
   Future<File?> _updateRecipeImage() async {
@@ -518,11 +780,22 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
   }
 
+  void _showHiddenFields() {
+    setState(() {
+      _hideGroceryItems = false;
+      _hideGroups = false;
+      _hideIngredients = false;
+      _hideInstructions = false;
+    });
+  }
+
   @override
   void dispose() {
     _groceryItemsController.dispose();
     _ingredientsController.dispose();
     _instructionsController.dispose();
+    _recipeNameController.dispose();
+    _groupsController.dispose();
     super.dispose();
   }
 }

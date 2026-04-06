@@ -3,12 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ItemListViewWidget extends StatefulWidget {
   final List<String> items;
+  final bool isNumericalList;
   final Function(String item) deleteForParentList;
   final Function(int oldIndex, int newIndex) updatePositionForParentList;
 
   const ItemListViewWidget({
     super.key,
     required this.items,
+    required this.isNumericalList,
     required this.deleteForParentList,
     required this.updatePositionForParentList,
   });
@@ -59,50 +61,56 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: const Color.fromARGB(255, 138, 138, 138),
-              ),
-              borderRadius: BorderRadius.circular(16),
-              color: const Color.fromARGB(255, 216, 216, 216),
-            ),
-            child: ReorderableListView.builder(
-              scrollController: _scrollController,
-              onReorder: (oldIndex, newIndex) {
-                setState(() {
-                  if (newIndex > oldIndex) newIndex -= 1;
-                  final item = _itemsList.removeAt(oldIndex);
-                  _itemsList.insert(newIndex, item);
-                });
-              },
+    return _itemsList.isNotEmpty
+        ? Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color.fromARGB(255, 138, 138, 138),
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                ),
+                child: ReorderableListView.builder(
+                  scrollController: _scrollController,
+                  onReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) newIndex -= 1;
+                      final item = _itemsList.removeAt(oldIndex);
+                      _itemsList.insert(newIndex, item);
+                    });
+                  },
 
-              shrinkWrap: true,
-              itemCount: _itemsList.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  key: Key('$index'),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 4),
-                  leading: ReorderableDragStartListener(
-                    index: index,
-                    child: Icon(Icons.drag_handle),
-                  ),
-                  title: Text("${index + 1}. ${_itemsList[index]}"),
-                  trailing: IconButton(
-                    onPressed: () => _deleteItem(_itemsList[index]),
-                    icon: Icon(Icons.delete),
-                  ),
-                );
-              },
+                  shrinkWrap: true,
+                  itemCount: _itemsList.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      key: Key('$index'),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                      leading: ReorderableDragStartListener(
+                        index: index,
+                        child: Icon(Icons.drag_handle),
+                      ),
+                      title: Text(
+                        widget.isNumericalList
+                            ? "${index + 1}. ${_itemsList[index]}"
+                            : _itemsList[index],
+                      ),
+                      trailing: IconButton(
+                        onPressed: () => _deleteItem(_itemsList[index]),
+                        icon: Icon(Icons.delete),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
-    );
+          ],
+        )
+        : SizedBox();
   }
 
   @override
