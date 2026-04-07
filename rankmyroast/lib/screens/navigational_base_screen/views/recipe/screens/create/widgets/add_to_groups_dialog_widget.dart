@@ -25,7 +25,7 @@ class _AddToGroupsDialogWidgetState extends State<AddToGroupsDialogWidget> {
     if (widget.selectedGroups != null) {
       _selectedGroups.addAll(
         widget.groups.where(
-          (groupWidget) => widget.selectedGroups!.contains(groupWidget),
+          (group) => widget.selectedGroups!.any((s) => s.id == group.id),
         ),
       );
     }
@@ -34,44 +34,90 @@ class _AddToGroupsDialogWidgetState extends State<AddToGroupsDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Defining a local green theme for consistency
+    final Color primaryGreen = Colors.green;
+
     return AlertDialog(
-      title: Text("Select Groups for Recipe"),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      titlePadding: EdgeInsets.zero,
+      title: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: primaryGreen,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+        ),
+        child: const Text(
+          "Select Groups",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       content: SizedBox(
-        width: double.maxFinite,
+        width: MediaQuery.of(context).size.width * 0.8,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 8),
             Flexible(
-              child: ListView(
+              child: ListView.separated(
                 shrinkWrap: true,
-                children:
-                    widget.groups
-                        .map(
-                          (group) => ListTile(
-                            leading: Checkbox(
-                              value: _selectedGroups.contains(group),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedGroups.contains(group)
-                                      ? _selectedGroups.remove(group)
-                                      : _selectedGroups.add(group);
-                                });
-                              },
-                            ),
-                            title: Text(group.name),
-                          ),
-                        )
-                        .toList(),
+                itemCount: widget.groups.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final group = widget.groups[index];
+                  final isSelected = _selectedGroups.contains(group);
+
+                  return CheckboxListTile(
+                    activeColor: primaryGreen,
+                    title: Text(
+                      group.name,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    value: isSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedGroups.add(group);
+                        } else {
+                          _selectedGroups.remove(group);
+                        }
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
+      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       actions: [
-        ElevatedButton(onPressed: () => context.pop(), child: Text("Cancel")),
+        TextButton(
+          onPressed: () => context.pop(),
+          child: Text("Cancel", style: TextStyle(color: Colors.grey[600])),
+        ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryGreen,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 0,
+          ),
           onPressed: () => context.pop(_selectedGroups),
-          child: Text("Apply"),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Text("Apply"),
+          ),
         ),
       ],
     );

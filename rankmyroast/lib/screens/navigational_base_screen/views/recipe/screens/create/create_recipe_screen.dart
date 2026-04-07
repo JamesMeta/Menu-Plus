@@ -344,7 +344,18 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 ExpansionTile(
                   tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
                   initiallyExpanded: true,
-                  shape: Border.all(color: Colors.transparent),
+                  shape: RoundedRectangleBorder(
+                    side:
+                        _selectedGroups.isNotEmpty
+                            ? BorderSide(color: Colors.black)
+                            : BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  collapsedShape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  maintainState: true,
                   leading: IconButton(
                     onPressed:
                         () => setState(() {
@@ -363,19 +374,17 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     textAlign: TextAlign.left,
                   ),
                   children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: 150.h),
-                      child: ItemListViewWidget(
-                        items:
-                            _selectedGroups.map((group) => group.name).toList(),
-                        isNumericalList: false,
-                        deleteForParentList:
-                            (String item) => _selectedGroups.removeWhere(
-                              (group) => group.name == item,
-                            ),
-                        updatePositionForParentList:
-                            (int oldIndex, int newIndex) {},
-                      ),
+                    ItemListViewWidget(
+                      items:
+                          _selectedGroups.map((group) => group.name).toList(),
+                      isNumericalList: false,
+                      deleteForParentList:
+                          (String item) => _selectedGroups.removeWhere(
+                            (group) => group.name == item,
+                          ),
+                      updatePositionForParentList:
+                          (int oldIndex, int newIndex) {},
+                      setParentState: setState,
                     ),
                   ],
                 ),
@@ -409,9 +418,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               );
 
                               if (result != null) {
-                                _groupsController.text = result
-                                    .map((group) => group.name)
-                                    .join(", ");
+                                setState(() {
+                                  _selectedGroups = result;
+                                });
                               }
                             },
                             child: TextField(
@@ -440,20 +449,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         child: IconButton(
                           padding: EdgeInsets.zero,
 
-                          onPressed: () {
-                            if (_groupsController.text.isEmpty) return;
-                            final groupNames = _groupsController.text.split(
-                              ", ",
-                            );
-                            setState(() {
-                              _selectedGroups.addAll(
-                                widget.groups.where(
-                                  (group) => groupNames.contains(group.name),
-                                ),
-                              );
-                              _groupsController.text = "";
-                            });
-                          },
+                          onPressed: () {},
                           icon: Icon(Icons.add, color: Colors.white),
                           style: IconButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -488,59 +484,37 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        constraints: BoxConstraints(
-                          maxHeight: 40.w,
-                          maxWidth: 40.w,
-                        ),
-                        padding: EdgeInsets.all(1),
-                        margin: EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 150, 150, 150),
-                            width: 2,
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        iconSize: 25,
+                        onPressed:
+                            () => setState(() {
+                              _hideGroups = true;
+                            }),
+                        icon: Icon(Icons.close, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            150,
+                            150,
+                            150,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          iconSize: 25,
-                          onPressed:
-                              () => setState(() {
-                                _hideGroups = true;
-                              }),
-                          icon: Icon(
-                            Icons.close,
-                            color: const Color.fromARGB(255, 150, 150, 150),
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-                      Container(
-                        constraints: BoxConstraints(
-                          maxHeight: 40.w,
-                          maxWidth: 40.w,
-                        ),
-                        padding: EdgeInsets.zero,
-                        margin: EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.green, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          onPressed:
-                              () => setState(() {
-                                _includeGroups = true;
-                              }),
-                          iconSize: 25,
-                          icon: Icon(Icons.check, color: Colors.green),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      IconButton(
+                        onPressed:
+                            () => setState(() {
+                              _includeGroups = true;
+                            }),
+                        iconSize: 25,
+                        icon: Icon(Icons.check, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
@@ -571,7 +545,17 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 ExpansionTile(
                   tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
                   initiallyExpanded: true,
-                  shape: Border.all(color: Colors.transparent),
+                  shape: RoundedRectangleBorder(
+                    side:
+                        itemsList.isNotEmpty
+                            ? BorderSide(color: Colors.black)
+                            : BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  collapsedShape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                   leading: IconButton(
                     onPressed: onModify,
                     icon: Icon(Icons.close),
@@ -586,22 +570,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     textAlign: TextAlign.left,
                   ),
                   children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: 800.h),
-                      child: ItemListViewWidget(
-                        items: itemsList,
-                        isNumericalList: isNumericalList,
-                        deleteForParentList:
-                            (String item) => itemsList.remove(item),
-                        updatePositionForParentList: (
-                          int oldIndex,
-                          int newIndex,
-                        ) {
-                          if (newIndex > oldIndex) newIndex -= 1;
-                          final item = itemsList.removeAt(oldIndex);
-                          itemsList.insert(newIndex, item);
-                        },
-                      ),
+                    ItemListViewWidget(
+                      items: itemsList,
+                      isNumericalList: isNumericalList,
+                      deleteForParentList:
+                          (String item) => itemsList.remove(item),
+                      updatePositionForParentList: (
+                        int oldIndex,
+                        int newIndex,
+                      ) {
+                        if (newIndex > oldIndex) newIndex -= 1;
+                        final item = itemsList.removeAt(oldIndex);
+                        itemsList.insert(newIndex, item);
+                      },
+                      setParentState: setState,
                     ),
                   ],
                 ),
@@ -688,53 +670,32 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        constraints: BoxConstraints(
-                          maxHeight: 40.w,
-                          maxWidth: 40.w,
-                        ),
-                        padding: EdgeInsets.all(1),
-                        margin: EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 150, 150, 150),
-                            width: 2,
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        iconSize: 25,
+                        onPressed: onHide,
+
+                        icon: Icon(Icons.close, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            150,
+                            150,
+                            150,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          iconSize: 25,
-                          onPressed: onHide,
-                          icon: Icon(
-                            Icons.close,
-                            color: const Color.fromARGB(255, 150, 150, 150),
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-                      Container(
-                        constraints: BoxConstraints(
-                          maxHeight: 40.w,
-                          maxWidth: 40.w,
-                        ),
-                        padding: EdgeInsets.zero,
-                        margin: EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.green, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          onPressed: onModify,
-                          iconSize: 25,
-                          icon: Icon(Icons.check, color: Colors.green),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      IconButton(
+                        onPressed: onModify,
+                        iconSize: 25,
+                        icon: Icon(Icons.check, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
