@@ -118,7 +118,7 @@ final GoRouter _router = GoRouter(
         } else {
           return null;
         }
-      } on Exception catch (e) {
+      } on Exception {
         return '/login';
       }
     }

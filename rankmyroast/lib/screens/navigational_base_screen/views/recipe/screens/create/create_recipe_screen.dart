@@ -8,6 +8,8 @@ import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/add_to_groups_dialog_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/form_section_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/item_list_view_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
@@ -54,7 +56,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final List<String> _instructionsList = [];
   final List<String> _groceryList = [];
 
-  List<Group> _selectedGroups = [];
+  final List<Group> _selectedGroups = [];
 
   @override
   void initState() {
@@ -198,7 +200,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                       if (_ingredientsList.isNotEmpty) SizedBox(height: 8),
 
-                      _buildFormSection(
+                      FormSectionWidget(
                         header: "Ingredients",
                         subtitle: "Add ingredients...",
                         isNumericalList: false,
@@ -215,11 +217,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             () => setState(() {
                               _hideIngredients = true;
                             }),
+                        setParentState: setState,
                       ),
 
                       SizedBox(height: 16),
 
-                      _buildFormSection(
+                      FormSectionWidget(
                         header: "Instructions",
                         subtitle: "Add instructions...",
                         isNumericalList: true,
@@ -236,11 +239,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             () => setState(() {
                               _hideInstructions = true;
                             }),
+                        setParentState: setState,
                       ),
 
                       SizedBox(height: 16),
 
-                      _buildFormSection(
+                      FormSectionWidget(
                         header: "Grocery Items",
                         subtitle: "Add items to purchase...",
                         isNumericalList: false,
@@ -257,11 +261,31 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             () => setState(() {
                               _hideGroceryItems = true;
                             }),
+                        setParentState: setState,
                       ),
 
                       SizedBox(height: 16),
 
-                      _buildGroupsFormSection(),
+                      GroupFormSectionWidget(
+                        header: "Add to Groups",
+                        subtitle: "Click to add groups...",
+                        includeSectionText: "Add to your Groups?",
+                        isNumericalList: false,
+                        includeSection: _includeGroups,
+                        isHidden: _hideGroups,
+                        onModify:
+                            () => setState(() {
+                              _includeGroups = !_includeGroups;
+                            }),
+                        onHide:
+                            () => setState(() {
+                              _hideGroups = true;
+                            }),
+                        controller: _groupsController,
+                        itemsList: _selectedGroups,
+                        groups: widget.groups,
+                        setParentState: setState,
+                      ),
 
                       // Row(
                       //   children: [
@@ -334,377 +358,6 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildGroupsFormSection() {
-    return !_hideGroups
-        ? _includeGroups
-            ? Column(
-              children: [
-                ExpansionTile(
-                  tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
-                  initiallyExpanded: true,
-                  shape: RoundedRectangleBorder(
-                    side:
-                        _selectedGroups.isNotEmpty
-                            ? BorderSide(color: Colors.black)
-                            : BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  maintainState: true,
-                  leading: IconButton(
-                    onPressed:
-                        () => setState(() {
-                          _includeGroups = false;
-                        }),
-                    icon: Icon(Icons.close),
-                    padding: EdgeInsets.zero,
-                  ),
-
-                  title: Text(
-                    "Add to Groups",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                  children: [
-                    ItemListViewWidget(
-                      items:
-                          _selectedGroups.map((group) => group.name).toList(),
-                      isNumericalList: false,
-                      deleteForParentList:
-                          (String item) => _selectedGroups.removeWhere(
-                            (group) => group.name == item,
-                          ),
-                      updatePositionForParentList:
-                          (int oldIndex, int newIndex) {},
-                      setParentState: setState,
-                    ),
-                  ],
-                ),
-
-                if (_selectedGroups.isNotEmpty) SizedBox(height: 8),
-
-                Container(
-                  height: 42.h,
-                  alignment: Alignment.center,
-
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 17,
-                        child: Container(
-                          height: 42.h,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              final List<Group>? result = await showDialog(
-                                context: context,
-                                builder:
-                                    (context) => AddToGroupsDialogWidget(
-                                      groups: widget.groups,
-                                      selectedGroups: _selectedGroups,
-                                    ),
-                              );
-
-                              if (result != null) {
-                                setState(() {
-                                  _selectedGroups = result;
-                                });
-                              }
-                            },
-                            child: TextField(
-                              controller: _groupsController,
-
-                              decoration: InputDecoration(
-                                labelText: "Click to add groups...",
-                                labelStyle: TextStyle(fontSize: 18),
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-
-                                isCollapsed: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                border: InputBorder.none,
-                                enabled: false,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        flex: 3,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-
-                          onPressed: () {},
-                          icon: Icon(Icons.add, color: Colors.white),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size(0, 42.h),
-
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                              side: BorderSide(color: Colors.black, width: 1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-            : Center(
-              child: Column(
-                children: [
-                  Text(
-                    "Add to your Groups?",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        iconSize: 25,
-                        onPressed:
-                            () => setState(() {
-                              _hideGroups = true;
-                            }),
-                        icon: Icon(Icons.close, color: Colors.white),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            150,
-                            150,
-                            150,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed:
-                            () => setState(() {
-                              _includeGroups = true;
-                            }),
-                        iconSize: 25,
-                        icon: Icon(Icons.check, color: Colors.white),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            )
-        : SizedBox();
-  }
-
-  Widget _buildFormSection({
-    required String header,
-    required String subtitle,
-    required bool isNumericalList,
-    required TextEditingController controller,
-    required List<String> itemsList,
-    required bool includeSection,
-    required VoidCallback onModify,
-    required bool isHidden,
-    required VoidCallback onHide,
-    required String includeSectionText,
-  }) {
-    return !isHidden
-        ? includeSection
-            ? Column(
-              children: [
-                ExpansionTile(
-                  tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
-                  initiallyExpanded: true,
-                  shape: RoundedRectangleBorder(
-                    side:
-                        itemsList.isNotEmpty
-                            ? BorderSide(color: Colors.black)
-                            : BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  leading: IconButton(
-                    onPressed: onModify,
-                    icon: Icon(Icons.close),
-                    padding: EdgeInsets.zero,
-                  ),
-                  title: Text(
-                    header,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                  children: [
-                    ItemListViewWidget(
-                      items: itemsList,
-                      isNumericalList: isNumericalList,
-                      deleteForParentList:
-                          (String item) => itemsList.remove(item),
-                      updatePositionForParentList: (
-                        int oldIndex,
-                        int newIndex,
-                      ) {
-                        if (newIndex > oldIndex) newIndex -= 1;
-                        final item = itemsList.removeAt(oldIndex);
-                        itemsList.insert(newIndex, item);
-                      },
-                      setParentState: setState,
-                    ),
-                  ],
-                ),
-
-                if (itemsList.isNotEmpty) SizedBox(height: 8),
-
-                Container(
-                  height: 42.h,
-                  alignment: Alignment.center,
-
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 17,
-                        child: Container(
-                          height: 42.h,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextField(
-                            controller: controller,
-
-                            decoration: InputDecoration(
-                              labelText: subtitle,
-                              labelStyle: TextStyle(fontSize: 18),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-
-                              isCollapsed: true,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        flex: 3,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-
-                          onPressed: () {
-                            if (controller.text.isEmpty) return;
-                            setState(() {
-                              itemsList.add(controller.text.trim());
-                              controller.text = "";
-                            });
-                          },
-                          icon: Icon(Icons.add, color: Colors.white),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size(0, 42.h),
-
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                              side: BorderSide(color: Colors.black, width: 1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-            : Center(
-              child: Column(
-                children: [
-                  Text(
-                    includeSectionText,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        iconSize: 25,
-                        onPressed: onHide,
-
-                        icon: Icon(Icons.close, color: Colors.white),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            150,
-                            150,
-                            150,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: onModify,
-                        iconSize: 25,
-                        icon: Icon(Icons.check, color: Colors.white),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            )
-        : SizedBox();
   }
 
   Future<File?> _updateRecipeImage() async {
