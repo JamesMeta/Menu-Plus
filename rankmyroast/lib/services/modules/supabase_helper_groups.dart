@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:rankmyroast/models/create_group_response.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/group_member.dart';
-import 'package:rankmyroast/services/modules/supabase_helper_users.dart';
-import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseHelperGroups {

@@ -7,7 +7,6 @@ import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/recipe
 import 'package:rankmyroast/screens/navigational_base_screen/widgets/create_username_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/widgets/sign_out_dialog_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ignore: constant_identifier_names
 const SELECTED_ICON_SIZE = 36.0;

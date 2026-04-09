@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/models/group.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/add_to_groups_dialog_widget.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/item_list_view_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 
 class GroupFormSectionWidget extends StatelessWidget {
   final String header;
@@ -17,6 +17,7 @@ class GroupFormSectionWidget extends StatelessWidget {
   final List<Group> itemsList;
   final List<Group> groups;
   final void Function(void Function()) setParentState;
+  final void Function(String item) deleteFromParent;
 
   const GroupFormSectionWidget({
     super.key,
@@ -28,6 +29,7 @@ class GroupFormSectionWidget extends StatelessWidget {
     required this.isHidden,
     required this.onModify,
     required this.onHide,
+    required this.deleteFromParent,
     required this.controller,
     required this.itemsList,
     required this.groups,
@@ -42,6 +44,7 @@ class GroupFormSectionWidget extends StatelessWidget {
               children: [
                 ExpansionTile(
                   tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
+
                   initiallyExpanded: true,
                   shape: RoundedRectangleBorder(
                     side:
@@ -74,9 +77,7 @@ class GroupFormSectionWidget extends StatelessWidget {
                       items: itemsList.map((group) => group.name).toList(),
                       isNumericalList: false,
                       deleteForParentList:
-                          (String item) => itemsList.removeWhere(
-                            (group) => group.name == item,
-                          ),
+                          (String item) => deleteFromParent(item),
                       updatePositionForParentList:
                           (int oldIndex, int newIndex) {},
                       setParentState: setParentState,

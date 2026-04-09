@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/item_list_view_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 
 class FormSectionWidget extends StatelessWidget {
   final String header;
@@ -14,6 +14,7 @@ class FormSectionWidget extends StatelessWidget {
   final TextEditingController controller;
   final List<String> itemsList;
   final void Function(void Function()) setParentState;
+  final void Function(String item) deleteFromParent;
 
   const FormSectionWidget({
     super.key,
@@ -25,6 +26,7 @@ class FormSectionWidget extends StatelessWidget {
     required this.isHidden,
     required this.onModify,
     required this.onHide,
+    required this.deleteFromParent,
     required this.controller,
     required this.itemsList,
     required this.setParentState,

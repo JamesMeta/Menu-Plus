@@ -7,10 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/add_to_groups_dialog_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/item_list_view_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
@@ -218,6 +218,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               _hideIngredients = true;
                             }),
                         setParentState: setState,
+                        deleteFromParent:
+                            (item) => _ingredientsList.remove(item),
                       ),
 
                       SizedBox(height: 16),
@@ -240,6 +242,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               _hideInstructions = true;
                             }),
                         setParentState: setState,
+                        deleteFromParent:
+                            (item) => _instructionsList.remove(item),
                       ),
 
                       SizedBox(height: 16),
@@ -262,6 +266,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                               _hideGroceryItems = true;
                             }),
                         setParentState: setState,
+                        deleteFromParent: (item) => _groceryList.remove(item),
                       ),
 
                       SizedBox(height: 16),
@@ -285,6 +290,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         itemsList: _selectedGroups,
                         groups: widget.groups,
                         setParentState: setState,
+                        deleteFromParent:
+                            (item) => _selectedGroups.removeWhere(
+                              (group) => group.name == item,
+                            ),
                       ),
 
                       // Row(

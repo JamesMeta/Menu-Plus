@@ -208,106 +208,104 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     SizedBox(height: 8),
                     _users.isEmpty
                         ? SizedBox()
-                        : Container(
-                          child: Column(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    topRight: Radius.circular(12),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 4,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
-                                          "Valid",
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.bold,
-                                            overflow: TextOverflow.ellipsis,
-                                            color: Colors.white,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-
-                                      Expanded(
-                                        flex: 8,
-                                        child: Text(
-                                          "Username",
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.bold,
-                                            overflow: TextOverflow.ellipsis,
-                                            color: Colors.white,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-
-                                      Expanded(
-                                        flex: 6,
-                                        child: Text(
-                                          "Permissions",
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.bold,
-                                            overflow: TextOverflow.ellipsis,
-                                            color: Colors.white,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-
-                                      Expanded(flex: 3, child: SizedBox()),
-                                    ],
-                                  ),
+                        : Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
                                 ),
                               ),
-
-                              Container(
-                                constraints: BoxConstraints(
-                                  minHeight: 20.h,
-                                  maxHeight: 150.h,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
                                 ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(12),
-                                    bottomRight: Radius.circular(12),
-                                  ),
-                                ),
-                                child: ListView(
-                                  shrinkWrap: true,
-                                  padding: EdgeInsets.zero,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        "Valid",
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          overflow: TextOverflow.ellipsis,
+                                          color: Colors.white,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
 
-                                  children:
-                                      _users
-                                          .map(
-                                            (user) => GroupMemberListTile(
-                                              groupMember: user,
-                                              deleteTileCallBack:
-                                                  _deleteGroupMember,
-                                              modifySecurityLevelCallBack:
-                                                  _modifyGroupMemberSecurityLevel,
-                                            ),
-                                          )
-                                          .toList(),
+                                    Expanded(
+                                      flex: 8,
+                                      child: Text(
+                                        "Username",
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          overflow: TextOverflow.ellipsis,
+                                          color: Colors.white,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+
+                                    Expanded(
+                                      flex: 6,
+                                      child: Text(
+                                        "Permissions",
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          overflow: TextOverflow.ellipsis,
+                                          color: Colors.white,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+
+                                    Expanded(flex: 3, child: SizedBox()),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+
+                            Container(
+                              constraints: BoxConstraints(
+                                minHeight: 20.h,
+                                maxHeight: 150.h,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
+                              child: ListView(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+
+                                children:
+                                    _users
+                                        .map(
+                                          (user) => GroupMemberListTile(
+                                            groupMember: user,
+                                            deleteTileCallBack:
+                                                _deleteGroupMember,
+                                            modifySecurityLevelCallBack:
+                                                _modifyGroupMemberSecurityLevel,
+                                          ),
+                                        )
+                                        .toList(),
+                              ),
+                            ),
+                          ],
                         ),
 
                     _users.isEmpty ? SizedBox() : SizedBox(height: 12),

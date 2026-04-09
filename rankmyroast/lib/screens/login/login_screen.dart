@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rankmyroast/screens/login/classes/clipped_container.dart';
 import 'package:rankmyroast/screens/login/classes/login_screen_theme.dart';
 import 'package:rankmyroast/screens/login/classes/sign_in_with_google.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 const serverClientId =
     "474584121880-5f7qh4hd4eonbpirt35mnddrlmahma9n.apps.googleusercontent.com";
@@ -343,7 +341,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${e}'),
+              content: Text('Error: $e'),
               behavior: SnackBarBehavior.floating, // Recommended for modern UI
             ),
           );
