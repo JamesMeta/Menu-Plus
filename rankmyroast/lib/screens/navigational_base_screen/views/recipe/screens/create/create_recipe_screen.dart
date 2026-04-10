@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
+import 'package:rankmyroast/models/create_recipe_response.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
@@ -367,6 +369,24 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         ),
       ),
     );
+  }
+
+  Future<bool> _createRecipe() async {
+    if (_recipeNameController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
+      return false;
+    }
+    if (_recipeNameController.text.length <= 30) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Recipe name must be shorter then 30 characters"),
+        ),
+      );
+      return false;
+    }
+    return false;
   }
 
   Future<File?> _updateRecipeImage() async {
