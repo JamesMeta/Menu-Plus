@@ -534,7 +534,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       }
       return true;
     } else {
-      if (mounted && response.error != null) {
+      if (mounted && response.localError != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.errorMessage ?? "Failed to update group"),
@@ -620,7 +620,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       }
       return true;
     } else {
-      if (mounted && response.error != null) {
+      if (mounted && response.localError != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.errorMessage ?? "Failed to create group"),

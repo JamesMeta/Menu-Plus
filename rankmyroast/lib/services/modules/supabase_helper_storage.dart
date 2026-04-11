@@ -57,6 +57,33 @@ class SupabaseHelperStorage {
     return null;
   }
 
+  Future<String?> uploadFileToBucket({
+    required String bucketName,
+    required File file,
+    required String fileName,
+  }) async {
+    final supabase = Supabase.instance.client;
+
+    // Construct the full path: "folder/filename.ext"
+    final String path = fileName;
+
+    try {
+      await supabase.storage
+          .from(bucketName)
+          .upload(
+            path,
+            file,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+          );
+      print('Upload successful to $bucketName/$path');
+      return path;
+    } on StorageException catch (error) {
+      print('Storage Error: ${error.message}');
+    } catch (error) {
+      print('Unexpected Error: $error');
+    }
+  }
+
   Future<String?> uploadFileToFolder({
     required String bucketName,
     required String folderName,
