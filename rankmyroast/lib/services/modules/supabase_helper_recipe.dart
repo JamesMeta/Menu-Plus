@@ -18,18 +18,14 @@ class SupabaseHelperRecipe {
     bool? isPublic,
   ) async {
     try {
-      final ingredientsText = ingredientList?.join("/%/");
-      final instructionText = instructionList?.join("/%/");
-      final groceryText = groceryList?.join("/%/");
-
       final response =
           await _client
-              .from("Recipe")
+              .from("recipe")
               .insert({
                 "name": name,
-                "ingredients": ingredientsText,
-                "instructions": instructionText,
-                "groceries": groceryText,
+                "ingredients": ingredientList,
+                "instructions": instructionList,
+                "groceries": groceryList,
                 "is_public": isPublic,
               })
               .select("*")
@@ -49,23 +45,20 @@ class SupabaseHelperRecipe {
 
       final success = true;
 
+      final List<Map<String, dynamic>> groupLinks =
+          groupList
+              .map((g) => {"recipe_id": recipeId, "group_id": g.id})
+              .toList();
+
       final failedGroups = <Group>[];
 
-      final recipeGroupResponse = await Future.wait(
-        groupList.map(
-          (group) => _client
-              .from("recipe_group")
-              .insert({"recipe_id": recipeId, "group_id": group.id})
-              .select("*")
-              .single()
-              .then((r) {
-                if (r["id"] == null) {
-                  failedGroups.add(group);
-                }
-              }),
-        ),
-      );
+      try {
+        await _client.from("recipe_group").insert(groupLinks);
+      } catch (e) {
+        failedGroups.addAll(groupList);
+      }
 
+      bool imageUploadFailed = false;
       if (image != null) {
         final imageResponse = await SupabaseHelper.storage.uploadFileToBucket(
           bucketName: "public_recipe_image",
@@ -73,24 +66,13 @@ class SupabaseHelperRecipe {
           fileName: imageName,
         );
 
-        if (imageResponse != null) {
-          return CreateRecipeResponse(
-            success: success,
-            failedToAddGroups: failedGroups,
-          );
-        } else {
-          return CreateRecipeResponse(
-            success: success,
-            failedToAddGroups: failedGroups,
-            failedToUploadImage: true,
-          );
-        }
-      } else {
-        return CreateRecipeResponse(
-          success: success,
-          failedToAddGroups: failedGroups,
-        );
+        if (imageResponse == null) imageUploadFailed = true;
       }
+      return CreateRecipeResponse(
+        success: success,
+        failedToAddGroups: failedGroups,
+        failedToUploadImage: imageUploadFailed,
+      );
     } catch (e) {
       return CreateRecipeResponse(
         success: false,

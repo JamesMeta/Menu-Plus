@@ -14,6 +14,7 @@ import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screen
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   final Recipe? recipeToEdit;
@@ -178,6 +179,18 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: TextField(
+                                      controller: _recipeNameController,
+                                      onChanged:
+                                          (value) =>
+                                              _recipeNameController
+                                                      .text
+                                                      .isNotEmpty
+                                                  ? setState(() {
+                                                    _canSubmit = true;
+                                                  })
+                                                  : setState(() {
+                                                    _canSubmit = false;
+                                                  }),
                                       decoration: InputDecoration(
                                         labelText: "Recipe Name",
                                         labelStyle: TextStyle(fontSize: 18),
@@ -326,7 +339,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             //TODO
                             response = true;
                           } else {
-                            //TODO
+                            response = await _createRecipe();
                           }
                           setState(() {
                             _isCreatingRecipe = false;
@@ -378,14 +391,60 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
       return false;
     }
-    if (_recipeNameController.text.length <= 30) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Recipe name must be shorter then 30 characters"),
-        ),
-      );
-      return false;
+
+    final name = _recipeNameController.text.trim();
+
+    final response = await SupabaseHelper.recipe.createNewRecipe(
+      _recipeImage,
+      name,
+      _ingredientsList,
+      _instructionsList,
+      _groceryList,
+      _selectedGroups,
+      _isPublic,
+    );
+
+    if (response.success && mounted) {
+      final failedGroups = response.failedToAddGroups;
+      final failedImage = response.failedToUploadImage;
+
+      if (failedGroups != null) {
+        if (failedGroups.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to add recipe to groups.")),
+          );
+        }
+      }
+
+      if (failedImage != null) {
+        if (failedImage) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to upload image for recipe")),
+          );
+        }
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Recipe Created Successfully")));
+      return true;
+    } else if (!response.success && mounted) {
+      final localError = response.localError;
+      final errorMessage = response.errorMessage;
+
+      if (localError != null && errorMessage != null) {
+        if (localError) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+        }
+      }
     }
+
     return false;
   }
 
@@ -400,27 +459,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         _recipeImage = file;
       });
     }
-  }
-
-  //TODO
-  // MAKE THIS WORK AS INTENDED
-  Future<String?> _handleImageUploadProcedure(File file) async {
-    String folderName = SupabaseHelper.users.getAuthId();
-
-    final String fileName = DateTime.now().toString();
-
-    try {
-      final path = await SupabaseHelper.storage.uploadFileToFolder(
-        bucketName: "recipe_image",
-        folderName: folderName,
-        file: file,
-        fileName: fileName,
-      );
-
-      return path;
-    } on Exception catch (e) {
-      print("Something went wrong when uploading file");
-    }
+    return null;
   }
 
   void _showHiddenFields() {
