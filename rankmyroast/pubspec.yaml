@@ -18,6 +18,7 @@ dependencies:
   flutter_screenutil: any
   permission_handler: any
   image_picker: any
+  uuid: any
 
 dev_dependencies:
   flutter_test:
