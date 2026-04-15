@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/models/create_recipe_extra.dart';
 import 'package:rankmyroast/models/group.dart';
 import 'package:rankmyroast/models/recipe.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/widgets/recipe_tile_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class RecipeView extends StatefulWidget {
@@ -151,23 +152,53 @@ class _RecipeViewState extends State<RecipeView> {
 
           SizedBox(height: 8.h),
 
-          FutureBuilder(
-            future: _groupsList,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.connectionState == ConnectionState.done) {
-                final groups = snapshot.data;
+          Expanded(
+            child: FutureBuilder(
+              future: _groupsList,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  final groups = snapshot.data;
 
-                if (groups != null) {
-                  return Center(child: Text("Data has arrived"));
+                  if (groups != null) {
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        const double idealItemWidth = 120.0;
+
+                        int crossAxisCount =
+                            (constraints.maxWidth / idealItemWidth).floor();
+
+                        if (crossAxisCount < 2) crossAxisCount = 2;
+
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                              ),
+                          itemCount:
+                              _selectedGroup != null
+                                  ? _selectedGroup!.recipes.length
+                                  : 0,
+                          itemBuilder: (context, index) {
+                            print(index);
+                            final recipe = _selectedGroup!.recipes[index];
+                            return RecipeTileWidget(recipe: recipe);
+                          },
+                        );
+                      },
+                    );
+                  } else {
+                    return Center(child: Text("The Data is null"));
+                  }
                 } else {
-                  return Center(child: Text("The Data is null"));
+                  return Center(child: Text("The Data is never coming"));
                 }
-              } else {
-                return Center(child: Text("The Data is never coming"));
-              }
-            },
+              },
+            ),
           ),
         ],
       ),
@@ -196,18 +227,4 @@ class _RecipeViewState extends State<RecipeView> {
       _selectedGroup = null;
     }
   }
-
-  // Future<File?> _takePhoto() async {
-  //   final image = SupabaseHelper.storage.pickImage(ImageSource.camera);
-  //   return image;
-  // }
-
-  // Future<void> _uploadPhoto(File file) async {
-  //   await SupabaseHelper.storage.uploadFileToFolder(
-  //     bucketName: "recipe_image",
-  //     folderName: "2d24a4c0-479f-4656-9778-2e8ab2dce3e6",
-  //     file: file,
-  //     fileName: "test.png",
-  //   );
-  // }
 }

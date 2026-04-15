@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,7 +22,30 @@ class SupabaseHelperStorage {
       );
 
       if (pickedFile != null) {
-        return File(pickedFile.path);
+        CroppedFile? croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatio: const CropAspectRatio(
+            ratioX: 1,
+            ratioY: 1,
+          ), // Forces a Square
+          compressQuality: 90,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Photo',
+              toolbarColor: Colors.green,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true, // Prevents user from changing the ratio
+            ),
+            IOSUiSettings(
+              title: 'Crop Photo',
+              aspectRatioLockEnabled: true,
+              resetButtonHidden: true,
+            ),
+          ],
+        );
+
+        return croppedFile != null ? File(croppedFile.path) : null;
       }
     } else if (status.isPermanentlyDenied) {
       // If the user denied it previously, send them to settings
@@ -48,7 +73,30 @@ class SupabaseHelperStorage {
       );
 
       if (pickedFile != null) {
-        return File(pickedFile.path);
+        CroppedFile? croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatio: const CropAspectRatio(
+            ratioX: 1,
+            ratioY: 1,
+          ), // Forces a Square
+          compressQuality: 90,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Photo',
+              toolbarColor: Colors.green,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true, // Prevents user from changing the ratio
+            ),
+            IOSUiSettings(
+              title: 'Crop Photo',
+              aspectRatioLockEnabled: true,
+              resetButtonHidden: true,
+            ),
+          ],
+        );
+
+        return croppedFile != null ? File(croppedFile.path) : null;
       }
     } else if (status.isPermanentlyDenied) {
       await openAppSettings();
@@ -73,7 +121,7 @@ class SupabaseHelperStorage {
           .upload(
             path,
             file,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
           );
       print('Upload successful to $bucketName/$path');
       return path;

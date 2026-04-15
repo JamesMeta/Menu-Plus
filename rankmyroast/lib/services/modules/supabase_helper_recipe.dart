@@ -20,30 +20,29 @@ class SupabaseHelperRecipe {
     bool? isPublic,
   ) async {
     try {
-      final response =
-          await _client
-              .from("recipe")
-              .insert({
+      final insert =
+          image == null
+              ? {
                 "name": name,
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
                 "is_public": isPublic,
-              })
-              .select("*")
-              .single();
+                "image_name": null,
+              }
+              : {
+                "name": name,
+                "ingredients": ingredientList,
+                "instructions": instructionList,
+                "groceries": groceryList,
+                "is_public": isPublic,
+              };
+
+      final response =
+          await _client.from("recipe").insert(insert).select("*").single();
 
       final recipeId = response["id"];
       final imageName = response["image_name"];
-
-      if (imageName == null) {
-        return CreateRecipeResponse(
-          success: false,
-          localError: true,
-          errorMessage:
-              "Error: Recipe failed to be created at this time, please try again later.",
-        );
-      }
 
       final success = true;
 
@@ -60,7 +59,7 @@ class SupabaseHelperRecipe {
         failedGroups.addAll(groupList);
       }
 
-      bool imageUploadFailed = false;
+      bool imageUploadFailed = true;
       if (image != null) {
         final imageResponse = await SupabaseHelper.storage.uploadFileToBucket(
           bucketName: "public_recipe_image",
@@ -68,7 +67,9 @@ class SupabaseHelperRecipe {
           fileName: imageName,
         );
 
-        if (imageResponse == null) imageUploadFailed = true;
+        if (imageResponse != null) imageUploadFailed = false;
+      } else {
+        imageUploadFailed = false;
       }
       return CreateRecipeResponse(
         success: success,
@@ -100,34 +101,34 @@ class SupabaseHelperRecipe {
     bool? isPublic,
   ) async {
     try {
-      final newImageName = generateUUID();
+      final newImageName = image != null ? generateUUID() : null;
 
-      final response =
-          await _client
-              .from("recipe")
-              .update({
+      final update =
+          image == null
+              ? {
                 "name": name,
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
-                "image_name": newImageName,
                 "is_public": isPublic,
-              })
-              .select("*")
-              .single();
+                "image_name": null,
+              }
+              : {
+                "name": name,
+                "ingredients": ingredientList,
+                "instructions": instructionList,
+                "groceries": groceryList,
+                "is_public": isPublic,
+                "image_name": newImageName,
+              };
+
+      final response =
+          await _client.from("recipe").update(update).select("*").single();
 
       final recipeId = response["id"];
       final imageName = response["image_name"];
 
-      if (imageName == null) {
-        return CreateRecipeResponse(
-          success: false,
-          localError: true,
-          errorMessage:
-              "Error: Recipe failed to be updated at this time, please try again later.",
-        );
-      }
-
+      // The one in the trillion chance that the UUID generated for the image name already exists, we want to prevent the recipe from being updated with an image name that doesn't match the one in storage
       if (imageName != newImageName) {
         return CreateRecipeResponse(
           success: false,

@@ -19,6 +19,9 @@ dependencies:
   permission_handler: any
   image_picker: any
   uuid: any
+  cached_network_image: ^3.4.1
+  image_cropper: ^12.2.0
+
 
 dev_dependencies:
   flutter_test:
