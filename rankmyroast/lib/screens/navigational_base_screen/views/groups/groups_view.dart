@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rankmyroast/models/group.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/group_tile_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
@@ -14,8 +14,6 @@ class GroupsView extends StatefulWidget {
 
 class _GroupsViewState extends State<GroupsView> {
   late Future<List<Group>> _groups;
-
-  double _yOffset = 0;
 
   @override
   void initState() {

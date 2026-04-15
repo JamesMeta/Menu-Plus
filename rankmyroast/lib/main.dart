@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rankmyroast/models/group.dart';
+import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/navigational_base_screen.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/screens/create_group_screen.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/create_group_screen.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/create_recipe_screen.dart';
 import 'package:rankmyroast/screens/settings/settings_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -45,6 +47,25 @@ final GoRouter _router = GoRouter(
             }
 
             return const CreateGroupScreen(groupToEdit: null);
+          },
+        ),
+        GoRoute(
+          path: '/create-recipe',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra != null && extra is CreateRecipeExtra) {
+              return CreateRecipeScreen(
+                recipeToEdit: extra.recipeToEdit,
+                selectedGroup: extra.selectedGroup,
+                groups: extra.groups,
+              );
+            }
+
+            return const CreateRecipeScreen(
+              recipeToEdit: null,
+              selectedGroup: null,
+              groups: [],
+            );
           },
         ),
       ],
@@ -97,7 +118,7 @@ final GoRouter _router = GoRouter(
         } else {
           return null;
         }
-      } on Exception catch (e) {
+      } on Exception {
         return '/login';
       }
     }

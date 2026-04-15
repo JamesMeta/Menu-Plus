@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:rankmyroast/models/create_group_response.dart';
-import 'package:rankmyroast/models/group.dart';
-import 'package:rankmyroast/models/group_member.dart';
-import 'package:rankmyroast/services/modules/supabase_helper_users.dart';
-import 'package:rankmyroast/services/supabase_helper.dart';
+import 'package:rankmyroast/classes/responses/create_group_response.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/group_member.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseHelperGroups {
@@ -108,7 +105,7 @@ class SupabaseHelperGroups {
         if (response["id"] == null) {
           return CreateGroupResponse(
             success: false,
-            error: true,
+            localError: true,
             errorMessage: "Failed to create group, Database Rejected Insert",
           );
         }
@@ -155,7 +152,7 @@ class SupabaseHelperGroups {
         print(e);
         return CreateGroupResponse(
           success: false,
-          error: true,
+          localError: true,
           errorMessage: e.toString(),
         );
       }
@@ -173,7 +170,7 @@ class SupabaseHelperGroups {
         if (group.isPersonalGroup) {
           return CreateGroupResponse(
             success: false,
-            error: true,
+            localError: true,
             errorMessage: "Personal groups cannot be edited",
           );
         }
@@ -193,7 +190,7 @@ class SupabaseHelperGroups {
         if (response["id"] == null) {
           return CreateGroupResponse(
             success: false,
-            error: true,
+            localError: true,
             errorMessage: "Failed to update group, Database Rejected Update",
           );
         }
@@ -241,7 +238,7 @@ class SupabaseHelperGroups {
         print(e);
         return CreateGroupResponse(
           success: false,
-          error: true,
+          localError: true,
           errorMessage: e.toString(),
         );
       }
