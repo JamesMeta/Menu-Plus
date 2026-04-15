@@ -1,5 +1,5 @@
-import 'package:rankmyroast/models/group.dart';
-import 'package:rankmyroast/models/recipe.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/recipe.dart';
 
 class CreateRecipeExtra {
   Group? selectedGroup;

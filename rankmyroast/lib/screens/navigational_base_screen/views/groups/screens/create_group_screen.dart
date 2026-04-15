@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rankmyroast/models/group.dart';
-import 'package:rankmyroast/models/group_member.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/group_member.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/widgets/delete_group_confirmation_dialog.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/widgets/group_member_list_tile.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/widgets/group_security_informational_dialog.dart';

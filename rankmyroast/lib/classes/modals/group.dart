@@ -1,5 +1,5 @@
-import 'package:rankmyroast/models/group_member.dart';
-import 'package:rankmyroast/models/recipe.dart';
+import 'package:rankmyroast/classes/modals/group_member.dart';
+import 'package:rankmyroast/classes/modals/recipe.dart';
 
 class Group {
   final String id;

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:rankmyroast/models/group.dart';
-import 'package:rankmyroast/models/responses/create_recipe_response.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -99,27 +99,36 @@ class SupabaseHelperRecipe {
     List<String>? groceryList,
     List<Group> groupList,
     bool? isPublic,
+    bool changeImage,
   ) async {
     try {
       final newImageName = image != null ? generateUUID() : null;
 
       final update =
-          image == null
-              ? {
-                "name": name,
-                "ingredients": ingredientList,
-                "instructions": instructionList,
-                "groceries": groceryList,
-                "is_public": isPublic,
-                "image_name": null,
-              }
+          changeImage
+              ? image == null
+                  ? {
+                    "name": name,
+                    "ingredients": ingredientList,
+                    "instructions": instructionList,
+                    "groceries": groceryList,
+                    "is_public": isPublic,
+                    "image_name": null,
+                  }
+                  : {
+                    "name": name,
+                    "ingredients": ingredientList,
+                    "instructions": instructionList,
+                    "groceries": groceryList,
+                    "is_public": isPublic,
+                    "image_name": newImageName,
+                  }
               : {
                 "name": name,
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
                 "is_public": isPublic,
-                "image_name": newImageName,
               };
 
       final response =
@@ -177,5 +186,30 @@ class SupabaseHelperRecipe {
         errorMessage: e.toString(),
       );
     }
+  }
+
+  Future<List<Group>?> getGroupsForRecipe(String recipeId) async {
+    try {
+      final response = await _client
+          .from("recipe_group")
+          .select(
+            "group_id, group (id, created_at, name, user_id, grade_visible, use_rating, is_personal_group)",
+          )
+          .eq("recipe_id", recipeId);
+
+      if (response != null) {
+        final groups =
+            (response as List)
+                .map(
+                  (item) =>
+                      Group.fromMap(item['group'] as Map<String, dynamic>),
+                )
+                .toList();
+        return groups;
+      }
+    } catch (e) {
+      print('Error fetching groups for recipe: $e');
+    }
+    return null;
   }
 }

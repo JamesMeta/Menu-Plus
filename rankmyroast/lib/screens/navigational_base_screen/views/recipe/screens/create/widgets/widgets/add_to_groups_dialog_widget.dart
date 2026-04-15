@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rankmyroast/models/group.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
 
 class AddToGroupsDialogWidget extends StatefulWidget {
   final List<Group> groups;

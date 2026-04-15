@@ -34,9 +34,9 @@ class Recipe {
 }
 
 extension RecipeImageUrl on Recipe {
-  String get publicImageUrl {
+  String? get publicImageUrl {
     if (imageName == null || imageName!.isEmpty) {
-      return 'https://mysite.com/placeholder.png';
+      return null;
     }
 
     return 'https://ozmzpnayygajicxafxfm.supabase.co/storage/v1/object/public/public_recipe_image/$imageName';

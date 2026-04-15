@@ -5,7 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class TakePhotoBottomModalWidget extends StatelessWidget {
-  const TakePhotoBottomModalWidget({super.key});
+  final bool includeRemoveImage;
+
+  const TakePhotoBottomModalWidget({
+    super.key,
+    required this.includeRemoveImage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,17 @@ class TakePhotoBottomModalWidget extends StatelessWidget {
               }
             },
           ),
+          includeRemoveImage
+              ? ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Remove Current Image'),
+                onTap: () {
+                  if (context.mounted) {
+                    context.pop(true);
+                  }
+                },
+              )
+              : SizedBox(),
         ],
       ),
     );

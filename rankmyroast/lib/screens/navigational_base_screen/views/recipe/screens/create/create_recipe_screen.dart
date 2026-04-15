@@ -1,17 +1,19 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
-import 'package:rankmyroast/models/responses/create_recipe_response.dart';
-import 'package:rankmyroast/models/group.dart';
-import 'package:rankmyroast/models/recipe.dart';
+import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/image_content_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,9 +35,13 @@ class CreateRecipeScreen extends StatefulWidget {
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
+  late final bool _isEditing;
+  late final Recipe? _recipeToEdit;
+  late final String? _recipeToEditImageUrl;
+
   late final String _labelText;
 
-  File? _recipeImage;
+  File? _recipeImageFile;
 
   bool _isPublic = false;
   bool _isCreatingRecipe = false;
@@ -48,6 +54,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _hideInstructions = false;
   bool _hideGroceryItems = false;
   bool _hideGroups = false;
+  bool _removeImage = false;
 
   final TextEditingController _recipeNameController = TextEditingController();
   final TextEditingController _ingredientsController = TextEditingController();
@@ -63,11 +70,40 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   @override
   void initState() {
-    widget.recipeToEdit == null
-        ? _labelText = "Create Recipe"
-        : _labelText = "Edit Recipe";
+    _isEditing = widget.recipeToEdit != null;
+
+    if (_isEditing) {
+      _recipeToEdit = widget.recipeToEdit!;
+      _recipeToEditImageUrl = _recipeToEdit!.publicImageUrl;
+      _labelText = "Edit Recipe";
+      _recipeNameController.text = widget.recipeToEdit!.name;
+      _ingredientsList.addAll(widget.recipeToEdit!.ingredientList);
+      _instructionsList.addAll(widget.recipeToEdit!.instructionsList);
+      _groceryList.addAll(widget.recipeToEdit!.groceriesList);
+      _isPublic = widget.recipeToEdit!.isPublic;
+      _canSubmit = true;
+      _getGroupsForRecipe();
+    } else {
+      _labelText = "Create Recipe";
+      _recipeToEditImageUrl = null;
+      _recipeToEdit = null;
+    }
 
     super.initState();
+  }
+
+  Future<void> _getGroupsForRecipe() async {
+    if (widget.recipeToEdit == null) return;
+
+    final groupsForRecipe = await SupabaseHelper.recipe.getGroupsForRecipe(
+      widget.recipeToEdit!.id,
+    );
+
+    if (groupsForRecipe != null) {
+      setState(() {
+        _selectedGroups.addAll(groupsForRecipe);
+      });
+    }
   }
 
   @override
@@ -136,32 +172,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           SizedBox(
                             width: 128.w,
                             height: 128.w,
-                            child:
-                                _recipeImage == null
-                                    ? Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.black),
-                                        borderRadius: BorderRadius.circular(32),
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.camera_alt, size: 48),
-                                        onPressed:
-                                            () async =>
-                                                await _updateRecipeImage(),
-                                      ),
-                                    )
-                                    : GestureDetector(
-                                      onTap:
-                                          () async =>
-                                              await _updateRecipeImage(),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(32),
-                                        child: Image.file(
-                                          _recipeImage!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
+                            child: ImageContentWidget(
+                              recipeImage: _recipeImageFile,
+                              updateRecipeImage: _updateRecipeImage,
+                              isEditing: _isEditing,
+                              removeImage: _removeImage,
+                              recipeImageUrl: _recipeToEditImageUrl,
+                            ),
                           ),
                           Expanded(
                             child: Column(
@@ -335,9 +352,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           });
 
                           late final bool? response;
-                          if (widget.recipeToEdit != null) {
-                            //TODO
-                            response = true;
+                          if (_isEditing) {
                           } else {
                             response = await _createRecipe();
                           }
@@ -395,7 +410,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     final name = _recipeNameController.text.trim();
 
     final response = await SupabaseHelper.recipe.createNewRecipe(
-      _recipeImage,
+      _recipeImageFile,
       name,
       _ingredientsList,
       _instructionsList,
@@ -448,18 +463,104 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     return false;
   }
 
-  Future<File?> _updateRecipeImage() async {
-    File? file = await showModalBottomSheet(
-      context: context,
-      builder: (context) => TakePhotoBottomModalWidget(),
+  Future<bool> _editRecipe() async {
+    if (_recipeNameController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
+      return false;
+    }
+
+    final name = _recipeNameController.text.trim();
+
+    final bool noImageBecameAnImage =
+        _recipeToEditImageUrl == null && _recipeImageFile != null;
+    final bool anImageBecameNoImage = _removeImage;
+    final bool anImageBecameADiffImage =
+        _recipeToEditImageUrl != null && _recipeImageFile != null;
+
+    final bool changeImage =
+        noImageBecameAnImage || anImageBecameADiffImage || anImageBecameNoImage;
+
+    final response = await SupabaseHelper.recipe.updateRecipe(
+      _recipeImageFile,
+      name,
+      _ingredientsList,
+      _instructionsList,
+      _groceryList,
+      _selectedGroups,
+      _isPublic,
+      changeImage,
     );
 
-    if (file != null) {
-      setState(() {
-        _recipeImage = file;
-      });
+    if (response.success && mounted) {
+      final failedGroups = response.failedToAddGroups;
+      final failedImage = response.failedToUploadImage;
+
+      if (failedGroups != null) {
+        if (failedGroups.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to add recipe to groups.")),
+          );
+        }
+      }
+
+      if (failedImage != null) {
+        if (failedImage) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to upload image for recipe")),
+          );
+        }
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Recipe Updated Successfully")));
+      return true;
+    } else if (!response.success && mounted) {
+      final localError = response.localError;
+      final errorMessage = response.errorMessage;
+
+      if (localError != null && errorMessage != null) {
+        if (localError) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+        }
+      }
     }
-    return null;
+
+    return false;
+  }
+
+  Future<void> _updateRecipeImage() async {
+    dynamic response = await showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => TakePhotoBottomModalWidget(
+            includeRemoveImage:
+                _recipeImageFile != null || _recipeToEditImageUrl != null,
+          ),
+    );
+
+    if (response != null) {
+      if (response is File) {
+        setState(() {
+          _recipeImageFile = response;
+          _removeImage = false;
+        });
+      }
+      if (response is bool) {
+        setState(() {
+          _removeImage = response;
+          _recipeImageFile = null;
+        });
+      }
+    }
   }
 
   void _showHiddenFields() {

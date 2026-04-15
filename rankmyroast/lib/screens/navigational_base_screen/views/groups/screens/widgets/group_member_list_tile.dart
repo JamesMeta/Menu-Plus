@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rankmyroast/models/group_member.dart';
+import 'package:rankmyroast/classes/modals/group_member.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/widgets/classes/security_level_to_role.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
