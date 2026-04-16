@@ -35,7 +35,7 @@ class Recipe {
 
 extension RecipeImageUrl on Recipe {
   String? get publicImageUrl {
-    if (imageName == null || imageName!.isEmpty) {
+    if (imageName.isEmpty) {
       return null;
     }
 

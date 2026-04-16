@@ -44,31 +44,40 @@ class GroupFormSectionWidget extends StatelessWidget {
               children: [
                 ExpansionTile(
                   tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
+                  backgroundColor: Colors.white,
 
                   initiallyExpanded: true,
                   shape: RoundedRectangleBorder(
                     side:
                         itemsList.isNotEmpty
-                            ? BorderSide(color: Colors.black)
-                            : BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(24),
+                            ? BorderSide(color: Colors.grey[600]!)
+                            : BorderSide(color: Colors.grey[600]!),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   collapsedShape: RoundedRectangleBorder(
                     side: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   maintainState: true,
                   leading: IconButton(
                     onPressed: onModify,
-                    icon: Icon(Icons.close),
+                    style: IconButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      backgroundColor: const Color.fromARGB(22, 161, 161, 161),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: Icon(Icons.close, color: Colors.grey[600]),
                     padding: EdgeInsets.zero,
                   ),
 
                   title: Text(
-                    "Add to Groups",
+                    header,
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
                     ),
                     textAlign: TextAlign.left,
                   ),
@@ -85,7 +94,7 @@ class GroupFormSectionWidget extends StatelessWidget {
                   ],
                 ),
 
-                if (itemsList.isNotEmpty) SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 Container(
                   height: 42.h,
@@ -99,8 +108,9 @@ class GroupFormSectionWidget extends StatelessWidget {
                           height: 42.h,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
+                            border: Border.all(color: Colors.grey[600]!),
                             borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
                           ),
                           child: GestureDetector(
                             onTap: () async {
@@ -124,7 +134,7 @@ class GroupFormSectionWidget extends StatelessWidget {
                               controller: controller,
 
                               decoration: InputDecoration(
-                                labelText: "Click to add groups...",
+                                labelText: subtitle,
                                 labelStyle: TextStyle(fontSize: 18),
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.never,
@@ -157,7 +167,6 @@ class GroupFormSectionWidget extends StatelessWidget {
                               borderRadius: BorderRadius.all(
                                 Radius.circular(12),
                               ),
-                              side: BorderSide(color: Colors.black, width: 1),
                             ),
                           ),
                         ),
@@ -171,7 +180,7 @@ class GroupFormSectionWidget extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Add to your Groups?",
+                    includeSectionText,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -187,23 +196,21 @@ class GroupFormSectionWidget extends StatelessWidget {
                         onPressed: onHide,
                         icon: Icon(Icons.close, color: Colors.white),
                         style: IconButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            150,
-                            150,
-                            150,
-                          ),
+                          backgroundColor: Colors.grey[600],
+                          minimumSize: Size(40.h, 40.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
+                      SizedBox(width: 8),
                       IconButton(
                         onPressed: onModify,
                         iconSize: 25,
                         icon: Icon(Icons.check, color: Colors.white),
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.green,
+                          minimumSize: Size(40.h, 40.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

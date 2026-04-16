@@ -70,12 +70,13 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
         ? Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Divider(color: Colors.black),
+            Divider(color: Colors.grey[600]!),
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 800.h, minHeight: 100.h),
               child: ReorderableListView.builder(
                 scrollController: _scrollController,
                 onReorder: (oldIndex, newIndex) {
+                  widget.updatePositionForParentList(oldIndex, newIndex);
                   setState(() {
                     if (newIndex > oldIndex) newIndex -= 1;
                     final item = _itemsList.removeAt(oldIndex);
@@ -88,24 +89,50 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
                 itemCount: _itemsList.length,
                 clipBehavior: Clip.none,
                 itemBuilder: (context, index) {
-                  return ListTile(
+                  return Container(
                     key: Key('$index'),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    leading: ReorderableDragStartListener(
-                      index: index,
-                      child: Icon(Icons.drag_handle),
-                    ),
-                    title: Text(
-                      widget.isNumericalList
-                          ? "${index + 1}. ${_itemsList[index]}"
-                          : _itemsList[index],
-                    ),
-                    trailing: IconButton(
-                      onPressed: () => _deleteItem(_itemsList[index]),
-                      icon: Icon(Icons.delete),
+                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: const Color.fromARGB(124, 149, 161, 150),
+                        ),
+                      ),
+                      leading: ReorderableDragStartListener(
+                        index: index,
+                        child: Icon(Icons.drag_handle, color: Colors.grey[600]),
+                      ),
+
+                      title: Text(
+                        widget.isNumericalList
+                            ? "${index + 1}. ${_itemsList[index]}"
+                            : _itemsList[index],
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      trailing: IconButton(
+                        style: IconButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: const Color.fromARGB(
+                            43,
+                            255,
+                            82,
+                            82,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _deleteItem(_itemsList[index]),
+                        icon: Icon(Icons.delete, color: Colors.redAccent),
+                      ),
                     ),
                   );
                 },

@@ -192,8 +192,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                     height: 42.h,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
+                                      border: Border.all(
+                                        color: Colors.grey[600]!,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
+                                      color: Colors.white,
                                     ),
                                     child: TextField(
                                       controller: _recipeNameController,
@@ -210,7 +213,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                                   }),
                                       decoration: InputDecoration(
                                         labelText: "Recipe Name",
-                                        labelStyle: TextStyle(fontSize: 18),
+                                        labelStyle: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.grey[600],
+                                        ),
                                         floatingLabelBehavior:
                                             FloatingLabelBehavior.never,
 
@@ -252,6 +258,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         setParentState: setState,
                         deleteFromParent:
                             (item) => _ingredientsList.remove(item),
+                        updatePositionForParentList: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = _ingredientsList.removeAt(oldIndex);
+                          _ingredientsList.insert(newIndex, item);
+                        },
                       ),
 
                       SizedBox(height: 16),
@@ -273,6 +284,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             () => setState(() {
                               _hideInstructions = true;
                             }),
+                        updatePositionForParentList: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = _instructionsList.removeAt(oldIndex);
+                          _instructionsList.insert(newIndex, item);
+                        },
                         setParentState: setState,
                         deleteFromParent:
                             (item) => _instructionsList.remove(item),
@@ -299,6 +315,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             }),
                         setParentState: setState,
                         deleteFromParent: (item) => _groceryList.remove(item),
+                        updatePositionForParentList: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = _groceryList.removeAt(oldIndex);
+                          _groceryList.insert(newIndex, item);
+                        },
                       ),
 
                       SizedBox(height: 16),
@@ -366,7 +387,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              _canSubmit ? Colors.green : Colors.grey,
+                              _canSubmit ? Colors.green : Colors.grey[600],
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             side: BorderSide(color: Colors.black),
