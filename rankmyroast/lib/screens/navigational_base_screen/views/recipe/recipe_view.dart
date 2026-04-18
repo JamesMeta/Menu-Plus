@@ -21,7 +21,7 @@ class _RecipeViewState extends State<RecipeView> {
   bool groupRecipes = true;
   Group? _selectedGroup;
 
-  late final Future<List<Group>?> _groupsList;
+  late Future<List<Group>?> _groupsList;
 
   @override
   void initState() {
@@ -171,23 +171,40 @@ class _RecipeViewState extends State<RecipeView> {
 
                         if (crossAxisCount < 2) crossAxisCount = 2;
 
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                mainAxisSpacing: 8,
-                                crossAxisSpacing: 8,
-                              ),
-                          itemCount:
-                              _selectedGroup != null
-                                  ? _selectedGroup!.recipes.length
-                                  : 0,
-                          itemBuilder: (context, index) {
-                            print(index);
-                            final recipe = _selectedGroup!.recipes[index];
-                            return RecipeTileWidget(recipe: recipe);
+                        return RefreshIndicator(
+                          onRefresh: () async {
+                            setState(() {
+                              _loadData();
+                            });
                           },
+                          color: Colors.white, // Color of the spinner
+                          backgroundColor: Colors.green,
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                ),
+                            itemCount:
+                                _selectedGroup != null
+                                    ? _selectedGroup!.recipes.length
+                                    : 0,
+                            itemBuilder: (context, index) {
+                              print(index);
+                              final recipe = _selectedGroup!.recipes[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  context.push(
+                                    "/base/view-recipe",
+                                    extra: recipe,
+                                  );
+                                },
+                                child: RecipeTileWidget(recipe: recipe),
+                              );
+                            },
+                          ),
                         );
                       },
                     );

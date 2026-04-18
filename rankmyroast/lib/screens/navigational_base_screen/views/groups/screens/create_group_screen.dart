@@ -87,7 +87,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(blurRadius: 0.5, offset: Offset(1, 1))],
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color.fromARGB(115, 0, 0, 0),
+                    blurRadius: 10,
+                    offset: Offset(2, 5),
+                  ),
+                ],
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),

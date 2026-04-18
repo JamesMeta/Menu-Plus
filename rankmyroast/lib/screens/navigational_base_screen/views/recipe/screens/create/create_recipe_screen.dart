@@ -157,6 +157,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(115, 0, 0, 0),
+                      blurRadius: 10,
+                      offset: Offset(2, 5),
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
