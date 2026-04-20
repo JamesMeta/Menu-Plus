@@ -13,6 +13,8 @@ class SupabaseHelperRecipe {
   Future<CreateRecipeResponse> createNewRecipe(
     File? image,
     String name,
+    int? prepTime,
+    int? cookTime,
     List<String>? ingredientList,
     List<String>? instructionList,
     List<String>? groceryList,
@@ -27,6 +29,8 @@ class SupabaseHelperRecipe {
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
+                "prep_time": prepTime,
+                "cook_time": cookTime,
                 "is_public": isPublic,
                 "image_name": null,
               }
@@ -35,6 +39,8 @@ class SupabaseHelperRecipe {
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
+                "prep_time": prepTime,
+                "cook_time": cookTime,
                 "is_public": isPublic,
               };
 
@@ -94,10 +100,13 @@ class SupabaseHelperRecipe {
   Future<CreateRecipeResponse> updateRecipe(
     File? image,
     String name,
+    int? prepTime,
+    int? cookTime,
     List<String>? ingredientList,
     List<String>? instructionList,
     List<String>? groceryList,
     List<Group> groupList,
+
     bool? isPublic,
     bool changeImage,
   ) async {
@@ -112,6 +121,8 @@ class SupabaseHelperRecipe {
                     "ingredients": ingredientList,
                     "instructions": instructionList,
                     "groceries": groceryList,
+                    "prep_time": prepTime,
+                    "cook_time": cookTime,
                     "is_public": isPublic,
                     "image_name": null,
                   }
@@ -120,6 +131,8 @@ class SupabaseHelperRecipe {
                     "ingredients": ingredientList,
                     "instructions": instructionList,
                     "groceries": groceryList,
+                    "prep_time": prepTime,
+                    "cook_time": cookTime,
                     "is_public": isPublic,
                     "image_name": newImageName,
                   }
@@ -128,6 +141,8 @@ class SupabaseHelperRecipe {
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
+                "prep_time": prepTime,
+                "cook_time": cookTime,
                 "is_public": isPublic,
               };
 

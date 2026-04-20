@@ -10,6 +10,7 @@ import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
 import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/time_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
@@ -46,10 +47,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _isPublic = false;
   bool _isCreatingRecipe = false;
   bool _canSubmit = false;
+  bool _includeTimeEstimations = false;
   bool _includeIngredients = false;
   bool _includeInstructions = false;
   bool _includeGroceryItems = false;
   bool _includeGroups = false;
+  bool _hideTimeEstimations = false;
   bool _hideIngredients = false;
   bool _hideInstructions = false;
   bool _hideGroceryItems = false;
@@ -61,6 +64,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final TextEditingController _instructionsController = TextEditingController();
   final TextEditingController _groceryItemsController = TextEditingController();
   final TextEditingController _groupsController = TextEditingController();
+  final TextEditingController _prepTimeController = TextEditingController();
+  final TextEditingController _cookTimeController = TextEditingController();
 
   final List<String> _ingredientsList = [];
   final List<String> _instructionsList = [];
@@ -245,6 +250,26 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                       if (_ingredientsList.isNotEmpty) SizedBox(height: 8),
 
+                      TimeSectionWidget(
+                        includeSectionText: "Include Time Estimations?",
+                        includeSection: _includeTimeEstimations,
+                        isHidden: _hideTimeEstimations,
+                        onModify:
+                            () => setState(() {
+                              _includeTimeEstimations =
+                                  !_includeTimeEstimations;
+                            }),
+                        onHide:
+                            () => setState(() {
+                              _hideTimeEstimations = true;
+                            }),
+                        controllerPrepTime: _prepTimeController,
+                        controllerCookTime: _cookTimeController,
+                        setParentState: setState,
+                      ),
+
+                      SizedBox(height: 16),
+
                       FormSectionWidget(
                         header: "Ingredients",
                         subtitle: "Add ingredients...",
@@ -428,10 +453,37 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<bool> _createRecipe() async {
+    final int? prepTime = int.tryParse(_prepTimeController.text);
+    final int? cookTime = int.tryParse(_cookTimeController.text);
+
     if (_recipeNameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
+      return false;
+    }
+
+    if (prepTime == null &&
+            _prepTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        prepTime != null && prepTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Preparation time must be a valid non negative number"),
+        ),
+      );
+      return false;
+    }
+
+    if (cookTime == null &&
+            _cookTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        cookTime != null && cookTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Cook time must be a valid non negative number"),
+        ),
+      );
       return false;
     }
 
@@ -440,10 +492,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     final response = await SupabaseHelper.recipe.createNewRecipe(
       _recipeImageFile,
       name,
+      prepTime,
+      cookTime,
       _ingredientsList,
       _instructionsList,
       _groceryList,
       _selectedGroups,
+
       _isPublic,
     );
 
@@ -492,10 +547,37 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<bool> _editRecipe() async {
+    final int? prepTime = int.tryParse(_prepTimeController.text);
+    final int? cookTime = int.tryParse(_cookTimeController.text);
+
     if (_recipeNameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
+      return false;
+    }
+
+    if (prepTime == null &&
+            _prepTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        prepTime != null && prepTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Preparation time must be a valid non negative number"),
+        ),
+      );
+      return false;
+    }
+
+    if (cookTime == null &&
+            _cookTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        cookTime != null && cookTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Cook time must be a valid non negative number"),
+        ),
+      );
       return false;
     }
 
@@ -513,6 +595,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     final response = await SupabaseHelper.recipe.updateRecipe(
       _recipeImageFile,
       name,
+      prepTime,
+      cookTime,
       _ingredientsList,
       _instructionsList,
       _groceryList,
@@ -597,6 +681,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       _hideGroups = false;
       _hideIngredients = false;
       _hideInstructions = false;
+      _hideTimeEstimations = false;
     });
   }
 
@@ -607,6 +692,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     _instructionsController.dispose();
     _recipeNameController.dispose();
     _groupsController.dispose();
+    _prepTimeController.dispose();
+    _cookTimeController.dispose();
     super.dispose();
   }
 }
