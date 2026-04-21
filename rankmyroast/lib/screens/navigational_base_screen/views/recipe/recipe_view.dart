@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
+import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/widgets/recipe_tile_widget.dart';
@@ -198,7 +199,10 @@ class _RecipeViewState extends State<RecipeView> {
                                 onTap: () {
                                   context.push(
                                     "/base/view-recipe",
-                                    extra: recipe,
+                                    extra: ViewRecipeExtra(
+                                      group: _selectedGroup!,
+                                      recipe: recipe,
+                                    ),
                                   );
                                 },
                                 child: RecipeTileWidget(recipe: recipe),

@@ -251,7 +251,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       if (_ingredientsList.isNotEmpty) SizedBox(height: 8),
 
                       TimeSectionWidget(
-                        includeSectionText: "Include Time Estimations?",
+                        includeSectionText: "Include Time Estimations",
                         includeSection: _includeTimeEstimations,
                         isHidden: _hideTimeEstimations,
                         onModify:
@@ -277,7 +277,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         controller: _ingredientsController,
                         itemsList: _ingredientsList,
                         includeSection: _includeIngredients,
-                        includeSectionText: "Include Ingredients?",
+                        includeSectionText: "Include Ingredients",
                         onModify:
                             () => setState(() {
                               _includeIngredients = !_includeIngredients;
@@ -306,7 +306,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         controller: _instructionsController,
                         itemsList: _instructionsList,
                         includeSection: _includeInstructions,
-                        includeSectionText: "Include Instructions?",
+                        includeSectionText: "Include Instructions",
                         onModify:
                             () => setState(() {
                               _includeInstructions = !_includeInstructions;
@@ -335,7 +335,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         controller: _groceryItemsController,
                         itemsList: _groceryList,
                         includeSection: _includeGroceryItems,
-                        includeSectionText: "Include Grocery Items?",
+                        includeSectionText: "Include Grocery Items",
                         onModify:
                             () => setState(() {
                               _includeGroceryItems = !_includeGroceryItems;
@@ -359,7 +359,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       GroupFormSectionWidget(
                         header: "Add to Groups",
                         subtitle: "Click to add groups...",
-                        includeSectionText: "Add to your Groups?",
+                        includeSectionText: "Add to your Groups",
                         isNumericalList: false,
                         includeSection: _includeGroups,
                         isHidden: _hideGroups,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
+import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
@@ -74,8 +75,11 @@ final GoRouter _router = GoRouter(
           path: '/view-recipe',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra != null && extra is Recipe) {
-              return RecipeViewer(recipe: extra);
+            if (extra != null && extra is ViewRecipeExtra) {
+              final recipe = extra.recipe;
+              final group = extra.group;
+
+              return RecipeViewer(recipe: recipe, group: group);
             }
             return const RecipeViewer();
           },

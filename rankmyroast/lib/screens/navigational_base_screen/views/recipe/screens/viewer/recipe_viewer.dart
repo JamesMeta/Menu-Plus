@@ -1,13 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
+import 'package:rankmyroast/classes/modals/recipe_rating.dart';
+import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecipeViewer extends StatefulWidget {
   final Recipe? recipe;
+  final Group? group;
 
-  const RecipeViewer({super.key, this.recipe});
+  const RecipeViewer({super.key, this.recipe, this.group});
 
   @override
   State<RecipeViewer> createState() => _RecipeViewerState();
@@ -16,14 +20,19 @@ class RecipeViewer extends StatefulWidget {
 class _RecipeViewerState extends State<RecipeViewer> {
   late final bool _isOwner;
   late final Recipe _recipe;
+  late final Group? _group;
   late final String? _recipeImageUrl;
+
+  late final Future<List<RecipeRating>?> _ratings;
 
   @override
   void initState() {
     _recipe = widget.recipe!;
     _recipeImageUrl = _recipe.publicImageUrl;
+    _group = widget.group;
 
     _isOwner = _recipe.userId == Supabase.instance.client.auth.currentUser!.id;
+    _ratings = _fetchRatings();
   }
 
   @override
@@ -112,6 +121,88 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         ),
                       ),
 
+                      FutureBuilder(
+                        future: _ratings,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            final ratings = snapshot.data;
+                            if (ratings == null || ratings.isEmpty) {
+                              return Text("No reviews yet");
+                            } else {
+                              if (_group != null) {
+                                if (_group.useRating) {
+                                  final averageRating =
+                                      ratings
+                                          .where(
+                                            (r) => r.recipeId == _recipe.id,
+                                          )
+                                          .map((r) => r.rating)
+                                          .reduce((a, b) => a + b) /
+                                      ratings.length;
+
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.star, color: Colors.amber),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        averageRating.toStringAsFixed(1),
+                                        style: TextStyle(
+                                          fontSize: 18.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  final groupRecipeRankings = <String, int>{};
+                                  for (var rating in ratings) {
+                                    if (groupRecipeRankings.containsKey(
+                                      rating.recipeId,
+                                    )) {
+                                      groupRecipeRankings[rating.recipeId] =
+                                          groupRecipeRankings[rating
+                                              .recipeId]! +
+                                          rating.ranking;
+                                    } else {
+                                      groupRecipeRankings[rating.recipeId] =
+                                          rating.ranking;
+                                    }
+                                  }
+
+                                  final sortedRecipeRankings =
+                                      groupRecipeRankings.entries.toList()
+                                        ..sort(
+                                          (a, b) => b.value.compareTo(a.value),
+                                        );
+
+                                  final recipeRanking =
+                                      sortedRecipeRankings.indexWhere(
+                                        (entry) => entry.key == _recipe.id,
+                                      ) +
+                                      1;
+                                  return Text(
+                                    "Ranked #$recipeRanking in group",
+                                    style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                }
+                              } else {
+                                return Text("Error: Group not found");
+                              }
+                            }
+                          } else {
+                            return Text("Error fetching ratings");
+                          }
+                        },
+                      ),
+
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -181,12 +272,54 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         ),
                       ),
 
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: _recipe.ingredientList.length,
+                        itemBuilder: (context, index) {
+                          final ingredient = _recipe.ingredientList[index];
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                ingredient,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+
                       Text(
                         "Instructions",
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                         ),
+                      ),
+
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: _recipe.instructionsList.length,
+                        itemBuilder: (context, index) {
+                          final instruction = _recipe.instructionsList[index];
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "${index + 1}. $instruction",
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -197,5 +330,18 @@ class _RecipeViewerState extends State<RecipeViewer> {
         ),
       ),
     );
+  }
+
+  Future<List<RecipeRating>?> _fetchRatings() async {
+    final groupId = widget.group?.id;
+    final recipeId = widget.recipe?.id;
+
+    if (groupId == null || recipeId == null) {
+      return null;
+    }
+
+    final response = await SupabaseHelper.recipe.getRatingsByGroupId(groupId);
+
+    return response;
   }
 }
