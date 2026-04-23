@@ -130,6 +130,11 @@ class _RecipeViewState extends State<RecipeView> {
                     if (groups != null) {
                       return DropdownMenu(
                         initialSelection: _selectedGroup,
+                        onSelected: (value) {
+                          setState(() {
+                            _selectedGroup = value;
+                          });
+                        },
                         dropdownMenuEntries:
                             groups
                                 .map(

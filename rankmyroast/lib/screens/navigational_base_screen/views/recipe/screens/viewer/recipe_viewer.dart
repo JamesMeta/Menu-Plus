@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/widgets/recipe_list_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -78,28 +79,50 @@ class _RecipeViewerState extends State<RecipeViewer> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _recipeImageUrl != null
-                    ? Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: CachedNetworkImage(
-                        httpHeaders: {
-                          'Authorization':
-                              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
-                        },
-                        imageUrl: _recipeImageUrl,
-                        scale: 1,
-                        placeholder:
-                            (context, url) => const CircularProgressIndicator(),
-                        errorWidget:
-                            (context, url, error) => const Icon(Icons.error),
-                      ),
-                    )
-                    : Image.asset(
-                      "assets/images/rankmyroast_icon4.png",
-                      scale: 1,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child:
+                        _recipeImageUrl != null
+                            ? Container(
+                              constraints: BoxConstraints(
+                                maxHeight: 300.h,
+                                maxWidth: double.infinity,
+                              ),
+
+                              child: CachedNetworkImage(
+                                httpHeaders: {
+                                  'Authorization':
+                                      'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+                                },
+                                imageUrl: _recipeImageUrl,
+                                fit: BoxFit.fill,
+                                width: double.infinity,
+                                height: 300.h,
+
+                                placeholder:
+                                    (context, url) =>
+                                        const CircularProgressIndicator(),
+                                errorWidget:
+                                    (context, url, error) =>
+                                        const Icon(Icons.error),
+                              ),
+                            )
+                            : Container(
+                              constraints: BoxConstraints(
+                                maxHeight: 250.h,
+                                maxWidth: double.infinity,
+                              ),
+                              child: Image.asset(
+                                "assets/images/rankmyroast_icon4.png",
+                                fit: BoxFit.fill,
+                                width: double.infinity,
+                                height: 250.h,
+                              ),
+                            ),
+                  ),
+                ),
 
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -203,66 +226,58 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         },
                       ),
 
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: Colors.grey[600]!),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Estimated Preparation Time: ",
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-
-                                  Text(
-                                    "???",
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                "Estimated Preparation Time: ",
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[600],
+                                ),
                               ),
 
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Estimated Cook Time: ",
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-
-                                  Text(
-                                    "???",
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                _recipe.prepTime != null
+                                    ? "${_recipe.prepTime} mins"
+                                    : "???",
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[600],
+                                ),
                               ),
                             ],
                           ),
-                        ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Estimated Cook Time: ",
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+
+                              Text(
+                                _recipe.cookTime != null
+                                    ? "${_recipe.cookTime} mins"
+                                    : "???",
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       Text(
                         "Ingredients",
@@ -272,25 +287,9 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         ),
                       ),
 
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: _recipe.ingredientList.length,
-                        itemBuilder: (context, index) {
-                          final ingredient = _recipe.ingredientList[index];
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                ingredient,
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                      RecipeListWidget(
+                        itemList: _recipe.ingredientList,
+                        numbered: false,
                       ),
 
                       Text(
@@ -301,25 +300,9 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         ),
                       ),
 
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: _recipe.instructionsList.length,
-                        itemBuilder: (context, index) {
-                          final instruction = _recipe.instructionsList[index];
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "${index + 1}. $instruction",
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                      RecipeListWidget(
+                        itemList: _recipe.instructionsList,
+                        numbered: true,
                       ),
                     ],
                   ),
