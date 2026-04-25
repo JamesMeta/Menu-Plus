@@ -207,6 +207,7 @@ class _RecipeViewState extends State<RecipeView> {
                                     extra: ViewRecipeExtra(
                                       group: _selectedGroup!,
                                       recipe: recipe,
+                                      userGroups: groups,
                                     ),
                                   );
                                 },

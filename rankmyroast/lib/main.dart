@@ -78,8 +78,13 @@ final GoRouter _router = GoRouter(
             if (extra != null && extra is ViewRecipeExtra) {
               final recipe = extra.recipe;
               final group = extra.group;
+              final userGroups = extra.userGroups;
 
-              return RecipeViewer(recipe: recipe, group: group);
+              return RecipeViewer(
+                recipe: recipe,
+                group: group,
+                userGroups: userGroups,
+              );
             }
             return const RecipeViewer();
           },

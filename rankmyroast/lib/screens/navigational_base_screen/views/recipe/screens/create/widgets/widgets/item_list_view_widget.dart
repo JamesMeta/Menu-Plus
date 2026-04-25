@@ -122,16 +122,20 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
                           padding: EdgeInsets.zero,
                           backgroundColor: const Color.fromARGB(
                             43,
-                            255,
-                            82,
-                            82,
+                            184,
+                            184,
+                            184,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         onPressed: () => _deleteItem(_itemsList[index]),
-                        icon: Icon(Icons.delete, color: Colors.redAccent),
+                        icon: Icon(
+                          Icons.delete,
+                          color: Colors.grey[600],
+                          size: 18.sp,
+                        ),
                       ),
                     ),
                   );

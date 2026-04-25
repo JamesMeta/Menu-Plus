@@ -69,6 +69,7 @@ class TimeSectionWidget extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                   children: [
+                    Divider(color: Colors.grey[600]!),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,6 +94,7 @@ class TimeSectionWidget extends StatelessWidget {
                                     child: TextField(
                                       controller: controllerPrepTime,
                                       keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.center,
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(
@@ -125,6 +127,7 @@ class TimeSectionWidget extends StatelessWidget {
                                     child: TextField(
                                       controller: controllerCookTime,
                                       keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.center,
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(

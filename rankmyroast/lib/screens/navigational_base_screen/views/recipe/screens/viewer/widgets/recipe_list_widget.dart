@@ -13,19 +13,24 @@ class RecipeListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return ListView.separated(
+      separatorBuilder: (context, index) => SizedBox(height: 4.h),
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemCount: itemList.length,
       itemBuilder: (context, index) {
         final item = itemList[index];
         return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "${numbered ? "${index + 1}. " : "- "}$item",
-              style: TextStyle(fontSize: 18.sp, color: Colors.grey[600]),
+              numbered ? "${index + 1}. " : "• ",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
             ),
+            Text(item, style: TextStyle(fontSize: 16.sp)),
           ],
         );
       },

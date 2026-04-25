@@ -82,12 +82,46 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       _recipeToEditImageUrl = _recipeToEdit!.publicImageUrl;
       _labelText = "Edit Recipe";
       _recipeNameController.text = widget.recipeToEdit!.name;
+      _prepTimeController.text =
+          widget.recipeToEdit!.prepTime != null
+              ? widget.recipeToEdit!.prepTime.toString()
+              : "";
+      _cookTimeController.text =
+          widget.recipeToEdit!.cookTime != null
+              ? widget.recipeToEdit!.cookTime.toString()
+              : "";
       _ingredientsList.addAll(widget.recipeToEdit!.ingredientList);
       _instructionsList.addAll(widget.recipeToEdit!.instructionsList);
       _groceryList.addAll(widget.recipeToEdit!.groceriesList);
       _isPublic = widget.recipeToEdit!.isPublic;
       _canSubmit = true;
       _getGroupsForRecipe();
+
+      if (_ingredientsList.isNotEmpty) {
+        _includeIngredients = true;
+      } else {
+        _hideIngredients = true;
+      }
+      if (_instructionsList.isNotEmpty) {
+        _includeInstructions = true;
+      } else {
+        _hideInstructions = true;
+      }
+      if (_groceryList.isNotEmpty) {
+        _includeGroceryItems = true;
+      } else {
+        _hideGroceryItems = true;
+      }
+      if (widget.selectedGroup != null) {
+        _includeGroups = true;
+      } else {
+        _hideGroups = true;
+      }
+      if (_recipeToEdit!.prepTime != null || _recipeToEdit!.cookTime != null) {
+        _includeTimeEstimations = true;
+      } else {
+        _hideTimeEstimations = true;
+      }
     } else {
       _labelText = "Create Recipe";
       _recipeToEditImageUrl = null;

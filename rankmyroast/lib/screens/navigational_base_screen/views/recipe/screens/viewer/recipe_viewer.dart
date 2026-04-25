@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
@@ -11,8 +13,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class RecipeViewer extends StatefulWidget {
   final Recipe? recipe;
   final Group? group;
+  final List<Group>? userGroups;
 
-  const RecipeViewer({super.key, this.recipe, this.group});
+  const RecipeViewer({super.key, this.recipe, this.group, this.userGroups});
 
   @override
   State<RecipeViewer> createState() => _RecipeViewerState();
@@ -22,6 +25,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
   late final bool _isOwner;
   late final Recipe _recipe;
   late final Group? _group;
+  late final List<Group>? _userGroups;
   late final String? _recipeImageUrl;
 
   late final Future<List<RecipeRating>?> _ratings;
@@ -31,6 +35,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
     _recipe = widget.recipe!;
     _recipeImageUrl = _recipe.publicImageUrl;
     _group = widget.group;
+    _userGroups = widget.userGroups;
 
     _isOwner = _recipe.userId == Supabase.instance.client.auth.currentUser!.id;
     _ratings = _fetchRatings();
@@ -44,10 +49,17 @@ class _RecipeViewerState extends State<RecipeViewer> {
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
-          _isOwner
+          _isOwner && _userGroups != null
               ? IconButton(
                 onPressed: () {
-                  //TODO
+                  context.pushReplacement(
+                    "/base/create-recipe",
+                    extra: CreateRecipeExtra(
+                      recipeToEdit: _recipe,
+                      selectedGroup: _group,
+                      groups: _userGroups,
+                    ),
+                  );
                 },
                 icon: Icon(Icons.edit),
               )
@@ -99,7 +111,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                 imageUrl: _recipeImageUrl,
                                 fit: BoxFit.fill,
                                 width: double.infinity,
-                                height: 300.h,
+                                height: 250.h,
 
                                 placeholder:
                                     (context, url) =>
@@ -125,24 +137,25 @@ class _RecipeViewerState extends State<RecipeViewer> {
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 24,
+                  ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         _recipe.name,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
 
-                      Text(
-                        "Reviews",
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      SizedBox(height: 12),
 
                       FutureBuilder(
                         future: _ratings,
@@ -154,7 +167,14 @@ class _RecipeViewerState extends State<RecipeViewer> {
                               ConnectionState.done) {
                             final ratings = snapshot.data;
                             if (ratings == null || ratings.isEmpty) {
-                              return Text("No reviews yet");
+                              return Text(
+                                "No reviews yet",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
                             } else {
                               if (_group != null) {
                                 if (_group.useRating) {
@@ -226,63 +246,90 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         },
                       ),
 
+                      SizedBox(height: 12),
                       Column(
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(
-                                "Estimated Preparation Time: ",
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[600],
-                                ),
+                              Row(
+                                children: [
+                                  Icon(Icons.timer, color: Colors.grey[600]),
+                                  SizedBox(width: 4),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Prep",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.grey[600],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        _recipe.prepTime != null
+                                            ? "${_recipe.prepTime} mins"
+                                            : "???",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
 
-                              Text(
-                                _recipe.prepTime != null
-                                    ? "${_recipe.prepTime} mins"
-                                    : "???",
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
+                              SizedBox(width: 100.w),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Estimated Cook Time: ",
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-
-                              Text(
-                                _recipe.cookTime != null
-                                    ? "${_recipe.cookTime} mins"
-                                    : "???",
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[600],
-                                ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.local_fire_department,
+                                    color: Colors.grey[600],
+                                  ),
+                                  SizedBox(width: 4),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Cook",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.grey[600],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        _recipe.cookTime != null
+                                            ? "${_recipe.cookTime} mins"
+                                            : "???",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ],
                       ),
+
+                      SizedBox(height: 12),
+
+                      Divider(color: Colors.grey[600]),
+
+                      SizedBox(height: 12),
                       Text(
                         "Ingredients",
                         style: TextStyle(
-                          fontSize: 24.sp,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -291,11 +338,15 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         itemList: _recipe.ingredientList,
                         numbered: false,
                       ),
+                      SizedBox(height: 12),
 
+                      Divider(color: Colors.grey[600]),
+
+                      SizedBox(height: 12),
                       Text(
                         "Instructions",
                         style: TextStyle(
-                          fontSize: 24.sp,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -304,6 +355,8 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         itemList: _recipe.instructionsList,
                         numbered: true,
                       ),
+
+                      SizedBox(height: 32),
                     ],
                   ),
                 ),

@@ -4,5 +4,10 @@ import 'package:rankmyroast/classes/modals/recipe.dart';
 class ViewRecipeExtra {
   final Group group;
   final Recipe recipe;
-  ViewRecipeExtra({required this.group, required this.recipe});
+  final List<Group> userGroups;
+  ViewRecipeExtra({
+    required this.group,
+    required this.recipe,
+    required this.userGroups,
+  });
 }
