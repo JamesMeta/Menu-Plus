@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/recipe_rating.dart';
 import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,6 +14,8 @@ class SupabaseHelperRecipe {
   Future<CreateRecipeResponse> createNewRecipe(
     File? image,
     String name,
+    int? prepTime,
+    int? cookTime,
     List<String>? ingredientList,
     List<String>? instructionList,
     List<String>? groceryList,
@@ -27,6 +30,8 @@ class SupabaseHelperRecipe {
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
+                "prep_time": prepTime,
+                "cook_time": cookTime,
                 "is_public": isPublic,
                 "image_name": null,
               }
@@ -35,6 +40,8 @@ class SupabaseHelperRecipe {
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
+                "prep_time": prepTime,
+                "cook_time": cookTime,
                 "is_public": isPublic,
               };
 
@@ -94,10 +101,13 @@ class SupabaseHelperRecipe {
   Future<CreateRecipeResponse> updateRecipe(
     File? image,
     String name,
+    int? prepTime,
+    int? cookTime,
     List<String>? ingredientList,
     List<String>? instructionList,
     List<String>? groceryList,
     List<Group> groupList,
+
     bool? isPublic,
     bool changeImage,
   ) async {
@@ -112,6 +122,8 @@ class SupabaseHelperRecipe {
                     "ingredients": ingredientList,
                     "instructions": instructionList,
                     "groceries": groceryList,
+                    "prep_time": prepTime,
+                    "cook_time": cookTime,
                     "is_public": isPublic,
                     "image_name": null,
                   }
@@ -120,6 +132,8 @@ class SupabaseHelperRecipe {
                     "ingredients": ingredientList,
                     "instructions": instructionList,
                     "groceries": groceryList,
+                    "prep_time": prepTime,
+                    "cook_time": cookTime,
                     "is_public": isPublic,
                     "image_name": newImageName,
                   }
@@ -128,6 +142,8 @@ class SupabaseHelperRecipe {
                 "ingredients": ingredientList,
                 "instructions": instructionList,
                 "groceries": groceryList,
+                "prep_time": prepTime,
+                "cook_time": cookTime,
                 "is_public": isPublic,
               };
 
@@ -209,6 +225,70 @@ class SupabaseHelperRecipe {
       }
     } catch (e) {
       print('Error fetching groups for recipe: $e');
+    }
+    return null;
+  }
+
+  Future<List<RecipeRating>?> getRatingsByRecipeIdByGroupId(
+    String recipeId,
+    String groupId,
+  ) async {
+    try {
+      final response = await _client
+          .from("recipe_rating")
+          .select("*")
+          .eq("recipe_id", recipeId)
+          .eq("group_id", groupId);
+
+      if (response != null) {
+        final ratings =
+            (response as List)
+                .map(
+                  (item) => RecipeRating(
+                    id: item['id'],
+                    createdAt: item['created_at'],
+                    recipeId: item['recipe_id'],
+                    userId: item['user_id'],
+                    groupId: item['group_id'],
+                    rating: item['rating'],
+                    ranking: item['ranking'],
+                  ),
+                )
+                .toList();
+        return ratings;
+      }
+    } catch (e) {
+      print('Error fetching ratings for recipe by group id: $e');
+    }
+    return null;
+  }
+
+  Future<List<RecipeRating>?> getRatingsByGroupId(String groupId) async {
+    try {
+      final response = await _client
+          .from("recipe_rating")
+          .select("*")
+          .eq("group_id", groupId);
+
+      if (response != null) {
+        final ratings =
+            (response as List)
+                .map(
+                  (item) => RecipeRating(
+                    id: item['id'],
+                    createdAt: item['created_at'],
+                    recipeId: item['recipe_id'],
+                    userId: item['user_id'],
+                    groupId: item['group_id'],
+                    rating: item['rating'],
+                    ranking: item['ranking'],
+                  ),
+                )
+                .toList();
+        return ratings;
+      }
+    } catch (e) {
+      print('Error fetching ratings for recipe by group id: $e');
     }
     return null;
   }

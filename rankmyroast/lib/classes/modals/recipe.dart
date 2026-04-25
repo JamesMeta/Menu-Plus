@@ -3,6 +3,8 @@ class Recipe {
   final String name;
   final String imageName;
   final String userId;
+  final int? prepTime;
+  final int? cookTime;
   final List<String> ingredientList;
   final List<String> instructionsList;
   final List<String> groceriesList;
@@ -13,6 +15,8 @@ class Recipe {
     required this.name,
     required this.imageName,
     required this.userId,
+    this.prepTime,
+    this.cookTime,
     required this.ingredientList,
     required this.instructionsList,
     required this.groceriesList,
@@ -25,6 +29,8 @@ class Recipe {
       name: map['name'] ?? 'Untitled Recipe',
       imageName: map['image_name'] ?? '',
       userId: map['user_id'] ?? '',
+      prepTime: map['prep_time'],
+      cookTime: map['cook_time'],
       ingredientList: List<String>.from(map['ingredients'] ?? []),
       instructionsList: List<String>.from(map['instructions'] ?? []),
       groceriesList: List<String>.from(map['groceries'] ?? []),
@@ -35,7 +41,7 @@ class Recipe {
 
 extension RecipeImageUrl on Recipe {
   String? get publicImageUrl {
-    if (imageName == null || imageName!.isEmpty) {
+    if (imageName.isEmpty) {
       return null;
     }
 

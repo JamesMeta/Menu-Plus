@@ -23,11 +23,12 @@ class ImageContentWidget extends StatelessWidget {
   Widget buildPlaceholderIcon() {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black),
-        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: Colors.grey[600]!),
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(24),
       ),
       child: IconButton(
-        icon: const Icon(Icons.camera_alt, size: 48),
+        icon: Icon(Icons.camera_alt, size: 48, color: Colors.grey[600]),
         onPressed: updateRecipeImage,
       ),
     );
