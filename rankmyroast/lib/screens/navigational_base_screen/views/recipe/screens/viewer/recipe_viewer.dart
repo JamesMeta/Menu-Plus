@@ -177,21 +177,32 @@ class _RecipeViewerState extends State<RecipeViewer> {
                               );
                             } else {
                               if (_group != null) {
-                                if (_group.useRating) {
+                                if (_group.useRating && ratings.isNotEmpty) {
+                                  // 1. Filter for specific recipe and non-null ratings once
+                                  final recipeRatings = ratings.where(
+                                    (r) =>
+                                        r.recipeId == _recipe.id &&
+                                        r.rating != null,
+                                  );
+
+                                  // 2. Calculate average safely
                                   final averageRating =
-                                      ratings
-                                          .where(
-                                            (r) => r.recipeId == _recipe.id,
-                                          )
-                                          .map((r) => r.rating)
-                                          .reduce((a, b) => a + b) /
-                                      ratings.length;
+                                      recipeRatings.isEmpty
+                                          ? 0.0
+                                          : recipeRatings.fold<double>(
+                                                0,
+                                                (sum, r) => sum + r.rating!,
+                                              ) /
+                                              recipeRatings.length;
 
                                   return Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.star, color: Colors.amber),
-                                      SizedBox(width: 4),
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                      const SizedBox(width: 4),
                                       Text(
                                         averageRating.toStringAsFixed(1),
                                         style: TextStyle(
@@ -202,34 +213,37 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                     ],
                                   );
                                 } else {
-                                  final groupRecipeRankings = <String, int>{};
-                                  for (var rating in ratings) {
-                                    if (groupRecipeRankings.containsKey(
-                                      rating.recipeId,
-                                    )) {
-                                      groupRecipeRankings[rating.recipeId] =
-                                          groupRecipeRankings[rating
-                                              .recipeId]! +
-                                          rating.ranking;
-                                    } else {
-                                      groupRecipeRankings[rating.recipeId] =
-                                          rating.ranking;
-                                    }
+                                  final averages = <String, double>{};
+                                  final counts = <String, int>{};
+
+                                  for (var r in ratings) {
+                                    final val = r.ranking?.toDouble() ?? 0.0;
+                                    averages.update(
+                                      r.recipeId,
+                                      (curr) => curr + val,
+                                      ifAbsent: () => val,
+                                    );
+                                    counts.update(
+                                      r.recipeId,
+                                      (curr) => curr + 1,
+                                      ifAbsent: () => 1,
+                                    );
                                   }
 
-                                  final sortedRecipeRankings =
-                                      groupRecipeRankings.entries.toList()
-                                        ..sort(
-                                          (a, b) => b.value.compareTo(a.value),
-                                        );
+                                  // 2. Map to averages and sort descending (highest score = Rank #1)
+                                  final sortedIds =
+                                      averages.keys.toList()..sort((a, b) {
+                                        final avgA = averages[a]! / counts[a]!;
+                                        final avgB = averages[b]! / counts[b]!;
+                                        return avgA.compareTo(avgB);
+                                      });
 
-                                  final recipeRanking =
-                                      sortedRecipeRankings.indexWhere(
-                                        (entry) => entry.key == _recipe.id,
-                                      ) +
-                                      1;
+                                  // 3. Find rank (1-indexed)
+                                  final rank =
+                                      sortedIds.indexOf(_recipe.id) + 1;
+
                                   return Text(
-                                    "Ranked #$recipeRanking in group",
+                                    "Ranked #$rank in group",
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,

@@ -4,8 +4,8 @@ class RecipeRating {
   final String recipeId;
   final String userId;
   final String groupId;
-  final double rating;
-  final int ranking;
+  final double? rating;
+  final int? ranking;
 
   RecipeRating({
     required this.id,
@@ -13,7 +13,19 @@ class RecipeRating {
     required this.recipeId,
     required this.userId,
     required this.groupId,
-    required this.rating,
-    required this.ranking,
+    this.rating,
+    this.ranking,
   });
+
+  factory RecipeRating.fromMap(Map<String, dynamic> map) {
+    return RecipeRating(
+      id: map['id'] ?? '',
+      createdAt: map['created_at'] ?? '',
+      recipeId: map['recipe_id'] ?? '',
+      userId: map['user_id'] ?? '',
+      groupId: map['group_id'] ?? '',
+      rating: map['rating'] != null ? (map['rating'] as num).toDouble() : null,
+      ranking: map['ranking'],
+    );
+  }
 }

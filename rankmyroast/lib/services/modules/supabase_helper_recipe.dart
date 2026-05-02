@@ -244,15 +244,7 @@ class SupabaseHelperRecipe {
         final ratings =
             (response as List)
                 .map(
-                  (item) => RecipeRating(
-                    id: item['id'],
-                    createdAt: item['created_at'],
-                    recipeId: item['recipe_id'],
-                    userId: item['user_id'],
-                    groupId: item['group_id'],
-                    rating: item['rating'],
-                    ranking: item['ranking'],
-                  ),
+                  (item) => RecipeRating.fromMap(item as Map<String, dynamic>),
                 )
                 .toList();
         return ratings;
@@ -274,15 +266,7 @@ class SupabaseHelperRecipe {
         final ratings =
             (response as List)
                 .map(
-                  (item) => RecipeRating(
-                    id: item['id'],
-                    createdAt: item['created_at'],
-                    recipeId: item['recipe_id'],
-                    userId: item['user_id'],
-                    groupId: item['group_id'],
-                    rating: item['rating'],
-                    ranking: item['ranking'],
-                  ),
+                  (item) => RecipeRating.fromMap(item as Map<String, dynamic>),
                 )
                 .toList();
         return ratings;
