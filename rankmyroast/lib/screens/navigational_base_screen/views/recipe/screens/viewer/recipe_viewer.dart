@@ -196,7 +196,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                               recipeRatings.length;
 
                                   return Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       const Icon(
                                         Icons.star,
@@ -204,10 +204,11 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        averageRating.toStringAsFixed(1),
+                                        "${averageRating.toStringAsFixed(1)} / 10 (${recipeRatings.length} ratings)",
                                         style: TextStyle(
-                                          fontSize: 18.sp,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
+                                          color: Colors.grey[600],
                                         ),
                                       ),
                                     ],
@@ -243,10 +244,16 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                       sortedIds.indexOf(_recipe.id) + 1;
 
                                   return Text(
-                                    "Ranked #$rank in group",
+                                    rank == 1
+                                        ? "Top Ranked Recipe!"
+                                        : "Standing: #$rank of ${sortedIds.length} Recipes",
                                     style: TextStyle(
-                                      fontSize: 18.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
+                                      color:
+                                          rank == 1
+                                              ? Colors.green
+                                              : Colors.grey[600],
                                     ),
                                   );
                                 }
