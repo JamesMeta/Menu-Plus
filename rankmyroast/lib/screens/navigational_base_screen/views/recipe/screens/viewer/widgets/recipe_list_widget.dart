@@ -25,12 +25,12 @@ class RecipeListWidget extends StatelessWidget {
             Text(
               numbered ? "${index + 1}. " : "• ",
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[600],
               ),
             ),
-            Text(item, style: TextStyle(fontSize: 16.sp)),
+            Text(item, style: TextStyle(fontSize: 14 .sp)),
           ],
         );
       },

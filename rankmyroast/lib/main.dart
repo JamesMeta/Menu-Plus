@@ -61,14 +61,11 @@ final GoRouter _router = GoRouter(
                 recipeToEdit: extra.recipeToEdit,
                 selectedGroup: extra.selectedGroup,
                 groups: extra.groups,
+                isCopying: extra.isCopying,
               );
             }
 
-            return const CreateRecipeScreen(
-              recipeToEdit: null,
-              selectedGroup: null,
-              groups: [],
-            );
+            return const CreateRecipeScreen(groups: []);
           },
         ),
         GoRoute(

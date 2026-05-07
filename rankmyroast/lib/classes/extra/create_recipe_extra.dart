@@ -5,10 +5,12 @@ class CreateRecipeExtra {
   Group? selectedGroup;
   List<Group> groups;
   Recipe? recipeToEdit;
+  bool? isCopying;
 
   CreateRecipeExtra({
     this.selectedGroup,
     this.recipeToEdit,
     required this.groups,
+    this.isCopying,
   });
 }

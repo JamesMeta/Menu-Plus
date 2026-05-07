@@ -23,12 +23,14 @@ class CreateRecipeScreen extends StatefulWidget {
   final Recipe? recipeToEdit;
   final Group? selectedGroup;
   final List<Group> groups;
+  final bool? isCopying;
 
   const CreateRecipeScreen({
     super.key,
     this.recipeToEdit,
     this.selectedGroup,
     required this.groups,
+    this.isCopying,
   });
 
   @override
@@ -58,6 +60,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _hideGroceryItems = false;
   bool _hideGroups = false;
   bool _removeImage = false;
+  bool _isCopying = false;
 
   final TextEditingController _recipeNameController = TextEditingController();
   final TextEditingController _ingredientsController = TextEditingController();
@@ -76,52 +79,22 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   @override
   void initState() {
     _isEditing = widget.recipeToEdit != null;
+    _isCopying = widget.isCopying == true;
 
-    if (_isEditing) {
-      _recipeToEdit = widget.recipeToEdit!;
-      _recipeToEditImageUrl = _recipeToEdit!.publicImageUrl;
-      _labelText = "Edit Recipe";
-      _recipeNameController.text = widget.recipeToEdit!.name;
-      _prepTimeController.text =
-          widget.recipeToEdit!.prepTime != null
-              ? widget.recipeToEdit!.prepTime.toString()
-              : "";
-      _cookTimeController.text =
-          widget.recipeToEdit!.cookTime != null
-              ? widget.recipeToEdit!.cookTime.toString()
-              : "";
-      _ingredientsList.addAll(widget.recipeToEdit!.ingredientList);
-      _instructionsList.addAll(widget.recipeToEdit!.instructionsList);
-      _groceryList.addAll(widget.recipeToEdit!.groceriesList);
-      _isPublic = widget.recipeToEdit!.isPublic;
-      _canSubmit = true;
+    if (_isEditing && !_isCopying) {
+      _applyRecipeData(
+        widget.recipeToEdit!,
+        label: "Edit Recipe",
+        includeImageUrl: true,
+      );
       _getGroupsForRecipe();
-
-      if (_ingredientsList.isNotEmpty) {
-        _includeIngredients = true;
-      } else {
-        _hideIngredients = true;
-      }
-      if (_instructionsList.isNotEmpty) {
-        _includeInstructions = true;
-      } else {
-        _hideInstructions = true;
-      }
-      if (_groceryList.isNotEmpty) {
-        _includeGroceryItems = true;
-      } else {
-        _hideGroceryItems = true;
-      }
-      if (widget.selectedGroup != null) {
-        _includeGroups = true;
-      } else {
-        _hideGroups = true;
-      }
-      if (_recipeToEdit!.prepTime != null || _recipeToEdit!.cookTime != null) {
-        _includeTimeEstimations = true;
-      } else {
-        _hideTimeEstimations = true;
-      }
+    } else if (_isCopying) {
+      _applyRecipeData(
+        widget.recipeToEdit!,
+        label: "Copy Recipe",
+        includeImageUrl: false,
+        nameSuffix: " Copy",
+      );
     } else {
       _labelText = "Create Recipe";
       _recipeToEditImageUrl = null;
@@ -129,6 +102,44 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
 
     super.initState();
+  }
+
+  void _applyRecipeData(
+    Recipe recipe, {
+    required String label,
+    bool includeImageUrl = true,
+    String nameSuffix = "",
+  }) {
+    _recipeToEdit = recipe;
+    _recipeToEditImageUrl = includeImageUrl ? recipe.publicImageUrl : null;
+    _labelText = label;
+    _recipeNameController.text = recipe.name + nameSuffix;
+    _prepTimeController.text =
+        recipe.prepTime != null ? recipe.prepTime.toString() : "";
+    _cookTimeController.text =
+        recipe.cookTime != null ? recipe.cookTime.toString() : "";
+
+    _ingredientsList.clear();
+    _ingredientsList.addAll(recipe.ingredientList);
+    _instructionsList.clear();
+    _instructionsList.addAll(recipe.instructionsList);
+    _groceryList.clear();
+    _groceryList.addAll(recipe.groceriesList);
+
+    _isPublic = recipe.isPublic;
+    _canSubmit = true;
+
+    _includeIngredients = _ingredientsList.isNotEmpty;
+    _hideIngredients = !_includeIngredients;
+    _includeInstructions = _instructionsList.isNotEmpty;
+    _hideInstructions = !_includeInstructions;
+    _includeGroceryItems = _groceryList.isNotEmpty;
+    _hideGroceryItems = !_includeGroceryItems;
+    _includeGroups = widget.selectedGroup != null;
+    _hideGroups = !_includeGroups;
+    _includeTimeEstimations =
+        recipe.prepTime != null || recipe.cookTime != null;
+    _hideTimeEstimations = !_includeTimeEstimations;
   }
 
   Future<void> _getGroupsForRecipe() async {
@@ -439,7 +450,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           });
 
                           late final bool? response;
-                          if (_isEditing) {
+                          if (_isEditing && !_isCopying) {
                           } else {
                             response = await _createRecipe();
                           }

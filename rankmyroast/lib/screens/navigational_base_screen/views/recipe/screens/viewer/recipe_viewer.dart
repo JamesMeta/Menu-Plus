@@ -66,7 +66,15 @@ class _RecipeViewerState extends State<RecipeViewer> {
               : SizedBox(),
           IconButton(
             onPressed: () {
-              //TODO
+              context.pushReplacement(
+                "/base/create-recipe",
+                extra: CreateRecipeExtra(
+                  recipeToEdit: _recipe,
+                  selectedGroup: _group,
+                  groups: _userGroups ?? [],
+                  isCopying: true,
+                ),
+              );
             },
             icon: Icon(Icons.copy),
           ),
