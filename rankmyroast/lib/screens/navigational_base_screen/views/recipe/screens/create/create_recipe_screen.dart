@@ -10,6 +10,7 @@ import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
 import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/time_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
@@ -22,12 +23,14 @@ class CreateRecipeScreen extends StatefulWidget {
   final Recipe? recipeToEdit;
   final Group? selectedGroup;
   final List<Group> groups;
+  final bool? isCopying;
 
   const CreateRecipeScreen({
     super.key,
     this.recipeToEdit,
     this.selectedGroup,
     required this.groups,
+    this.isCopying,
   });
 
   @override
@@ -46,21 +49,26 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   bool _isPublic = false;
   bool _isCreatingRecipe = false;
   bool _canSubmit = false;
+  bool _includeTimeEstimations = false;
   bool _includeIngredients = false;
   bool _includeInstructions = false;
   bool _includeGroceryItems = false;
   bool _includeGroups = false;
+  bool _hideTimeEstimations = false;
   bool _hideIngredients = false;
   bool _hideInstructions = false;
   bool _hideGroceryItems = false;
   bool _hideGroups = false;
   bool _removeImage = false;
+  bool _isCopying = false;
 
   final TextEditingController _recipeNameController = TextEditingController();
   final TextEditingController _ingredientsController = TextEditingController();
   final TextEditingController _instructionsController = TextEditingController();
   final TextEditingController _groceryItemsController = TextEditingController();
   final TextEditingController _groupsController = TextEditingController();
+  final TextEditingController _prepTimeController = TextEditingController();
+  final TextEditingController _cookTimeController = TextEditingController();
 
   final List<String> _ingredientsList = [];
   final List<String> _instructionsList = [];
@@ -71,18 +79,22 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   @override
   void initState() {
     _isEditing = widget.recipeToEdit != null;
+    _isCopying = widget.isCopying == true;
 
-    if (_isEditing) {
-      _recipeToEdit = widget.recipeToEdit!;
-      _recipeToEditImageUrl = _recipeToEdit!.publicImageUrl;
-      _labelText = "Edit Recipe";
-      _recipeNameController.text = widget.recipeToEdit!.name;
-      _ingredientsList.addAll(widget.recipeToEdit!.ingredientList);
-      _instructionsList.addAll(widget.recipeToEdit!.instructionsList);
-      _groceryList.addAll(widget.recipeToEdit!.groceriesList);
-      _isPublic = widget.recipeToEdit!.isPublic;
-      _canSubmit = true;
+    if (_isEditing && !_isCopying) {
+      _applyRecipeData(
+        widget.recipeToEdit!,
+        label: "Edit Recipe",
+        includeImageUrl: true,
+      );
       _getGroupsForRecipe();
+    } else if (_isCopying) {
+      _applyRecipeData(
+        widget.recipeToEdit!,
+        label: "Copy Recipe",
+        includeImageUrl: false,
+        nameSuffix: " Copy",
+      );
     } else {
       _labelText = "Create Recipe";
       _recipeToEditImageUrl = null;
@@ -90,6 +102,44 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
 
     super.initState();
+  }
+
+  void _applyRecipeData(
+    Recipe recipe, {
+    required String label,
+    bool includeImageUrl = true,
+    String nameSuffix = "",
+  }) {
+    _recipeToEdit = recipe;
+    _recipeToEditImageUrl = includeImageUrl ? recipe.publicImageUrl : null;
+    _labelText = label;
+    _recipeNameController.text = recipe.name + nameSuffix;
+    _prepTimeController.text =
+        recipe.prepTime != null ? recipe.prepTime.toString() : "";
+    _cookTimeController.text =
+        recipe.cookTime != null ? recipe.cookTime.toString() : "";
+
+    _ingredientsList.clear();
+    _ingredientsList.addAll(recipe.ingredientList);
+    _instructionsList.clear();
+    _instructionsList.addAll(recipe.instructionsList);
+    _groceryList.clear();
+    _groceryList.addAll(recipe.groceriesList);
+
+    _isPublic = recipe.isPublic;
+    _canSubmit = true;
+
+    _includeIngredients = _ingredientsList.isNotEmpty;
+    _hideIngredients = !_includeIngredients;
+    _includeInstructions = _instructionsList.isNotEmpty;
+    _hideInstructions = !_includeInstructions;
+    _includeGroceryItems = _groceryList.isNotEmpty;
+    _hideGroceryItems = !_includeGroceryItems;
+    _includeGroups = widget.selectedGroup != null;
+    _hideGroups = !_includeGroups;
+    _includeTimeEstimations =
+        recipe.prepTime != null || recipe.cookTime != null;
+    _hideTimeEstimations = !_includeTimeEstimations;
   }
 
   Future<void> _getGroupsForRecipe() async {
@@ -157,6 +207,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(115, 0, 0, 0),
+                      blurRadius: 10,
+                      offset: Offset(2, 5),
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -192,8 +249,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                     height: 42.h,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
+                                      border: Border.all(
+                                        color: Colors.grey[600]!,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
+                                      color: Colors.white,
                                     ),
                                     child: TextField(
                                       controller: _recipeNameController,
@@ -210,7 +270,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                                   }),
                                       decoration: InputDecoration(
                                         labelText: "Recipe Name",
-                                        labelStyle: TextStyle(fontSize: 18),
+                                        labelStyle: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.grey[600],
+                                        ),
                                         floatingLabelBehavior:
                                             FloatingLabelBehavior.never,
 
@@ -232,6 +295,26 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                       if (_ingredientsList.isNotEmpty) SizedBox(height: 8),
 
+                      TimeSectionWidget(
+                        includeSectionText: "Include Time Estimations",
+                        includeSection: _includeTimeEstimations,
+                        isHidden: _hideTimeEstimations,
+                        onModify:
+                            () => setState(() {
+                              _includeTimeEstimations =
+                                  !_includeTimeEstimations;
+                            }),
+                        onHide:
+                            () => setState(() {
+                              _hideTimeEstimations = true;
+                            }),
+                        controllerPrepTime: _prepTimeController,
+                        controllerCookTime: _cookTimeController,
+                        setParentState: setState,
+                      ),
+
+                      SizedBox(height: 16),
+
                       FormSectionWidget(
                         header: "Ingredients",
                         subtitle: "Add ingredients...",
@@ -239,7 +322,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         controller: _ingredientsController,
                         itemsList: _ingredientsList,
                         includeSection: _includeIngredients,
-                        includeSectionText: "Include Ingredients?",
+                        includeSectionText: "Include Ingredients",
                         onModify:
                             () => setState(() {
                               _includeIngredients = !_includeIngredients;
@@ -252,6 +335,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         setParentState: setState,
                         deleteFromParent:
                             (item) => _ingredientsList.remove(item),
+                        updatePositionForParentList: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = _ingredientsList.removeAt(oldIndex);
+                          _ingredientsList.insert(newIndex, item);
+                        },
                       ),
 
                       SizedBox(height: 16),
@@ -263,7 +351,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         controller: _instructionsController,
                         itemsList: _instructionsList,
                         includeSection: _includeInstructions,
-                        includeSectionText: "Include Instructions?",
+                        includeSectionText: "Include Instructions",
                         onModify:
                             () => setState(() {
                               _includeInstructions = !_includeInstructions;
@@ -273,6 +361,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             () => setState(() {
                               _hideInstructions = true;
                             }),
+                        updatePositionForParentList: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = _instructionsList.removeAt(oldIndex);
+                          _instructionsList.insert(newIndex, item);
+                        },
                         setParentState: setState,
                         deleteFromParent:
                             (item) => _instructionsList.remove(item),
@@ -287,7 +380,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         controller: _groceryItemsController,
                         itemsList: _groceryList,
                         includeSection: _includeGroceryItems,
-                        includeSectionText: "Include Grocery Items?",
+                        includeSectionText: "Include Grocery Items",
                         onModify:
                             () => setState(() {
                               _includeGroceryItems = !_includeGroceryItems;
@@ -299,6 +392,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             }),
                         setParentState: setState,
                         deleteFromParent: (item) => _groceryList.remove(item),
+                        updatePositionForParentList: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = _groceryList.removeAt(oldIndex);
+                          _groceryList.insert(newIndex, item);
+                        },
                       ),
 
                       SizedBox(height: 16),
@@ -306,7 +404,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       GroupFormSectionWidget(
                         header: "Add to Groups",
                         subtitle: "Click to add groups...",
-                        includeSectionText: "Add to your Groups?",
+                        includeSectionText: "Add to your Groups",
                         isNumericalList: false,
                         includeSection: _includeGroups,
                         isHidden: _hideGroups,
@@ -352,7 +450,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           });
 
                           late final bool? response;
-                          if (_isEditing) {
+                          if (_isEditing && !_isCopying) {
                           } else {
                             response = await _createRecipe();
                           }
@@ -366,7 +464,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              _canSubmit ? Colors.green : Colors.grey,
+                              _canSubmit ? Colors.green : Colors.grey[600],
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             side: BorderSide(color: Colors.black),
@@ -400,10 +498,37 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<bool> _createRecipe() async {
+    final int? prepTime = int.tryParse(_prepTimeController.text);
+    final int? cookTime = int.tryParse(_cookTimeController.text);
+
     if (_recipeNameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
+      return false;
+    }
+
+    if (prepTime == null &&
+            _prepTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        prepTime != null && prepTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Preparation time must be a valid non negative number"),
+        ),
+      );
+      return false;
+    }
+
+    if (cookTime == null &&
+            _cookTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        cookTime != null && cookTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Cook time must be a valid non negative number"),
+        ),
+      );
       return false;
     }
 
@@ -412,10 +537,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     final response = await SupabaseHelper.recipe.createNewRecipe(
       _recipeImageFile,
       name,
+      prepTime,
+      cookTime,
       _ingredientsList,
       _instructionsList,
       _groceryList,
       _selectedGroups,
+
       _isPublic,
     );
 
@@ -464,10 +592,37 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<bool> _editRecipe() async {
+    final int? prepTime = int.tryParse(_prepTimeController.text);
+    final int? cookTime = int.tryParse(_cookTimeController.text);
+
     if (_recipeNameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Recipe name cannot be empty")));
+      return false;
+    }
+
+    if (prepTime == null &&
+            _prepTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        prepTime != null && prepTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Preparation time must be a valid non negative number"),
+        ),
+      );
+      return false;
+    }
+
+    if (cookTime == null &&
+            _cookTimeController.text.isNotEmpty &&
+            _includeTimeEstimations ||
+        cookTime != null && cookTime < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Cook time must be a valid non negative number"),
+        ),
+      );
       return false;
     }
 
@@ -485,6 +640,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     final response = await SupabaseHelper.recipe.updateRecipe(
       _recipeImageFile,
       name,
+      prepTime,
+      cookTime,
       _ingredientsList,
       _instructionsList,
       _groceryList,
@@ -569,6 +726,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       _hideGroups = false;
       _hideIngredients = false;
       _hideInstructions = false;
+      _hideTimeEstimations = false;
     });
   }
 
@@ -579,6 +737,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     _instructionsController.dispose();
     _recipeNameController.dispose();
     _groupsController.dispose();
+    _prepTimeController.dispose();
+    _cookTimeController.dispose();
     super.dispose();
   }
 }

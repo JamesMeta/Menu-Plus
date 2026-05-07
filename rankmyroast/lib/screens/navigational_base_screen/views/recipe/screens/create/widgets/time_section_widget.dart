@@ -4,35 +4,25 @@ import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 
-class GroupFormSectionWidget extends StatelessWidget {
-  final String header;
-  final String subtitle;
+class TimeSectionWidget extends StatelessWidget {
   final String includeSectionText;
-  final bool isNumericalList;
   final bool includeSection;
   final bool isHidden;
   final VoidCallback onModify;
   final VoidCallback onHide;
-  final TextEditingController controller;
-  final List<Group> itemsList;
-  final List<Group> groups;
+  final TextEditingController controllerPrepTime;
+  final TextEditingController controllerCookTime;
   final void Function(void Function()) setParentState;
-  final void Function(String item) deleteFromParent;
 
-  const GroupFormSectionWidget({
+  const TimeSectionWidget({
     super.key,
-    required this.header,
-    required this.subtitle,
     required this.includeSectionText,
-    required this.isNumericalList,
     required this.includeSection,
     required this.isHidden,
     required this.onModify,
     required this.onHide,
-    required this.deleteFromParent,
-    required this.controller,
-    required this.itemsList,
-    required this.groups,
+    required this.controllerPrepTime,
+    required this.controllerCookTime,
     required this.setParentState,
   });
 
@@ -48,10 +38,7 @@ class GroupFormSectionWidget extends StatelessWidget {
 
                   initiallyExpanded: true,
                   shape: RoundedRectangleBorder(
-                    side:
-                        itemsList.isNotEmpty
-                            ? BorderSide(color: Colors.grey[600]!)
-                            : BorderSide(color: Colors.grey[600]!),
+                    side: BorderSide(color: Colors.grey[600]!),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   collapsedShape: RoundedRectangleBorder(
@@ -73,7 +60,7 @@ class GroupFormSectionWidget extends StatelessWidget {
                   ),
 
                   title: Text(
-                    header,
+                    "Time Estimations",
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -82,97 +69,87 @@ class GroupFormSectionWidget extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                   children: [
-                    ItemListViewWidget(
-                      items: itemsList.map((group) => group.name).toList(),
-                      isNumericalList: false,
-                      deleteForParentList:
-                          (String item) => deleteFromParent(item),
-                      updatePositionForParentList:
-                          (int oldIndex, int newIndex) {},
-                      setParentState: setParentState,
+                    Divider(color: Colors.grey[600]!),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Prep Time (minutes)",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: TextField(
+                                      controller: controllerPrepTime,
+                                      keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        constraints: BoxConstraints(
+                                          maxWidth: 55.w,
+                                          maxHeight: 40.h,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Cook Time (minutes)",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: TextField(
+                                      controller: controllerCookTime,
+                                      keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        constraints: BoxConstraints(
+                                          maxWidth: 55.w,
+                                          maxHeight: 40.h,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                      ],
                     ),
                   ],
-                ),
-
-                SizedBox(height: 8),
-
-                Container(
-                  height: 42.h,
-                  alignment: Alignment.center,
-
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 17,
-                        child: Container(
-                          height: 42.h,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[600]!),
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.white,
-                          ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              final List<Group>? result = await showDialog(
-                                context: context,
-                                builder:
-                                    (context) => AddToGroupsDialogWidget(
-                                      groups: groups,
-                                      selectedGroups: itemsList,
-                                    ),
-                              );
-
-                              if (result != null) {
-                                setParentState(() {
-                                  itemsList.clear();
-                                  itemsList.addAll(result);
-                                });
-                              }
-                            },
-                            child: TextField(
-                              controller: controller,
-
-                              decoration: InputDecoration(
-                                labelText: subtitle,
-                                labelStyle: TextStyle(fontSize: 18),
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-
-                                isCollapsed: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                border: InputBorder.none,
-                                enabled: false,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        flex: 3,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-
-                          onPressed: () {},
-                          icon: Icon(Icons.add, color: Colors.white),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size(0, 42.h),
-
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             )

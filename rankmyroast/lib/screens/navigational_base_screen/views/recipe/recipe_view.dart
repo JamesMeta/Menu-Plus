@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
+import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/widgets/recipe_tile_widget.dart';
@@ -21,7 +22,7 @@ class _RecipeViewState extends State<RecipeView> {
   bool groupRecipes = true;
   Group? _selectedGroup;
 
-  late final Future<List<Group>?> _groupsList;
+  late Future<List<Group>?> _groupsList;
 
   @override
   void initState() {
@@ -129,6 +130,11 @@ class _RecipeViewState extends State<RecipeView> {
                     if (groups != null) {
                       return DropdownMenu(
                         initialSelection: _selectedGroup,
+                        onSelected: (value) {
+                          setState(() {
+                            _selectedGroup = value;
+                          });
+                        },
                         dropdownMenuEntries:
                             groups
                                 .map(
@@ -171,23 +177,44 @@ class _RecipeViewState extends State<RecipeView> {
 
                         if (crossAxisCount < 2) crossAxisCount = 2;
 
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                mainAxisSpacing: 8,
-                                crossAxisSpacing: 8,
-                              ),
-                          itemCount:
-                              _selectedGroup != null
-                                  ? _selectedGroup!.recipes.length
-                                  : 0,
-                          itemBuilder: (context, index) {
-                            print(index);
-                            final recipe = _selectedGroup!.recipes[index];
-                            return RecipeTileWidget(recipe: recipe);
+                        return RefreshIndicator(
+                          onRefresh: () async {
+                            setState(() {
+                              _loadData();
+                            });
                           },
+                          color: Colors.white, // Color of the spinner
+                          backgroundColor: Colors.green,
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                ),
+                            itemCount:
+                                _selectedGroup != null
+                                    ? _selectedGroup!.recipes.length
+                                    : 0,
+                            itemBuilder: (context, index) {
+                              print(index);
+                              final recipe = _selectedGroup!.recipes[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  context.push(
+                                    "/base/view-recipe",
+                                    extra: ViewRecipeExtra(
+                                      group: _selectedGroup!,
+                                      recipe: recipe,
+                                      userGroups: groups,
+                                    ),
+                                  );
+                                },
+                                child: RecipeTileWidget(recipe: recipe),
+                              );
+                            },
+                          ),
                         );
                       },
                     );
