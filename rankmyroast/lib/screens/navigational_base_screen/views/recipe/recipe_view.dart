@@ -21,13 +21,22 @@ class RecipeView extends StatefulWidget {
 class _RecipeViewState extends State<RecipeView> {
   bool groupRecipes = true;
   Group? _selectedGroup;
+  List<Recipe> _recipes = [];
 
   late Future<List<Group>?> _groupsList;
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     _loadData();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,29 +51,40 @@ class _RecipeViewState extends State<RecipeView> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Row(
                   children: [
-                    Text(
-                      "Recipes ",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "(0)",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Recipes",
+                          style: TextStyle(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "No recipes",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                     Expanded(child: SizedBox()),
                     IconButton(
                       onPressed: () {},
+                      constraints: BoxConstraints(
+                        minWidth: 40.w,
+                        minHeight: 40.w,
+                      ),
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
-                          side: BorderSide(color: Colors.black, width: 1),
+                          side: BorderSide(color: Colors.transparent, width: 1),
                         ),
                       ),
                     ),
@@ -83,31 +103,41 @@ class _RecipeViewState extends State<RecipeView> {
 
                 return Row(
                   children: [
-                    Text(
-                      "Recipes ",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "(${_selectedGroup != null ? _selectedGroup!.recipes.length : 0})",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Recipes",
+                          style: TextStyle(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "${_selectedGroup != null ? _selectedGroup!.recipes.length : 0} recipes",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                     Expanded(child: SizedBox()),
                     IconButton(
                       onPressed: () async {
                         _navigateToCreateRecipeScreen(groups, null);
                       },
+                      constraints: BoxConstraints(
+                        minWidth: 40.w,
+                        minHeight: 40.w,
+                      ),
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
-                          side: BorderSide(color: Colors.black, width: 1),
+                          side: BorderSide(color: Colors.transparent, width: 1),
                         ),
                       ),
                     ),
@@ -117,43 +147,70 @@ class _RecipeViewState extends State<RecipeView> {
             },
           ),
 
-          Row(
-            children: [
-              FutureBuilder(
-                future: _groupsList,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.connectionState == ConnectionState.done) {
-                    final groups = snapshot.data;
+          SizedBox(height: 16.h),
 
-                    if (groups != null) {
-                      return DropdownMenu(
-                        initialSelection: _selectedGroup,
-                        onSelected: (value) {
-                          setState(() {
-                            _selectedGroup = value;
-                          });
-                        },
-                        dropdownMenuEntries:
-                            groups
-                                .map(
-                                  (group) => DropdownMenuEntry(
-                                    value: group,
-                                    label: group.name,
-                                  ),
-                                )
-                                .toList(),
-                      );
-                    } else {
-                      return Center(child: Text("The Data is null"));
-                    }
-                  } else {
-                    return Center(child: Text("The Data is never coming"));
-                  }
-                },
+          TextField(
+            controller: _searchController,
+            onChanged: (value) => _runFilter(value),
+            decoration: InputDecoration(
+              hintText: "Search recipes...",
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey, width: 1),
               ),
-            ],
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          FutureBuilder(
+            future: _groupsList,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                final groups = snapshot.data;
+
+                if (groups != null && groups.isNotEmpty) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children:
+                          groups.map((group) {
+                            final isSelected =
+                                _selectedGroup != null &&
+                                _selectedGroup!.id == group.id;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: ChoiceChip(
+                                label: Text(group.name),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    _selectedGroup = selected ? group : null;
+                                    _recipes = selected ? group.recipes : [];
+                                  });
+                                },
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  );
+                } else if (groups != null && groups.isEmpty) {
+                  return Center(child: Text("No groups found"));
+                } else {
+                  return Center(child: Text("The Data is null"));
+                }
+              } else {
+                return Center(child: Text("The Data is never coming"));
+              }
+            },
           ),
 
           SizedBox(height: 8.h),
@@ -167,10 +224,10 @@ class _RecipeViewState extends State<RecipeView> {
                 } else if (snapshot.connectionState == ConnectionState.done) {
                   final groups = snapshot.data;
 
-                  if (groups != null) {
+                  if (groups != null && _recipes.isNotEmpty) {
                     return LayoutBuilder(
                       builder: (context, constraints) {
-                        const double idealItemWidth = 120.0;
+                        const double idealItemWidth = 140.0;
 
                         int crossAxisCount =
                             (constraints.maxWidth / idealItemWidth).floor();
@@ -180,26 +237,24 @@ class _RecipeViewState extends State<RecipeView> {
                         return RefreshIndicator(
                           onRefresh: () async {
                             setState(() {
-                              _loadData();
+                              _refreshData();
                             });
                           },
                           color: Colors.white, // Color of the spinner
                           backgroundColor: Colors.green,
                           child: GridView.builder(
                             shrinkWrap: true,
+
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: crossAxisCount,
-                                  mainAxisSpacing: 8,
-                                  crossAxisSpacing: 8,
+                                  childAspectRatio: 4 / 5,
+                                  mainAxisSpacing: 16,
+                                  crossAxisSpacing: 16,
                                 ),
-                            itemCount:
-                                _selectedGroup != null
-                                    ? _selectedGroup!.recipes.length
-                                    : 0,
+                            itemCount: _recipes.length,
                             itemBuilder: (context, index) {
-                              print(index);
-                              final recipe = _selectedGroup!.recipes[index];
+                              final recipe = _recipes[index];
                               return GestureDetector(
                                 onTap: () {
                                   context.push(
@@ -218,6 +273,8 @@ class _RecipeViewState extends State<RecipeView> {
                         );
                       },
                     );
+                  } else if (groups != null && _recipes.isEmpty) {
+                    return Center(child: Text("No recipes found"));
                   } else {
                     return Center(child: Text("The Data is null"));
                   }
@@ -230,6 +287,27 @@ class _RecipeViewState extends State<RecipeView> {
         ],
       ),
     );
+  }
+
+  void _runFilter(String enteredKeyword) {
+    List<Recipe> results = [];
+    if (enteredKeyword.isEmpty) {
+      results = _selectedGroup?.recipes ?? [];
+    } else {
+      results =
+          _selectedGroup?.recipes
+              .where(
+                (recipe) => recipe.name.toLowerCase().contains(
+                  enteredKeyword.toLowerCase(),
+                ),
+              )
+              .toList() ??
+          [];
+    }
+
+    setState(() {
+      _recipes = results;
+    });
   }
 
   Future<void> _navigateToCreateRecipeScreen(
@@ -250,6 +328,16 @@ class _RecipeViewState extends State<RecipeView> {
     _groupsList = SupabaseHelper.groups.getGroupsForUser();
     try {
       _selectedGroup = (await _groupsList)?.first;
+      _recipes = _selectedGroup?.recipes ?? [];
+    } on Exception {
+      _selectedGroup = null;
+    }
+  }
+
+  Future<void> _refreshData() async {
+    _groupsList = SupabaseHelper.groups.getGroupsForUser();
+    try {
+      _recipes = _selectedGroup?.recipes ?? [];
     } on Exception {
       _selectedGroup = null;
     }
