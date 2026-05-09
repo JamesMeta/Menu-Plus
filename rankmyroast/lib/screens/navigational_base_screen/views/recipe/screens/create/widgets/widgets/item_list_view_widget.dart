@@ -67,82 +67,92 @@ class _ItemListViewWidgetState extends State<ItemListViewWidget> {
   @override
   Widget build(BuildContext context) {
     return _itemsList.isNotEmpty
-        ? Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Divider(color: Colors.grey[600]!),
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 800.h, minHeight: 100.h),
-              child: ReorderableListView.builder(
-                scrollController: _scrollController,
-                onReorder: (oldIndex, newIndex) {
-                  widget.updatePositionForParentList(oldIndex, newIndex);
-                  setState(() {
-                    if (newIndex > oldIndex) newIndex -= 1;
-                    final item = _itemsList.removeAt(oldIndex);
-                    _itemsList.insert(newIndex, item);
-                  });
-                },
+        ? Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
 
-                shrinkWrap: true,
+            border: Border(top: BorderSide(color: Colors.grey[600]!, width: 1)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Divider(color: Colors.grey[600]!),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 800.h, minHeight: 100.h),
+                child: ReorderableListView.builder(
+                  scrollController: _scrollController,
+                  onReorder: (oldIndex, newIndex) {
+                    widget.updatePositionForParentList(oldIndex, newIndex);
+                    setState(() {
+                      if (newIndex > oldIndex) newIndex -= 1;
+                      final item = _itemsList.removeAt(oldIndex);
+                      _itemsList.insert(newIndex, item);
+                    });
+                  },
 
-                itemCount: _itemsList.length,
-                clipBehavior: Clip.none,
-                itemBuilder: (context, index) {
-                  return Container(
-                    key: Key('$index'),
-                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: const Color.fromARGB(124, 149, 161, 150),
+                  shrinkWrap: true,
+
+                  itemCount: _itemsList.length,
+                  clipBehavior: Clip.none,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      key: Key('$index'),
+                      margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
                         ),
-                      ),
-                      leading: ReorderableDragStartListener(
-                        index: index,
-                        child: Icon(Icons.drag_handle, color: Colors.grey[600]),
-                      ),
-
-                      title: Text(
-                        widget.isNumericalList
-                            ? "${index + 1}. ${_itemsList[index]}"
-                            : _itemsList[index],
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      trailing: IconButton(
-                        style: IconButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: const Color.fromARGB(
-                            43,
-                            184,
-                            184,
-                            184,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: const Color.fromARGB(124, 149, 161, 150),
                           ),
                         ),
-                        onPressed: () => _deleteItem(_itemsList[index]),
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.grey[600],
-                          size: 18.sp,
+                        leading: ReorderableDragStartListener(
+                          index: index,
+                          child: Icon(
+                            Icons.drag_handle,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+
+                        title: Text(
+                          widget.isNumericalList
+                              ? "${index + 1}. ${_itemsList[index]}"
+                              : _itemsList[index],
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        trailing: IconButton(
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            backgroundColor: const Color.fromARGB(
+                              43,
+                              184,
+                              184,
+                              184,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () => _deleteItem(_itemsList[index]),
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.grey[600],
+                            size: 18.sp,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         )
         : SizedBox();
   }

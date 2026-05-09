@@ -100,6 +100,7 @@ class SupabaseHelperRecipe {
 
   Future<CreateRecipeResponse> updateRecipe(
     File? image,
+    String recipeId,
     String name,
     int? prepTime,
     int? cookTime,
@@ -148,9 +149,14 @@ class SupabaseHelperRecipe {
               };
 
       final response =
-          await _client.from("recipe").update(update).select("*").single();
+          await _client
+              .from("recipe")
+              .update(update)
+              .eq("id", recipeId)
+              .select("*")
+              .single();
 
-      final recipeId = response["id"];
+      recipeId = response["id"];
       final imageName = response["image_name"];
 
       // The one in the trillion chance that the UUID generated for the image name already exists, we want to prevent the recipe from being updated with an image name that doesn't match the one in storage

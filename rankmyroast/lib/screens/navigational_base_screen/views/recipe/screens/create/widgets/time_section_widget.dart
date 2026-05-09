@@ -4,7 +4,7 @@ import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 
-class TimeSectionWidget extends StatelessWidget {
+class TimeSectionWidget extends StatefulWidget {
   final String includeSectionText;
   final bool includeSection;
   final bool isHidden;
@@ -27,14 +27,23 @@ class TimeSectionWidget extends StatelessWidget {
   });
 
   @override
+  State<TimeSectionWidget> createState() => _TimeSectionWidgetState();
+}
+
+class _TimeSectionWidgetState extends State<TimeSectionWidget> {
+  bool _isExpanded = true;
+
+  @override
   Widget build(BuildContext context) {
-    return !isHidden
-        ? includeSection
+    return !widget.isHidden
+        ? widget.includeSection
             ? Column(
               children: [
                 ExpansionTile(
+                  onExpansionChanged:
+                      (value) => setState(() => _isExpanded = value),
                   tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.green,
 
                   initiallyExpanded: true,
                   shape: RoundedRectangleBorder(
@@ -45,109 +54,126 @@ class TimeSectionWidget extends StatelessWidget {
                     side: BorderSide(color: Colors.transparent),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  maintainState: true,
+
+                  iconColor: Colors.white,
+                  collapsedIconColor: Colors.grey[600],
+                  collapsedBackgroundColor: Colors.white,
+                  collapsedTextColor: Colors.grey[600],
+                  textColor: Colors.white,
                   leading: IconButton(
-                    onPressed: onModify,
+                    onPressed: widget.onModify,
                     style: IconButton.styleFrom(
                       padding: EdgeInsets.zero,
-                      backgroundColor: const Color.fromARGB(22, 161, 161, 161),
+
+                      backgroundColor:
+                          _isExpanded
+                              ? const Color.fromARGB(255, 90, 182, 93)
+                              : Colors.grey[100],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: Icon(Icons.close, color: Colors.grey[600]),
+                    icon: Icon(
+                      Icons.close,
+                      color: _isExpanded ? Colors.white : Colors.grey[600],
+                    ),
                     padding: EdgeInsets.zero,
                   ),
-
                   title: Text(
                     "Time Estimations",
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
                     ),
                     textAlign: TextAlign.left,
                   ),
                   children: [
-                    Divider(color: Colors.grey[600]!),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Prep Time (minutes)",
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: TextField(
-                                      controller: controllerPrepTime,
-                                      keyboardType: TextInputType.number,
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        constraints: BoxConstraints(
-                                          maxWidth: 55.w,
-                                          maxHeight: 40.h,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Cook Time (minutes)",
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: TextField(
-                                      controller: controllerCookTime,
-                                      keyboardType: TextInputType.number,
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        constraints: BoxConstraints(
-                                          maxWidth: 55.w,
-                                          maxHeight: 40.h,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                          top: BorderSide(color: Colors.grey[600]!, width: 1),
                         ),
-                        SizedBox(width: 8),
-                      ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Prep Time (minutes)",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: widget.controllerPrepTime,
+                                        keyboardType: TextInputType.number,
+                                        textAlign: TextAlign.center,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          constraints: BoxConstraints(
+                                            maxWidth: 55.w,
+                                            maxHeight: 40.h,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Cook Time (minutes)",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: widget.controllerCookTime,
+                                        keyboardType: TextInputType.number,
+                                        textAlign: TextAlign.center,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          constraints: BoxConstraints(
+                                            maxWidth: 55.w,
+                                            maxHeight: 40.h,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -157,7 +183,7 @@ class TimeSectionWidget extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    includeSectionText,
+                    widget.includeSectionText,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -170,7 +196,7 @@ class TimeSectionWidget extends StatelessWidget {
                       IconButton(
                         padding: EdgeInsets.zero,
                         iconSize: 25,
-                        onPressed: onHide,
+                        onPressed: widget.onHide,
                         icon: Icon(Icons.close, color: Colors.white),
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.grey[600],
@@ -182,7 +208,7 @@ class TimeSectionWidget extends StatelessWidget {
                       ),
                       SizedBox(width: 8),
                       IconButton(
-                        onPressed: onModify,
+                        onPressed: widget.onModify,
                         iconSize: 25,
                         icon: Icon(Icons.check, color: Colors.white),
                         style: IconButton.styleFrom(
