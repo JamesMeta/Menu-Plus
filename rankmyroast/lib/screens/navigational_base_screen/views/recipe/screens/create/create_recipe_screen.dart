@@ -451,6 +451,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                           late final bool? response;
                           if (_isEditing && !_isCopying) {
+                            response = await _editRecipe();
                           } else {
                             response = await _createRecipe();
                           }
@@ -639,6 +640,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
     final response = await SupabaseHelper.recipe.updateRecipe(
       _recipeImageFile,
+      _recipeToEdit!.id, // Pass the recipe ID
       name,
       prepTime,
       cookTime,

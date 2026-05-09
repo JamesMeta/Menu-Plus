@@ -34,19 +34,24 @@ class _GroupsViewState extends State<GroupsView> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Row(
                   children: [
-                    Text(
-                      "Active Groups ",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "(0)",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Active Groups",
+                          style: TextStyle(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "No active groups found",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                     Expanded(child: SizedBox()),
                     IconButton(
@@ -73,29 +78,38 @@ class _GroupsViewState extends State<GroupsView> {
               } else {
                 return Row(
                   children: [
-                    Text(
-                      "Active Groups ",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "(${snapshot.data!.length})",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Active Groups ",
+                          style: TextStyle(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "${snapshot.data!.length} group(s) found",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                     Expanded(child: SizedBox()),
                     IconButton(
                       onPressed: createGroup,
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
+                      constraints: BoxConstraints(
+                        minWidth: 40.w,
+                        minHeight: 40.w,
+                      ),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
-                          side: BorderSide(color: Colors.black, width: 1),
+                          side: BorderSide(color: Colors.transparent, width: 1),
                         ),
                       ),
                     ),

@@ -47,12 +47,16 @@ class ImageContentWidget extends StatelessWidget {
     }
 
     if (isEditing && recipeImageUrl != null && !removeImage) {
-      return CachedNetworkImage(
-        imageUrl: recipeImageUrl!,
-        fit: BoxFit.cover,
-        placeholder:
-            (context, url) => const Center(child: CircularProgressIndicator()),
-        errorWidget: (context, url, error) => buildPlaceholderIcon(),
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: CachedNetworkImage(
+          imageUrl: recipeImageUrl!,
+          fit: BoxFit.cover,
+          placeholder:
+              (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
+          errorWidget: (context, url, error) => buildPlaceholderIcon(),
+        ),
       );
     }
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 
-class FormSectionWidget extends StatelessWidget {
+class FormSectionWidget extends StatefulWidget {
   final String header;
   final String subtitle;
   final String includeSectionText;
@@ -35,19 +35,28 @@ class FormSectionWidget extends StatelessWidget {
   });
 
   @override
+  State<FormSectionWidget> createState() => _FormSectionWidgetState();
+}
+
+class _FormSectionWidgetState extends State<FormSectionWidget> {
+  bool _isExpanded = true;
+
+  @override
   Widget build(BuildContext context) {
-    return !isHidden
-        ? includeSection
+    return !widget.isHidden
+        ? widget.includeSection
             ? Column(
               children: [
                 ExpansionTile(
+                  onExpansionChanged:
+                      (value) => setState(() => _isExpanded = value),
                   tilePadding: EdgeInsets.symmetric(horizontal: 8.w),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.green,
 
                   initiallyExpanded: true,
                   shape: RoundedRectangleBorder(
                     side:
-                        itemsList.isNotEmpty
+                        widget.itemsList.isNotEmpty
                             ? BorderSide(color: Colors.grey[600]!)
                             : BorderSide(color: Colors.grey[600]!),
                     borderRadius: BorderRadius.circular(12),
@@ -56,35 +65,47 @@ class FormSectionWidget extends StatelessWidget {
                     side: BorderSide(color: Colors.transparent),
                     borderRadius: BorderRadius.circular(12),
                   ),
+
+                  iconColor: Colors.white,
+                  collapsedIconColor: Colors.grey[600],
+                  collapsedBackgroundColor: Colors.white,
+                  collapsedTextColor: Colors.grey[600],
+                  textColor: Colors.white,
                   leading: IconButton(
-                    onPressed: onModify,
+                    onPressed: widget.onModify,
                     style: IconButton.styleFrom(
                       padding: EdgeInsets.zero,
 
-                      backgroundColor: const Color.fromARGB(22, 161, 161, 161),
+                      backgroundColor:
+                          _isExpanded
+                              ? const Color.fromARGB(255, 90, 182, 93)
+                              : Colors.grey[100],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: Icon(Icons.close, color: Colors.grey[600]),
+                    icon: Icon(
+                      Icons.close,
+                      color: _isExpanded ? Colors.white : Colors.grey[600],
+                    ),
                     padding: EdgeInsets.zero,
                   ),
                   title: Text(
-                    header,
+                    widget.header,
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
                     ),
                     textAlign: TextAlign.left,
                   ),
                   children: [
                     ItemListViewWidget(
-                      items: itemsList,
-                      isNumericalList: isNumericalList,
-                      deleteForParentList: deleteFromParent,
-                      updatePositionForParentList: updatePositionForParentList,
-                      setParentState: setParentState,
+                      items: widget.itemsList,
+                      isNumericalList: widget.isNumericalList,
+                      deleteForParentList: widget.deleteFromParent,
+                      updatePositionForParentList:
+                          widget.updatePositionForParentList,
+                      setParentState: widget.setParentState,
                     ),
                   ],
                 ),
@@ -108,10 +129,10 @@ class FormSectionWidget extends StatelessWidget {
                             color: Colors.white,
                           ),
                           child: TextField(
-                            controller: controller,
+                            controller: widget.controller,
 
                             decoration: InputDecoration(
-                              labelText: subtitle,
+                              labelText: widget.subtitle,
                               labelStyle: TextStyle(fontSize: 18),
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.never,
@@ -132,10 +153,12 @@ class FormSectionWidget extends StatelessWidget {
                           padding: EdgeInsets.zero,
 
                           onPressed: () {
-                            if (controller.text.isEmpty) return;
-                            setParentState(() {
-                              itemsList.add(controller.text.trim());
-                              controller.text = "";
+                            if (widget.controller.text.isEmpty) return;
+                            widget.setParentState(() {
+                              widget.itemsList.add(
+                                widget.controller.text.trim(),
+                              );
+                              widget.controller.text = "";
                             });
                           },
                           icon: Icon(Icons.add, color: Colors.white),
@@ -161,7 +184,7 @@ class FormSectionWidget extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    includeSectionText,
+                    widget.includeSectionText,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -174,7 +197,7 @@ class FormSectionWidget extends StatelessWidget {
                       IconButton(
                         padding: EdgeInsets.zero,
                         iconSize: 25,
-                        onPressed: onHide,
+                        onPressed: widget.onHide,
 
                         icon: Icon(Icons.close, color: Colors.white),
                         style: IconButton.styleFrom(
@@ -187,7 +210,7 @@ class FormSectionWidget extends StatelessWidget {
                       ),
                       SizedBox(width: 8),
                       IconButton(
-                        onPressed: onModify,
+                        onPressed: widget.onModify,
 
                         iconSize: 25,
                         icon: Icon(Icons.check, color: Colors.white),

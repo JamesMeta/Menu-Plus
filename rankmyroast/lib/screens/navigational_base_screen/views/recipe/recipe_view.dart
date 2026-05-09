@@ -220,7 +220,7 @@ class _RecipeViewState extends State<RecipeView> {
               future: _groupsList,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 } else if (snapshot.connectionState == ConnectionState.done) {
                   final groups = snapshot.data;
 
@@ -236,9 +236,7 @@ class _RecipeViewState extends State<RecipeView> {
 
                         return RefreshIndicator(
                           onRefresh: () async {
-                            setState(() {
-                              _refreshData();
-                            });
+                            await _refreshData();
                           },
                           color: Colors.white, // Color of the spinner
                           backgroundColor: Colors.green,
@@ -274,7 +272,34 @@ class _RecipeViewState extends State<RecipeView> {
                       },
                     );
                   } else if (groups != null && _recipes.isEmpty) {
-                    return Center(child: Text("No recipes found"));
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              // Industry standard: await the refresh logic directly
+                              // so the indicator stays visible until the data is fetched.
+                              await _refreshData();
+                            },
+                            child: ListView(
+                              // This is the critical line:
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                  // Ensure the empty state takes up the full height
+                                  // so the entire screen is "pullable"
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.5,
+                                  child: const Center(
+                                    child: Text("No recipes found"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
                   } else {
                     return Center(child: Text("The Data is null"));
                   }
@@ -337,7 +362,24 @@ class _RecipeViewState extends State<RecipeView> {
   Future<void> _refreshData() async {
     _groupsList = SupabaseHelper.groups.getGroupsForUser();
     try {
-      _recipes = _selectedGroup?.recipes ?? [];
+      _groupsList.then((groups) {
+        if (groups != null) {
+          final currentGroup = groups.where(
+            (element) => element.id == _selectedGroup?.id,
+          );
+          if (currentGroup.isNotEmpty) {
+            setState(() {
+              _selectedGroup = currentGroup.first;
+              _recipes = _selectedGroup?.recipes ?? [];
+            });
+          } else {
+            setState(() {
+              _selectedGroup = groups.first;
+              _recipes = _selectedGroup?.recipes ?? [];
+            });
+          }
+        }
+      });
     } on Exception {
       _selectedGroup = null;
     }
