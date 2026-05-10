@@ -160,7 +160,7 @@ class SupabaseHelperRecipe {
       final imageName = response["image_name"];
 
       // The one in the trillion chance that the UUID generated for the image name already exists, we want to prevent the recipe from being updated with an image name that doesn't match the one in storage
-      if (imageName != newImageName) {
+      if (imageName != newImageName && changeImage && image != null) {
         return CreateRecipeResponse(
           success: false,
           localError: true,
