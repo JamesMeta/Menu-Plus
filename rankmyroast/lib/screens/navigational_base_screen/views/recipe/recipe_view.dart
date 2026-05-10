@@ -254,8 +254,8 @@ class _RecipeViewState extends State<RecipeView> {
                             itemBuilder: (context, index) {
                               final recipe = _recipes[index];
                               return GestureDetector(
-                                onTap: () {
-                                  context.push(
+                                onTap: () async {
+                                  final response = await context.push(
                                     "/base/view-recipe",
                                     extra: ViewRecipeExtra(
                                       group: _selectedGroup!,
@@ -263,6 +263,12 @@ class _RecipeViewState extends State<RecipeView> {
                                       userGroups: groups,
                                     ),
                                   );
+
+                                  if (response != null &&
+                                      response is bool &&
+                                      response) {
+                                    _refreshData();
+                                  }
                                 },
                                 child: RecipeTileWidget(recipe: recipe),
                               );

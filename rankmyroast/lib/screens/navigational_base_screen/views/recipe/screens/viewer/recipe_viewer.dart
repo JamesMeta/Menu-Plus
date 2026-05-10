@@ -251,17 +251,26 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                   final rank =
                                       sortedIds.indexOf(_recipe.id) + 1;
 
+                                  String rankText;
+                                  Color rankColor;
+                                  if (rank == 0) {
+                                    rankText = "Unranked";
+                                    rankColor = Colors.grey[600]!;
+                                  } else if (rank == 1) {
+                                    rankText = "Top Ranked Recipe!";
+                                    rankColor = Colors.green;
+                                  } else {
+                                    rankText =
+                                        "Standing: #$rank of ${sortedIds.length} Recipes";
+                                    rankColor = Colors.grey[600]!;
+                                  }
+
                                   return Text(
-                                    rank == 1
-                                        ? "Top Ranked Recipe!"
-                                        : "Standing: #$rank of ${sortedIds.length} Recipes",
+                                    rankText,
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
-                                      color:
-                                          rank == 1
-                                              ? Colors.green
-                                              : Colors.grey[600],
+                                      color: rankColor,
                                     ),
                                   );
                                 }
