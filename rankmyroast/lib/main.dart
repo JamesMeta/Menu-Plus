@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
+import 'package:rankmyroast/classes/extra/rank_recipe_extra.dart';
 import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
@@ -11,6 +12,7 @@ import 'package:rankmyroast/screens/login/login_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/navigational_base_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/screens/create_group_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/create_recipe_screen.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/rank_recipe_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/recipe_viewer.dart';
 import 'package:rankmyroast/screens/settings/settings_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -81,6 +83,22 @@ final GoRouter _router = GoRouter(
                 recipe: recipe,
                 group: group,
                 userGroups: userGroups,
+              );
+            }
+            return const RecipeViewer();
+          },
+        ),
+        GoRoute(
+          path: '/rank-recipe',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra != null && extra is RankRecipeExtra) {
+              final ratings = extra.ratings;
+              final recipeToRank = extra.recipeToRank;
+
+              return RankRecipeScreen(
+                ratings: ratings,
+                recipeToRank: recipeToRank,
               );
             }
             return const RecipeViewer();
