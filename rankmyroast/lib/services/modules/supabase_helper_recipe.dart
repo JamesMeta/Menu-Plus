@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
 import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
@@ -231,6 +232,31 @@ class SupabaseHelperRecipe {
       }
     } catch (e) {
       print('Error fetching groups for recipe: $e');
+    }
+    return null;
+  }
+
+  Future<List<Recipe>?> getRecipesByGroupId(String groupId) async {
+    try {
+      final response = await _client
+          .from("recipe_group")
+          .select(
+            "recipe_id, recipe (id, created_at, name, ingredients, instructions, groceries, prep_time, cook_time, is_public, image_name)",
+          )
+          .eq("group_id", groupId);
+
+      if (response != null) {
+        final recipes =
+            (response as List)
+                .map(
+                  (item) =>
+                      Recipe.fromMap(item['recipe'] as Map<String, dynamic>),
+                )
+                .toList();
+        return recipes;
+      }
+    } catch (e) {
+      print('Error fetching recipes by group id: $e');
     }
     return null;
   }
