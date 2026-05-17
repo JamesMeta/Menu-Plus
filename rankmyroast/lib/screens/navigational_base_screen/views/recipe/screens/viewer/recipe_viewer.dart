@@ -314,6 +314,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                               extra: RankRecipeExtra(
                                                 ratings: ratings,
                                                 recipeToRank: _recipe,
+                                                group: _group,
                                               ),
                                             ),
                                         icon: Icon(
@@ -328,6 +329,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                               extra: RankRecipeExtra(
                                                 ratings: ratings,
                                                 recipeToRank: _recipe,
+                                                group: _group,
                                               ),
                                             ),
                                         child: Text(

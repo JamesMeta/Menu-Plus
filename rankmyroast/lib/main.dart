@@ -95,9 +95,11 @@ final GoRouter _router = GoRouter(
             if (extra != null && extra is RankRecipeExtra) {
               final ratings = extra.ratings;
               final recipeToRank = extra.recipeToRank;
+              final group = extra.group;
 
               return RankRecipeScreen(
                 ratings: ratings,
+                group: group,
                 recipeToRank: recipeToRank,
               );
             }
