@@ -308,4 +308,32 @@ class SupabaseHelperRecipe {
     }
     return null;
   }
+
+  Future<bool?> updateRecipeRanking(List<RecipeRating> newRankings) async {
+    try {
+      final List<Map<String, dynamic>> updatedRanking =
+          newRankings
+              .map(
+                (ranking) => {
+                  "id": ranking.id,
+                  "created_at": ranking.createdAt,
+                  "rating": ranking.rating,
+                  "ranking": ranking.ranking,
+                  "recipe_id": ranking.recipeId,
+                  "user_id": ranking.userId,
+                  "group_id": ranking.groupId,
+                },
+              )
+              .toList();
+      final response = await _client
+          .from("recipe_rating")
+          .upsert(updatedRanking, onConflict: "id");
+      if (response != null) {
+        return true;
+      }
+    } catch (e) {
+      print('Error updating Recipe Ratings $e');
+    }
+    return null;
+  }
 }

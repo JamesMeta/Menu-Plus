@@ -132,55 +132,77 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                     }
                   }
 
-                  print(recipeGroupUserRankingList);
+                  return Column(
+                    children: [
+                      !_modifyRecipeRankings
+                          ? ListView.builder(
+                            itemCount: recipeGroupUserRankingList.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              final recipe =
+                                  recipeGroupUserRankingList[index].recipe;
+                              return ListTile(
+                                title: Text(recipe.name),
+                                subtitle: Text(
+                                  'Prep Time: ${recipe.prepTime} mins',
+                                ),
+                                trailing: Text(index.toString()),
+                              );
+                            },
+                          )
+                          : ReorderableListView.builder(
+                            onReorder: (oldIndex, newIndex) {
+                              if (newIndex > oldIndex) newIndex -= 1;
+                              final movedRecipe = recipeGroupUserRankingList
+                                  .removeAt(oldIndex);
+                              recipeGroupUserRankingList.insert(
+                                newIndex,
+                                movedRecipe,
+                              );
+                              setState(() {});
+                            },
+                            shrinkWrap: true,
+                            itemCount: recipeGroupUserRankingList.length,
+                            itemBuilder: (context, index) {
+                              final recipe =
+                                  recipeGroupUserRankingList[index].recipe;
+                              return ReorderableDragStartListener(
+                                key: ValueKey(recipe.id),
+                                index: index,
 
-                  return !_modifyRecipeRankings
-                      ? ListView.builder(
-                        itemCount: recipeGroupUserRankingList.length,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          final recipe =
-                              recipeGroupUserRankingList[index].recipe;
-                          return ListTile(
-                            title: Text(recipe.name),
-                            subtitle: Text(
-                              'Prep Time: ${recipe.prepTime} mins',
+                                child: ListTile(
+                                  leading: Icon(Icons.drag_handle),
+                                  title: Text(recipe.name),
+                                  subtitle: Text(
+                                    'Prep Time: ${recipe.prepTime} mins',
+                                  ),
+                                  trailing: Text(index.toString()),
+                                ),
+                              );
+                            },
+                          ),
+                      if (_reordering)
+                        ElevatedButton(
+                          onPressed: () async {
+                            final success = await _submitNewRankings(
+                              recipeGroupUserRankingList,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            maximumSize: Size(300.w, 50.h),
+                            minimumSize: Size(250.w, 40.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            trailing: Text(index.toString()),
-                          );
-                        },
-                      )
-                      : ReorderableListView.builder(
-                        onReorder: (oldIndex, newIndex) {
-                          if (newIndex > oldIndex) newIndex -= 1;
-                          final movedRecipe = recipeGroupUserRankingList
-                              .removeAt(oldIndex);
-                          recipeGroupUserRankingList.insert(
-                            newIndex,
-                            movedRecipe,
-                          );
-                          setState(() {});
-                        },
-                        shrinkWrap: true,
-                        itemCount: recipeGroupUserRankingList.length,
-                        itemBuilder: (context, index) {
-                          final recipe =
-                              recipeGroupUserRankingList[index].recipe;
-                          return ReorderableDragStartListener(
-                            key: ValueKey(recipe.id),
-                            index: index,
-
-                            child: ListTile(
-                              leading: Icon(Icons.drag_handle),
-                              title: Text(recipe.name),
-                              subtitle: Text(
-                                'Prep Time: ${recipe.prepTime} mins',
-                              ),
-                              trailing: Text(index.toString()),
-                            ),
-                          );
-                        },
-                      );
+                          ),
+                          child: Text(
+                            "Submit",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  );
                 }
               },
             ),
@@ -282,5 +304,73 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
     }
 
     return recipeGroupUserRankingList;
+  }
+
+  Future<bool> _submitNewRankings(
+    List<RecipeGroupUserRanking> newRankings,
+  ) async {
+    late final List<RecipeRating> currentUserRankings;
+
+    if (_ratings != null) {
+      currentUserRankings =
+          _ratings!
+              .where(
+                (r) =>
+                    r.userId == Supabase.instance.client.auth.currentUser?.id,
+              )
+              .toList();
+    } else {
+      final ratings =
+          await SupabaseHelper.recipe.getRatingsByGroupId(_group?.id ?? '')
+              as List<RecipeRating>;
+
+      currentUserRankings =
+          ratings
+              .where(
+                (r) =>
+                    r.userId == Supabase.instance.client.auth.currentUser?.id,
+              )
+              .toList();
+    }
+
+    final List<RecipeRating> updatedRankings =
+        newRankings.map((r) {
+          final associatedRankingIndex = currentUserRankings.indexWhere(
+            (ranking) => ranking.recipeId == r.recipe.id,
+          );
+
+          if (associatedRankingIndex == -1) {
+            return RecipeRating(
+              id: '',
+              createdAt: DateTime.now().toIso8601String(),
+              recipeId: r.recipe.id,
+              userId: Supabase.instance.client.auth.currentUser?.id ?? '',
+              groupId: _group?.id ?? '',
+              ranking: newRankings.indexOf(r),
+            );
+          }
+
+          return RecipeRating(
+            id: currentUserRankings[associatedRankingIndex].id,
+            createdAt: currentUserRankings[associatedRankingIndex].createdAt,
+            recipeId: r.recipe.id,
+            userId: Supabase.instance.client.auth.currentUser?.id ?? '',
+            groupId: _group?.id ?? '',
+            ranking: newRankings.indexOf(r),
+          );
+        }).toList();
+
+    final response = await SupabaseHelper.recipe.updateRecipeRanking(
+      updatedRankings,
+    );
+
+    if (response != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update rankings. Please try again.')),
+      );
+      return false;
+    }
+
+    return true;
   }
 }
