@@ -312,22 +312,30 @@ class SupabaseHelperRecipe {
   Future<bool?> updateRecipeRanking(List<RecipeRating> newRankings) async {
     try {
       final List<Map<String, dynamic>> updatedRanking =
-          newRankings
-              .map(
-                (ranking) => {
-                  "id": ranking.id,
-                  "created_at": ranking.createdAt,
-                  "rating": ranking.rating,
-                  "ranking": ranking.ranking,
-                  "recipe_id": ranking.recipeId,
-                  "user_id": ranking.userId,
-                  "group_id": ranking.groupId,
-                },
-              )
-              .toList();
+          newRankings.map((ranking) {
+            if (ranking.id == null) {
+              // If the ranking doesn't have an ID, it means it's a new ranking that needs to be inserted rather than updated
+              return {
+                "rating": ranking.rating,
+                "ranking": ranking.ranking,
+                "recipe_id": ranking.recipeId,
+                "user_id": ranking.userId,
+                "group_id": ranking.groupId,
+              };
+            }
+            return {
+              "id": ranking.id,
+              "created_at": ranking.createdAt,
+              "rating": ranking.rating,
+              "ranking": ranking.ranking,
+              "recipe_id": ranking.recipeId,
+              "user_id": ranking.userId,
+              "group_id": ranking.groupId,
+            };
+          }).toList();
       final response = await _client
           .from("recipe_rating")
-          .upsert(updatedRanking, onConflict: "id");
+          .upsert(updatedRanking, onConflict: "id", defaultToNull: false);
       if (response != null) {
         return true;
       }

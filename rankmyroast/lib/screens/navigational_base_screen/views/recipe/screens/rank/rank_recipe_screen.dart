@@ -341,7 +341,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
 
           if (associatedRankingIndex == -1) {
             return RecipeRating(
-              id: '',
+              id: null,
               createdAt: DateTime.now().toIso8601String(),
               recipeId: r.recipe.id,
               userId: Supabase.instance.client.auth.currentUser?.id ?? '',

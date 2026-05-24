@@ -1,5 +1,5 @@
 class RecipeRating {
-  final String id;
+  final String? id;
   final String createdAt;
   final String recipeId;
   final String userId;

@@ -180,12 +180,23 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                   ConnectionState.done) {
                                 final ratings = snapshot.data;
                                 if (ratings == null || ratings.isEmpty) {
-                                  return Text(
-                                    "No reviews yet",
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: Colors.grey[600],
-                                      fontWeight: FontWeight.bold,
+                                  return TextButton(
+                                    onPressed:
+                                        () => context.push(
+                                          "/base/rank-recipe",
+                                          extra: RankRecipeExtra(
+                                            ratings: ratings,
+                                            recipeToRank: _recipe,
+                                            group: _group,
+                                          ),
+                                        ),
+                                    child: Text(
+                                      "No reviews yet",
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   );
                                 } else {
