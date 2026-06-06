@@ -309,36 +309,47 @@ class SupabaseHelperRecipe {
     return null;
   }
 
+  //TODO
+  //this can be optimized by doing an upsert with the full list of ratings instead of separating into creates and updates, but supabase upsert doesn't work with RLS policies that would allow users to only update their own ratings, so for now we will do separate create and update requests 
   Future<bool?> updateRecipeRanking(List<RecipeRating> newRankings) async {
     try {
-      final List<Map<String, dynamic>> updatedRanking =
-          newRankings.map((ranking) {
-            if (ranking.id == null) {
-              // If the ranking doesn't have an ID, it means it's a new ranking that needs to be inserted rather than updated
-              return {
-                "rating": ranking.rating,
-                "ranking": ranking.ranking,
-                "recipe_id": ranking.recipeId,
-                "user_id": ranking.userId,
-                "group_id": ranking.groupId,
-              };
-            }
-            return {
-              "id": ranking.id,
-              "created_at": ranking.createdAt,
-              "rating": ranking.rating,
-              "ranking": ranking.ranking,
-              "recipe_id": ranking.recipeId,
-              "user_id": ranking.userId,
-              "group_id": ranking.groupId,
-            };
-          }).toList();
-      final response = await _client
-          .from("recipe_rating")
-          .upsert(updatedRanking, onConflict: "id", defaultToNull: false);
-      if (response != null) {
-        return true;
+      final newItems = <Map<String, dynamic>>[];
+      final existingItems = <Map<String, dynamic>>[];
+
+      for (var ranking in newRankings) {
+        if (ranking.id == null) {
+          newItems.add({
+            "rating": ranking.rating,
+            "ranking": ranking.ranking,
+            "recipe_id": ranking.recipeId,
+            "user_id": ranking.userId,
+            "group_id": ranking.groupId,
+          });
+        } else {
+          existingItems.add({
+            "id": ranking.id,
+            "rating": ranking.rating,
+            "ranking": ranking.ranking,
+            // Omit user_id, group_id, and recipe_id so RLS UPDATE rules don't trip
+          });
+        }
       }
+
+      // Execute at most 2 network requests instead of a loop of N requests
+      if (newItems.isNotEmpty) {
+        await _client.from("recipe_rating").insert(newItems);
+      }
+
+      if (existingItems.isNotEmpty) {
+        final updateFutures = existingItems.map((item) {
+          final id = item['id'];
+          return _client.from("recipe_rating").update(item).eq("id", id);
+        });
+
+        await Future.wait(updateFutures);
+      }
+
+      return true;
     } catch (e) {
       print('Error updating Recipe Ratings $e');
     }
