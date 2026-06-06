@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
@@ -32,12 +33,20 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
   bool _viewGroupRankings = false;
   bool _modifyRecipeRankings = false;
   bool _reordering = false;
+  bool _isSubmitting = false;
 
   final List<String> _titles = [
     'Your Rankings',
     'Group Rankings',
     'Edit Group Rankings',
   ];
+
+  final List<Color> _colors = [
+    Colors.green,
+    const Color.fromARGB(255, 37, 87, 39),
+    Colors.green,
+  ];
+
   int _currentTitleIndex = 0;
 
   @override
@@ -53,7 +62,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: _colors[_currentTitleIndex],
         centerTitle: true,
         title: Text(
           _titles[_currentTitleIndex],
@@ -82,7 +91,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                       onPressed: () {
                         setState(() {
                           if (_modifyRecipeRankings) {
-                            _currentTitleIndex = 1;
+                            _currentTitleIndex = 0;
                           } else {
                             _currentTitleIndex = 2;
                           }
@@ -139,8 +148,13 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                             itemCount: recipeGroupUserRankingList.length,
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
+                              final place =
+                                  recipeGroupUserRankingList[index].groupRank
+                                      .toString();
+
                               final recipe =
                                   recipeGroupUserRankingList[index].recipe;
+
                               return ListTile(
                                 title: Text(recipe.name),
                                 subtitle: Text(
@@ -183,10 +197,21 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                           ),
                       if (_reordering)
                         ElevatedButton(
+                          // TODO
+                          // Make updating not need to pop the screen so the data can refresh properly
                           onPressed: () async {
+                            setState(() {
+                              _isSubmitting = true;
+                            });
                             final success = await _submitNewRankings(
                               recipeGroupUserRankingList,
                             );
+                            setState(() {
+                              _isSubmitting = false;
+                            });
+                            if (success && context.mounted) {
+                              context.pop(true);
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
@@ -196,10 +221,13 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                               borderRadius: BorderRadius.circular(24),
                             ),
                           ),
-                          child: Text(
-                            "Submit",
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child:
+                              _isSubmitting
+                                  ? CircularProgressIndicator()
+                                  : Text(
+                                    "Submit",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                         ),
                     ],
                   );
@@ -232,6 +260,8 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
     return sortedIds;
   }
 
+  // TODO
+  // Make recipes with the same ranking show as the same ranking instead of whichever gets looked at first
   List<RecipeGroupUserRanking> _buildRecipeGroupUserRanking(
     List<Recipe> recipes,
     List<RecipeRating> ratings,
@@ -369,6 +399,10 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
         SnackBar(content: Text('Failed to update rankings. Please try again.')),
       );
       return false;
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Rankings updated successfully')));
     }
 
     return true;

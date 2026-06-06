@@ -182,14 +182,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                 if (ratings == null || ratings.isEmpty) {
                                   return TextButton(
                                     onPressed:
-                                        () => context.push(
-                                          "/base/rank-recipe",
-                                          extra: RankRecipeExtra(
-                                            ratings: ratings,
-                                            recipeToRank: _recipe,
-                                            group: _group,
-                                          ),
-                                        ),
+                                        () async => _goToRanking(ratings!),
                                     child: Text(
                                       "No reviews yet",
                                       style: TextStyle(
@@ -320,14 +313,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                   return _hasUserRated
                                       ? IconButton(
                                         onPressed:
-                                            () => context.push(
-                                              "/base/rank-recipe",
-                                              extra: RankRecipeExtra(
-                                                ratings: ratings,
-                                                recipeToRank: _recipe,
-                                                group: _group,
-                                              ),
-                                            ),
+                                            () async => _goToRanking(ratings),
                                         icon: Icon(
                                           Icons.reviews,
                                           color: Colors.green,
@@ -335,14 +321,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                       )
                                       : TextButton(
                                         onPressed:
-                                            () => context.push(
-                                              "/base/rank-recipe",
-                                              extra: RankRecipeExtra(
-                                                ratings: ratings,
-                                                recipeToRank: _recipe,
-                                                group: _group,
-                                              ),
-                                            ),
+                                            () async => _goToRanking(ratings),
                                         child: Text(
                                           "Tap to leave a review",
                                           style: TextStyle(
@@ -480,6 +459,21 @@ class _RecipeViewerState extends State<RecipeViewer> {
         ),
       ),
     );
+  }
+
+  Future<void> _goToRanking(List<RecipeRating> ratings) async {
+    final response = await context.push(
+      "/base/rank-recipe",
+      extra: RankRecipeExtra(
+        ratings: ratings,
+        recipeToRank: _recipe,
+        group: _group,
+      ),
+    );
+
+    if (response == true && mounted) {
+      context.pop();
+    }
   }
 
   Future<List<RecipeRating>?> _fetchRatings() async {
