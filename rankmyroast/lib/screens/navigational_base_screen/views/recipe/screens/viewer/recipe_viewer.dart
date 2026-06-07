@@ -32,6 +32,8 @@ class _RecipeViewerState extends State<RecipeViewer> {
 
   late final Future<List<RecipeRating>?> _ratings;
 
+  final TextEditingController _ratingController = TextEditingController();
+
   @override
   void initState() {
     _recipe = widget.recipe!;
@@ -167,8 +169,9 @@ class _RecipeViewerState extends State<RecipeViewer> {
 
                       SizedBox(height: 12),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           FutureBuilder(
                             future: _ratings,
@@ -184,7 +187,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                     onPressed:
                                         () async => _goToRanking(ratings!),
                                     child: Text(
-                                      "No reviews yet",
+                                      "Be the first to leave a ranking",
                                       style: TextStyle(
                                         fontSize: 12.sp,
                                         color: Colors.grey[600],
@@ -310,27 +313,65 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                 if (ratings == null || ratings.isEmpty) {
                                   return SizedBox();
                                 } else {
-                                  return _hasUserRated
-                                      ? IconButton(
-                                        onPressed:
-                                            () async => _goToRanking(ratings),
-                                        icon: Icon(
-                                          Icons.reviews,
-                                          color: Colors.green,
-                                        ),
-                                      )
-                                      : TextButton(
-                                        onPressed:
-                                            () async => _goToRanking(ratings),
-                                        child: Text(
-                                          "Tap to leave a review",
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: Colors.grey[600],
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      );
+                                  if (_group != null) {
+                                    if (_group.useRating) {
+                                      return _hasUserRated
+                                          ? TextButton(
+                                            onPressed:
+                                                () async => _showRatingDialog(),
+                                            child: Text(
+                                              "Tap to update your rating",
+                                              style: TextStyle(
+                                                fontSize: 12.sp,
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                          : TextButton(
+                                            onPressed:
+                                                () async => _showRatingDialog(),
+                                            child: Text(
+                                              "Tap to leave a rating",
+                                              style: TextStyle(
+                                                fontSize: 12.sp,
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          );
+                                    } else {
+                                      return _hasUserRated
+                                          ? TextButton(
+                                            onPressed:
+                                                () async =>
+                                                    _goToRanking(ratings),
+                                            child: Text(
+                                              "Tap to update your ranking",
+                                              style: TextStyle(
+                                                fontSize: 12.sp,
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                          : TextButton(
+                                            onPressed:
+                                                () async =>
+                                                    _goToRanking(ratings),
+                                            child: Text(
+                                              "Tap to leave a ranking",
+                                              style: TextStyle(
+                                                fontSize: 12.sp,
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          );
+                                    }
+                                  } else {
+                                    return Text("No Group Found For Recipe");
+                                  }
                                 }
                               } else {
                                 return SizedBox();
@@ -476,6 +517,104 @@ class _RecipeViewerState extends State<RecipeViewer> {
     }
   }
 
+  Future<void> _showRatingDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Leave Rating"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Leave a rating between 1 and 10, you can change this rating at any time.",
+              ),
+              Row(
+                children: [
+                  Expanded(child: SizedBox()),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[600]!),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: TextField(
+                        controller: _ratingController,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: "1 - 10",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Flexible(child: Expanded(child: Text(" / 10"))),
+                  Expanded(child: SizedBox()),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final input = _ratingController.text.trim();
+                final ratingValue = int.tryParse(input);
+
+                if (ratingValue == null ||
+                    ratingValue < 1 ||
+                    ratingValue > 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "Please enter a valid rating between 1 and 10.",
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                final response = await SupabaseHelper.recipe.upsertRecipeRating(
+                  _recipe,
+                  _group,
+                  ratingValue,
+                );
+
+                if (!context.mounted) return;
+
+                if (response == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Rating submitted successfully!")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "Failed to submit rating. Please try again.",
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: Text("Submit"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<List<RecipeRating>?> _fetchRatings() async {
     final groupId = widget.group?.id;
     final recipeId = widget.recipe?.id;
@@ -513,5 +652,11 @@ class _RecipeViewerState extends State<RecipeViewer> {
             r.ranking != null,
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _ratingController.dispose();
+    super.dispose();
   }
 }

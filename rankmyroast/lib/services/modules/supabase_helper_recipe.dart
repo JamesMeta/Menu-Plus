@@ -310,7 +310,7 @@ class SupabaseHelperRecipe {
   }
 
   //TODO
-  //this can be optimized by doing an upsert with the full list of ratings instead of separating into creates and updates, but supabase upsert doesn't work with RLS policies that would allow users to only update their own ratings, so for now we will do separate create and update requests 
+  //this can be optimized by doing an upsert with the full list of ratings instead of separating into creates and updates, but supabase upsert doesn't work with RLS policies that would allow users to only update their own ratings, so for now we will do separate create and update requests
   Future<bool?> updateRecipeRanking(List<RecipeRating> newRankings) async {
     try {
       final newItems = <Map<String, dynamic>>[];
@@ -354,5 +354,65 @@ class SupabaseHelperRecipe {
       print('Error updating Recipe Ratings $e');
     }
     return null;
+  }
+
+  Future<bool?> upsertRecipeRating(
+    Recipe recipe,
+    Group? group,
+    int rating,
+  ) async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        return null;
+      }
+
+      if (group == null) {
+        final response =
+            await _client
+                .from("recipe_rating")
+                .upsert(
+                  {
+                    "rating": rating,
+                    "recipe_id": recipe.id,
+                    "user_id": userId,
+                    "group_id": null, // Stays null in the payload
+                  },
+                  onConflict: 'recipe_id, user_id, group_id',
+                ) // Tell Supabase what makes this row unique
+                .select("*")
+                .single();
+
+        if (response["rating"] == rating) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        final response =
+            await _client
+                .from("recipe_rating")
+                .upsert({
+                  "rating": rating,
+                  "recipe_id": recipe.id,
+                  "user_id": userId,
+                  "group_id": group.id,
+                }, onConflict: 'recipe_id, user_id, group_id')
+                .eq("recipe_id", recipe.id)
+                .eq("user_id", userId)
+                .eq("group_id", group.id)
+                .select("*")
+                .single();
+
+        if (response["rating"] == rating) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } on Exception catch (e) {
+      print('Error upserting recipe rating: $e');
+      return null;
+    }
   }
 }

@@ -5,6 +5,8 @@ import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/classes/recipe_group_user_ranking.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/recipe_list_tile_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/recipe_reorderable_list_tile_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -42,7 +44,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
   ];
 
   final List<Color> _colors = [
-    Colors.green,
+    const Color.fromARGB(255, 102, 199, 105),
     const Color.fromARGB(255, 37, 87, 39),
     Colors.green,
   ];
@@ -60,181 +62,195 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: _colors[_currentTitleIndex],
-        centerTitle: true,
-        title: Text(
-          _titles[_currentTitleIndex],
-          style: TextStyle(fontSize: 28.sp),
-        ),
-        foregroundColor: Colors.white,
-        actions:
-            _group != null
-                ? [
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_viewGroupRankings) {
-                          _currentTitleIndex = 0;
-                        } else {
-                          _currentTitleIndex = 1;
-                          _modifyRecipeRankings = false;
-                        }
-                        _viewGroupRankings = !_viewGroupRankings;
-                      });
-                    },
-                    icon: Icon(_viewGroupRankings ? Icons.person : Icons.group),
-                  ),
-                  if (!_viewGroupRankings)
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: _colors[_currentTitleIndex],
+          centerTitle: true,
+          title: Text(
+            _titles[_currentTitleIndex],
+            style: TextStyle(fontSize: 28.sp),
+          ),
+          foregroundColor: Colors.white,
+          actions:
+              _group != null
+                  ? [
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          if (_modifyRecipeRankings) {
+                          if (_viewGroupRankings) {
                             _currentTitleIndex = 0;
                           } else {
-                            _currentTitleIndex = 2;
+                            _currentTitleIndex = 1;
+                            _modifyRecipeRankings = false;
                           }
-                          _modifyRecipeRankings = !_modifyRecipeRankings;
-                          _reordering = !_reordering;
+                          _viewGroupRankings = !_viewGroupRankings;
                         });
                       },
                       icon: Icon(
-                        _modifyRecipeRankings ? Icons.edit_off : Icons.edit,
+                        _viewGroupRankings ? Icons.person : Icons.group,
                       ),
                     ),
-                ]
-                : null,
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FutureBuilder(
-              future: _recipeGroupUserRankingList,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No recipes found.'));
-                } else {
-                  final List<RecipeGroupUserRanking>
-                  recipeGroupUserRankingList = snapshot.data!;
-
-                  if (!_reordering) {
-                    if (_viewGroupRankings) {
-                      recipeGroupUserRankingList.sort((a, b) {
-                        final rankingA = a.groupRank;
-                        final rankingB = b.groupRank;
-                        return rankingA.compareTo(rankingB);
-                      });
-                    } else {
-                      recipeGroupUserRankingList.sort((a, b) {
-                        final rankingA = a.userRank;
-                        final rankingB = b.userRank;
-                        return rankingA.compareTo(rankingB);
-                      });
-                    }
-                  }
-
-                  return Column(
-                    children: [
-                      !_modifyRecipeRankings
-                          ? ListView.builder(
-                            itemCount: recipeGroupUserRankingList.length,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              final place =
-                                  recipeGroupUserRankingList[index].groupRank
-                                      .toString();
-
-                              final recipe =
-                                  recipeGroupUserRankingList[index].recipe;
-
-                              return ListTile(
-                                title: Text(recipe.name),
-                                subtitle: Text(
-                                  'Prep Time: ${recipe.prepTime} mins',
-                                ),
-                                trailing: Text(index.toString()),
-                              );
-                            },
-                          )
-                          : ReorderableListView.builder(
-                            onReorder: (oldIndex, newIndex) {
-                              if (newIndex > oldIndex) newIndex -= 1;
-                              final movedRecipe = recipeGroupUserRankingList
-                                  .removeAt(oldIndex);
-                              recipeGroupUserRankingList.insert(
-                                newIndex,
-                                movedRecipe,
-                              );
-                              setState(() {});
-                            },
-                            shrinkWrap: true,
-                            itemCount: recipeGroupUserRankingList.length,
-                            itemBuilder: (context, index) {
-                              final recipe =
-                                  recipeGroupUserRankingList[index].recipe;
-                              return ReorderableDragStartListener(
-                                key: ValueKey(recipe.id),
-                                index: index,
-
-                                child: ListTile(
-                                  leading: Icon(Icons.drag_handle),
-                                  title: Text(recipe.name),
-                                  subtitle: Text(
-                                    'Prep Time: ${recipe.prepTime} mins',
-                                  ),
-                                  trailing: Text(index.toString()),
-                                ),
-                              );
-                            },
-                          ),
-                      if (_reordering)
-                        ElevatedButton(
-                          // TODO
-                          // Make updating not need to pop the screen so the data can refresh properly
-                          onPressed: () async {
-                            setState(() {
-                              _isSubmitting = true;
-                            });
-                            final success = await _submitNewRankings(
-                              recipeGroupUserRankingList,
-                            );
-                            setState(() {
-                              _isSubmitting = false;
-                            });
-                            if (success && context.mounted) {
-                              context.pop(true);
+                    if (!_viewGroupRankings)
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_modifyRecipeRankings) {
+                              _currentTitleIndex = 0;
+                            } else {
+                              _currentTitleIndex = 2;
                             }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            maximumSize: Size(300.w, 50.h),
-                            minimumSize: Size(250.w, 40.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                          ),
-                          child:
-                              _isSubmitting
-                                  ? CircularProgressIndicator()
-                                  : Text(
-                                    "Submit",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                            _modifyRecipeRankings = !_modifyRecipeRankings;
+                            _reordering = !_reordering;
+                          });
+                        },
+                        icon: Icon(
+                          _modifyRecipeRankings ? Icons.edit_off : Icons.edit,
                         ),
-                    ],
-                  );
-                }
-              },
-            ),
-          ],
+                      ),
+                  ]
+                  : null,
+        ),
+
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FutureBuilder(
+                future: _recipeGroupUserRankingList,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No recipes found.'));
+                  } else {
+                    final List<RecipeGroupUserRanking>
+                    recipeGroupUserRankingList = snapshot.data!;
+
+                    if (!_reordering) {
+                      if (_viewGroupRankings) {
+                        recipeGroupUserRankingList.sort((a, b) {
+                          final rankingA = a.groupRank;
+                          final rankingB = b.groupRank;
+                          return rankingA.compareTo(rankingB);
+                        });
+                      } else {
+                        recipeGroupUserRankingList.sort((a, b) {
+                          final rankingA = a.userRank;
+                          final rankingB = b.userRank;
+                          return rankingA.compareTo(rankingB);
+                        });
+                      }
+                    }
+
+                    return Expanded(
+                      child: Column(
+                        children: [
+                          !_modifyRecipeRankings
+                              ? Expanded(
+                                child: ListView.builder(
+                                  itemCount: recipeGroupUserRankingList.length,
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) {
+                                    final place =
+                                        recipeGroupUserRankingList[index]
+                                                    .groupRank !=
+                                                double.infinity
+                                            ? recipeGroupUserRankingList[index]
+                                                .groupRank
+                                                .toInt()
+                                                .toString()
+                                            : "N/A";
+
+                                    final recipe =
+                                        recipeGroupUserRankingList[index]
+                                            .recipe;
+
+                                    return RecipeListTileWidget(
+                                      recipe: recipe,
+                                      ranking: place,
+                                    );
+                                  },
+                                ),
+                              )
+                              : Expanded(
+                                child: ReorderableListView.builder(
+                                  onReorder: (oldIndex, newIndex) {
+                                    if (newIndex > oldIndex) newIndex -= 1;
+                                    final movedRecipe =
+                                        recipeGroupUserRankingList.removeAt(
+                                          oldIndex,
+                                        );
+                                    recipeGroupUserRankingList.insert(
+                                      newIndex,
+                                      movedRecipe,
+                                    );
+                                    setState(() {});
+                                  },
+                                  shrinkWrap: true,
+                                  itemCount: recipeGroupUserRankingList.length,
+                                  itemBuilder: (context, index) {
+                                    final recipe =
+                                        recipeGroupUserRankingList[index]
+                                            .recipe;
+                                    return ReorderableDragStartListener(
+                                      key: ValueKey(recipe.id),
+                                      index: index,
+
+                                      child: RecipeReorderableListTileWidget(
+                                        recipe: recipe,
+                                        ranking: index.toString(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                          if (_reordering)
+                            ElevatedButton(
+                              // TODO
+                              // Make updating not need to pop the screen so the data can refresh properly
+                              onPressed: () async {
+                                setState(() {
+                                  _isSubmitting = true;
+                                });
+                                final success = await _submitNewRankings(
+                                  recipeGroupUserRankingList,
+                                );
+                                setState(() {
+                                  _isSubmitting = false;
+                                });
+                                if (success && context.mounted) {
+                                  context.pop(true);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                maximumSize: Size(300.w, 50.h),
+                                minimumSize: Size(250.w, 40.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                              ),
+                              child:
+                                  _isSubmitting
+                                      ? CircularProgressIndicator()
+                                      : Text(
+                                        "Submit",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
