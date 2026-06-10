@@ -368,18 +368,41 @@ class SupabaseHelperRecipe {
       }
 
       if (group == null) {
-        final response =
+        // Check if a rating already exists for this user and recipe without a group
+        final existingRatingResponse =
             await _client
                 .from("recipe_rating")
-                .upsert(
-                  {
+                .select("*")
+                .eq("recipe_id", recipe.id)
+                .eq("user_id", userId)
+                .single();
+
+        if (existingRatingResponse.isEmpty) {
+          // No existing rating, create a new one
+          final response =
+              await _client
+                  .from("recipe_rating")
+                  .insert({
                     "rating": rating,
                     "recipe_id": recipe.id,
                     "user_id": userId,
-                    "group_id": null, // Stays null in the payload
-                  },
-                  onConflict: 'recipe_id, user_id, group_id',
-                ) // Tell Supabase what makes this row unique
+                    "group_id": null,
+                  })
+                  .select("*")
+                  .single();
+
+          if (response["rating"] == rating) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        // Existing rating found, update it
+        final response =
+            await _client
+                .from("recipe_rating")
+                .update({"rating": rating})
+                .eq("id", existingRatingResponse["id"])
                 .select("*")
                 .single();
 
@@ -389,18 +412,41 @@ class SupabaseHelperRecipe {
           return false;
         }
       } else {
-        final response =
+        // Check if a rating already exists for this user, recipe, and group
+        final existingRatingResponse =
             await _client
                 .from("recipe_rating")
-                .upsert({
-                  "rating": rating,
-                  "recipe_id": recipe.id,
-                  "user_id": userId,
-                  "group_id": group.id,
-                }, onConflict: 'recipe_id, user_id, group_id')
+                .select("*")
                 .eq("recipe_id", recipe.id)
                 .eq("user_id", userId)
                 .eq("group_id", group.id)
+                .single();
+        if (existingRatingResponse.isEmpty) {
+          // No existing rating, create a new one
+          final response =
+              await _client
+                  .from("recipe_rating")
+                  .insert({
+                    "rating": rating,
+                    "recipe_id": recipe.id,
+                    "user_id": userId,
+                    "group_id": group.id,
+                  })
+                  .select("*")
+                  .single();
+          if (response["rating"] == rating) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        // Existing rating found, update it
+
+        final response =
+            await _client
+                .from("recipe_rating")
+                .update({"rating": rating})
+                .eq("id", existingRatingResponse["id"])
                 .select("*")
                 .single();
 

@@ -167,8 +167,6 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         overflow: TextOverflow.ellipsis,
                       ),
 
-                      SizedBox(height: 12),
-
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,52 +520,100 @@ class _RecipeViewerState extends State<RecipeViewer> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Leave Rating"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Leave a rating between 1 and 10, you can change this rating at any time.",
+          titlePadding: EdgeInsets.zero,
+          title: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
-              Row(
-                children: [
-                  Expanded(child: SizedBox()),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[600]!),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: TextField(
-                        controller: _ratingController,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: "1 - 10",
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 8,
+            ),
+            child: Text(
+              "Leave Rating",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          backgroundColor: Colors.white,
+          content: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Leave a rating between 1 and 10, you can change this rating at any time.",
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: SizedBox()),
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[600]!),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: TextField(
+                          controller: _ratingController,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 8,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Flexible(child: Expanded(child: Text(" / 10"))),
-                  Expanded(child: SizedBox()),
-                ],
-              ),
-            ],
+                    Flexible(
+                      child: Text(
+                        " / 10",
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: SizedBox()),
+                  ],
+                ),
+              ],
+            ),
           ),
           actions: [
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[400],
+                foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
               onPressed: () {
                 context.pop();
               },
               child: Text("Cancel"),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
               onPressed: () async {
                 final input = _ratingController.text.trim();
                 final ratingValue = int.tryParse(input);
@@ -597,6 +643,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Rating submitted successfully!")),
                   );
+                  context.pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -607,7 +654,10 @@ class _RecipeViewerState extends State<RecipeViewer> {
                   );
                 }
               },
-              child: Text("Submit"),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text("Submit"),
+              ),
             ),
           ],
         );
