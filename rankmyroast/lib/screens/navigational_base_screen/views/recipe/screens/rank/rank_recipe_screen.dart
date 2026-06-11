@@ -5,7 +5,7 @@ import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/classes/recipe_group_user_ranking.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/recipe_list_tile_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/widgets/recipe_list_tile_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/recipe_reorderable_list_tile_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

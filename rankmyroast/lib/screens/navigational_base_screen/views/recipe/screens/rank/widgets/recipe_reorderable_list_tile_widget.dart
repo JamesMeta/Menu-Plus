@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/recipe_list_tile_widget.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/widgets/widgets/recipe_list_tile_widget.dart';
 
 class RecipeReorderableListTileWidget extends StatelessWidget {
   final Recipe recipe;

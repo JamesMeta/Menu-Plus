@@ -195,7 +195,7 @@ class _RatingDialogWidgetState extends State<RatingDialogWidget> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _ratingController.dispose();
     super.dispose();
   }
 }
