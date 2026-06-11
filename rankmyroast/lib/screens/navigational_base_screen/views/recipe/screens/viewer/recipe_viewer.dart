@@ -7,6 +7,7 @@ import 'package:rankmyroast/classes/extra/rank_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/widgets/rating_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/widgets/recipe_list_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,6 +26,7 @@ class RecipeViewer extends StatefulWidget {
 class _RecipeViewerState extends State<RecipeViewer> {
   late final bool _isOwner;
   late final bool _hasUserRated;
+  late final RecipeRating? _userRating;
   late final Recipe _recipe;
   late final Group? _group;
   late final List<Group>? _userGroups;
@@ -518,150 +520,12 @@ class _RecipeViewerState extends State<RecipeViewer> {
   Future<void> _showRatingDialog() async {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          titlePadding: EdgeInsets.zero,
-          title: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.green,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Text(
-              "Leave Rating",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+      builder:
+          (context) => RatingDialogWidget(
+            recipe: _recipe,
+            group: _group,
+            pastRating: _userRating?.rating?.toInt(),
           ),
-          backgroundColor: Colors.white,
-          content: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Leave a rating between 1 and 10, you can change this rating at any time.",
-                  style: TextStyle(fontSize: 14.sp),
-                ),
-                Row(
-                  children: [
-                    Expanded(child: SizedBox()),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[600]!),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: TextField(
-                          controller: _ratingController,
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 8,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        " / 10",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: SizedBox()),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[400],
-                foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              onPressed: () {
-                context.pop();
-              },
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              onPressed: () async {
-                final input = _ratingController.text.trim();
-                final ratingValue = int.tryParse(input);
-
-                if (ratingValue == null ||
-                    ratingValue < 1 ||
-                    ratingValue > 10) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "Please enter a valid rating between 1 and 10.",
-                      ),
-                    ),
-                  );
-                  return;
-                }
-
-                final response = await SupabaseHelper.recipe.upsertRecipeRating(
-                  _recipe,
-                  _group,
-                  ratingValue,
-                );
-
-                if (!context.mounted) return;
-
-                if (response == true) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Rating submitted successfully!")),
-                  );
-                  context.pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "Failed to submit rating. Please try again.",
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text("Submit"),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -675,6 +539,16 @@ class _RecipeViewerState extends State<RecipeViewer> {
 
     final response = await SupabaseHelper.recipe.getRatingsByGroupId(groupId);
     _hasUserRated = response != null ? _checkIfUserHasRated(response) : false;
+
+    if (_hasUserRated) {
+      _userRating = response!.firstWhere(
+        (r) =>
+            r.userId == Supabase.instance.client.auth.currentUser?.id &&
+            r.recipeId == widget.recipe?.id,
+      );
+    } else {
+      _userRating = null;
+    }
 
     return response;
   }
