@@ -21,7 +21,11 @@ class RecipeReorderableListTileWidget extends StatelessWidget {
           Expanded(flex: 1, child: Icon(Icons.drag_handle)),
           Expanded(
             flex: 9,
-            child: RecipeListTileWidget(recipe: recipe, ranking: ranking),
+            child: RecipeListTileWidget(
+              recipe: recipe,
+              ranking: ranking,
+              isEdit: true,
+            ),
           ),
         ],
       ),

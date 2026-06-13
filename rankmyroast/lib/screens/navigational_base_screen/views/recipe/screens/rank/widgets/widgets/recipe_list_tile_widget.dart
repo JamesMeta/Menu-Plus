@@ -7,11 +7,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class RecipeListTileWidget extends StatelessWidget {
   final Recipe recipe;
   final String ranking;
+  final bool isEdit;
 
   const RecipeListTileWidget({
     super.key,
     required this.recipe,
     required this.ranking,
+    this.isEdit = false,
   });
 
   @override
@@ -24,6 +26,9 @@ class RecipeListTileWidget extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey[600]!),
+          color:
+              isEdit ? const Color.fromARGB(255, 102, 199, 105) : Colors.green,
+          boxShadow: [BoxShadow(color: Colors.grey)],
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -69,6 +74,8 @@ class RecipeListTileWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.sp,
                     overflow: TextOverflow.ellipsis,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -77,13 +84,39 @@ class RecipeListTileWidget extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Center(
-                  child: Text(
-                    ranking,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Ranking",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          overflow: TextOverflow.ellipsis,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          ranking,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            overflow: TextOverflow.ellipsis,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

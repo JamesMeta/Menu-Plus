@@ -44,9 +44,10 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
   ];
 
   final List<Color> _colors = [
-    const Color.fromARGB(255, 102, 199, 105),
-    const Color.fromARGB(255, 37, 87, 39),
     Colors.green,
+    const Color.fromARGB(255, 37, 87, 39),
+
+    const Color.fromARGB(255, 102, 199, 105),
   ];
 
   int _currentTitleIndex = 0;
@@ -209,7 +210,8 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                                   },
                                 ),
                               ),
-                          if (_reordering)
+                          if (_reordering) ...[
+                            SizedBox(height: 8),
                             ElevatedButton(
                               // TODO
                               // Make updating not need to pop the screen so the data can refresh properly
@@ -228,11 +230,17 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  102,
+                                  199,
+                                  105,
+                                ),
                                 maximumSize: Size(300.w, 50.h),
-                                minimumSize: Size(250.w, 40.h),
+                                minimumSize: Size(300.w, 50.h),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(color: Colors.black),
                                 ),
                               ),
                               child:
@@ -243,6 +251,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                                         style: TextStyle(color: Colors.white),
                                       ),
                             ),
+                          ],
                         ],
                       ),
                     );
