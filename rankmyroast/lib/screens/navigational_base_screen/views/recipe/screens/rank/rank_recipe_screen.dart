@@ -151,65 +151,111 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                     return Expanded(
                       child: Column(
                         children: [
-                          !_modifyRecipeRankings
-                              ? Expanded(
-                                child: ListView.builder(
-                                  itemCount: recipeGroupUserRankingList.length,
-                                  shrinkWrap: true,
-                                  itemBuilder: (context, index) {
-                                    final place =
-                                        recipeGroupUserRankingList[index]
-                                                    .groupRank !=
-                                                double.infinity
-                                            ? recipeGroupUserRankingList[index]
-                                                .groupRank
-                                                .toInt()
-                                                .toString()
-                                            : "N/A";
+                          if (_currentTitleIndex == 0)
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: recipeGroupUserRankingList.length,
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  final userRankedPlace =
+                                      recipeGroupUserRankingList[index]
+                                                  .userRank !=
+                                              double.infinity
+                                          ? recipeGroupUserRankingList[index]
+                                              .userRank
+                                              .toInt()
+                                              .toString()
+                                          : "N/A";
 
-                                    final recipe =
-                                        recipeGroupUserRankingList[index]
-                                            .recipe;
+                                  final groupRankedPlace =
+                                      recipeGroupUserRankingList[index]
+                                                  .groupRank !=
+                                              double.infinity
+                                          ? recipeGroupUserRankingList[index]
+                                              .groupRank
+                                              .toInt()
+                                              .toString()
+                                          : "N/A";
 
-                                    return RecipeListTileWidget(
-                                      recipe: recipe,
-                                      ranking: place,
-                                    );
-                                  },
-                                ),
-                              )
-                              : Expanded(
-                                child: ReorderableListView.builder(
-                                  onReorder: (oldIndex, newIndex) {
-                                    if (newIndex > oldIndex) newIndex -= 1;
-                                    final movedRecipe =
-                                        recipeGroupUserRankingList.removeAt(
-                                          oldIndex,
-                                        );
-                                    recipeGroupUserRankingList.insert(
-                                      newIndex,
-                                      movedRecipe,
-                                    );
-                                    setState(() {});
-                                  },
-                                  shrinkWrap: true,
-                                  itemCount: recipeGroupUserRankingList.length,
-                                  itemBuilder: (context, index) {
-                                    final recipe =
-                                        recipeGroupUserRankingList[index]
-                                            .recipe;
-                                    return ReorderableDragStartListener(
-                                      key: ValueKey(recipe.id),
-                                      index: index,
+                                  final recipe =
+                                      recipeGroupUserRankingList[index].recipe;
 
-                                      child: RecipeReorderableListTileWidget(
-                                        recipe: recipe,
-                                        ranking: index.toString(),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                  return RecipeListTileWidget(
+                                    recipe: recipe,
+                                    userRanking: userRankedPlace,
+                                    groupRanking: groupRankedPlace,
+                                  );
+                                },
                               ),
+                            )
+                          else if (_currentTitleIndex == 2)
+                            Expanded(
+                              child: ReorderableListView.builder(
+                                onReorder: (oldIndex, newIndex) {
+                                  if (newIndex > oldIndex) newIndex -= 1;
+                                  final movedRecipe = recipeGroupUserRankingList
+                                      .removeAt(oldIndex);
+                                  recipeGroupUserRankingList.insert(
+                                    newIndex,
+                                    movedRecipe,
+                                  );
+                                  setState(() {});
+                                },
+                                shrinkWrap: true,
+                                itemCount: recipeGroupUserRankingList.length,
+                                itemBuilder: (context, index) {
+                                  final recipe =
+                                      recipeGroupUserRankingList[index].recipe;
+                                  return ReorderableDragStartListener(
+                                    key: ValueKey(recipe.id),
+                                    index: index,
+
+                                    child: RecipeReorderableListTileWidget(
+                                      recipe: recipe,
+                                      ranking: index.toString(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          else if (_currentTitleIndex == 1)
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: recipeGroupUserRankingList.length,
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  final userRankedPlace =
+                                      recipeGroupUserRankingList[index]
+                                                  .userRank !=
+                                              double.infinity
+                                          ? recipeGroupUserRankingList[index]
+                                              .userRank
+                                              .toInt()
+                                              .toString()
+                                          : "N/A";
+
+                                  final groupRankedPlace =
+                                      recipeGroupUserRankingList[index]
+                                                  .groupRank !=
+                                              double.infinity
+                                          ? recipeGroupUserRankingList[index]
+                                              .groupRank
+                                              .toInt()
+                                              .toString()
+                                          : "N/A";
+
+                                  final recipe =
+                                      recipeGroupUserRankingList[index].recipe;
+
+                                  return RecipeListTileWidget(
+                                    recipe: recipe,
+                                    groupRanking: groupRankedPlace,
+                                    userRanking: userRankedPlace,
+                                    isGroupRatingTile: true,
+                                  );
+                                },
+                              ),
+                            ),
                           if (_reordering) ...[
                             SizedBox(height: 8),
                             ElevatedButton(
@@ -331,7 +377,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
               )
               .toList();
 
-      final ratings = _ratings!;
+      final ratings = _ratings!.toList();
 
       recipeGroupUserRankingList = _buildRecipeGroupUserRanking(
         recipes,

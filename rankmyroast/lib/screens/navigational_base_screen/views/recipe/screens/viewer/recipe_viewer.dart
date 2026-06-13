@@ -183,18 +183,37 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                   ConnectionState.done) {
                                 final ratings = snapshot.data;
                                 if (ratings == null || ratings.isEmpty) {
-                                  return TextButton(
-                                    onPressed:
-                                        () async => _goToRanking(ratings!),
-                                    child: Text(
-                                      "Be the first to leave a ranking",
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  );
+                                  if (_group != null) {
+                                    if (_group.useRating) {
+                                      return TextButton(
+                                        onPressed:
+                                            () async => _showRatingDialog(),
+                                        child: Text(
+                                          "Be the first to leave a rating",
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      return TextButton(
+                                        onPressed:
+                                            () async => _goToRanking(ratings!),
+                                        child: Text(
+                                          "Be the first to leave a ranking",
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    return Text("Error: Group not found");
+                                  }
                                 } else {
                                   if (_group != null) {
                                     if (_group.useRating &&

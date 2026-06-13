@@ -23,7 +23,8 @@ class RecipeReorderableListTileWidget extends StatelessWidget {
             flex: 9,
             child: RecipeListTileWidget(
               recipe: recipe,
-              ranking: ranking,
+              userRanking: ranking,
+              groupRanking: ranking,
               isEdit: true,
             ),
           ),

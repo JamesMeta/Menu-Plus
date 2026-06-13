@@ -40,8 +40,9 @@ class _RecipeTileWidgetState extends State<RecipeTileWidget> {
     return GridTile(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.grey[700]!,
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey[500]!),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -92,7 +93,11 @@ class _RecipeTileWidgetState extends State<RecipeTileWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 _recipe.name,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.sp,
+                  color: Colors.white,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
