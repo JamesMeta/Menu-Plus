@@ -87,6 +87,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
                             _modifyRecipeRankings = false;
                           }
                           _viewGroupRankings = !_viewGroupRankings;
+                          _reordering = false;
                         });
                       },
                       icon: Icon(

@@ -49,39 +49,6 @@ class RecipeListTileWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (isGroupRatingTile) ...[
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey[600],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        difference.abs().toString(),
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          overflow: TextOverflow.ellipsis,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (difference == 0)
-                        Icon(CupertinoIcons.equal, color: Colors.white)
-                      else if (difference >= 0)
-                        Icon(Icons.arrow_upward, color: Colors.green)
-                      else
-                        Icon(Icons.arrow_downward, color: Colors.red),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 4),
-              ],
-
               // Large Custom Leading Image
               SizedBox(
                 width: 90,
@@ -114,7 +81,7 @@ class RecipeListTileWidget extends StatelessWidget {
               const SizedBox(width: 16), // Spacing between image and text
               // Title area expands to take up remaining space
               Expanded(
-                flex: 7,
+                flex: isGroupRatingTile ? 8 : 10,
                 child: Text(
                   recipe.name,
                   maxLines: 2,
@@ -127,9 +94,10 @@ class RecipeListTileWidget extends StatelessWidget {
                 ),
               ),
 
+              const SizedBox(width: 8),
               // Trailing ranking
               Expanded(
-                flex: 3,
+                flex: isGroupRatingTile ? 3 : 4,
                 child: Center(
                   child: Column(
                     children: [
@@ -146,26 +114,57 @@ class RecipeListTileWidget extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.symmetric(
                           vertical: 8,
-                          horizontal: 16,
+                          horizontal: isGroupRatingTile ? 6 : 14,
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.black),
                           borderRadius: BorderRadius.circular(8),
                           color:
                               isGroupRatingTile
-                                  ? Colors.grey[600]
+                                  ? Colors.grey[800]
                                   : Colors.white,
                         ),
-                        child: Text(
-                          isGroupRatingTile ? groupRanking : userRanking,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            overflow: TextOverflow.ellipsis,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                isGroupRatingTile ? Colors.white : Colors.black,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isGroupRatingTile ? groupRanking : userRanking,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                overflow: TextOverflow.ellipsis,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isGroupRatingTile
+                                        ? Colors.white
+                                        : Colors.black,
+                              ),
+                            ),
+
+                            if (isGroupRatingTile) ...[
+                              if (difference == 0)
+                                Icon(CupertinoIcons.equal, color: Colors.white)
+                              else if (difference >= 0)
+                                Icon(Icons.arrow_upward, color: Colors.green)
+                              else
+                                Icon(Icons.arrow_downward, color: Colors.red),
+                              Text(
+                                difference.abs().toString(),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  overflow: TextOverflow.ellipsis,
+                                  color:
+                                      difference == 0
+                                          ? Colors.white
+                                          : difference > 0
+                                          ? Colors.green
+                                          : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
