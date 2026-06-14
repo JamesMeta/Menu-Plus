@@ -38,6 +38,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
 
   @override
   void initState() {
+    super.initState();
     _recipe = widget.recipe!;
     _recipeImageUrl = _recipe.publicImageUrl;
     _group = widget.group;

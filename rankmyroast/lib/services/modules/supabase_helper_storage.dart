@@ -127,8 +127,10 @@ class SupabaseHelperStorage {
       return path;
     } on StorageException catch (error) {
       print('Storage Error: ${error.message}');
+      return null;
     } catch (error) {
       print('Unexpected Error: $error');
+      return null;
     }
   }
 
@@ -155,8 +157,10 @@ class SupabaseHelperStorage {
       return path;
     } on StorageException catch (error) {
       print('Storage Error: ${error.message}');
+      return null;
     } catch (error) {
       print('Unexpected Error: $error');
+      return null;
     }
   }
 }

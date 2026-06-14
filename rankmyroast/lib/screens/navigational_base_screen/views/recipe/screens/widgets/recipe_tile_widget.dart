@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
-import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecipeTileWidget extends StatefulWidget {

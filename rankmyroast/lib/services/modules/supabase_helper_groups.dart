@@ -289,7 +289,7 @@ class SupabaseHelperGroups {
 
     if (authId != null) {
       try {
-        final response = await _client
+        await _client
             .from("group")
             .delete()
             .eq("id", groupId)
@@ -319,7 +319,7 @@ class SupabaseHelperGroups {
 
     if (authId != null) {
       try {
-        final response = await _client
+        await _client
             .from("user_group")
             .delete()
             .eq("group_id", groupId)

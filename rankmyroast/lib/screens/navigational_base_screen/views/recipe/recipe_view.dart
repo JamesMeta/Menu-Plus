@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
 import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
@@ -345,7 +342,7 @@ class _RecipeViewState extends State<RecipeView> {
     List<Group> groups,
     Recipe? recipe,
   ) async {
-    final newRecipe = await context.push(
+    await context.push(
       "/base/create-recipe",
       extra: CreateRecipeExtra(
         groups: groups,

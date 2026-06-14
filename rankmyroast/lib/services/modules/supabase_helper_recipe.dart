@@ -7,7 +7,6 @@ import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
-import 'package:uuid/v4.dart';
 
 class SupabaseHelperRecipe {
   static final _client = Supabase.instance.client;
@@ -220,7 +219,7 @@ class SupabaseHelperRecipe {
           )
           .eq("recipe_id", recipeId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final groups =
             (response as List)
                 .map(
@@ -245,7 +244,7 @@ class SupabaseHelperRecipe {
           )
           .eq("group_id", groupId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final recipes =
             (response as List)
                 .map(
@@ -272,7 +271,7 @@ class SupabaseHelperRecipe {
           .eq("recipe_id", recipeId)
           .eq("group_id", groupId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final ratings =
             (response as List)
                 .map(
@@ -294,7 +293,7 @@ class SupabaseHelperRecipe {
           .select("*")
           .eq("group_id", groupId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final ratings =
             (response as List)
                 .map(

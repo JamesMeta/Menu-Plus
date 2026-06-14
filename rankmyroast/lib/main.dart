@@ -5,7 +5,6 @@ import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
 import 'package:rankmyroast/classes/extra/rank_recipe_extra.dart';
 import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
-import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/login/confirm_email_screen.dart';
 import 'package:rankmyroast/screens/login/create_account_screen.dart';
 import 'package:rankmyroast/screens/login/login_screen.dart';

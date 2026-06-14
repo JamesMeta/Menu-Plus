@@ -513,7 +513,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       gradeVisible: _showRatings,
       useRating: _isUsingRating,
       isPersonalGroup: false,
-      userId: SupabaseHelper.users.getAuthId(),
+      userId: SupabaseHelper.users.getAuthId()!,
       groupMembers: _users,
       recipes: [],
     );
@@ -586,7 +586,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       gradeVisible: _showRatings,
       useRating: _isUsingRating,
       isPersonalGroup: false,
-      userId: SupabaseHelper.users.getAuthId(),
+      userId: SupabaseHelper.users.getAuthId()!,
       groupMembers: _users,
       recipes: [],
     );
