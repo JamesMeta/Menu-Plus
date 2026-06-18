@@ -22,6 +22,7 @@ dependencies:
   cached_network_image: ^3.4.1
   image_cropper: ^12.2.0
   cupertino_icons: any
+  sqflite: any
 
 
 dev_dependencies:

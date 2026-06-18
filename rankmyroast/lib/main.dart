@@ -14,6 +14,7 @@ import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screen
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/rank/rank_recipe_screen.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/recipe_viewer.dart';
 import 'package:rankmyroast/screens/settings/settings_screen.dart';
+import 'package:rankmyroast/services/sqlite_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const supabaseUrl = "https://ozmzpnayygajicxafxfm.supabase.co";
@@ -22,6 +23,8 @@ const supabaseFunctionsVersion = 1.0;
 const sqliteTableVersion = 1.0;
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseKey,
@@ -29,6 +32,9 @@ void main() async {
       authFlowType: AuthFlowType.pkce,
     ),
   );
+
+  final dbHelper = SqliteHelper();
+  final db = await dbHelper.database;
 
   runApp(const MainApp());
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/group_order.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/group_tile_widget.dart';
+import 'package:rankmyroast/services/sqlite_helper.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class GroupsView extends StatefulWidget {
@@ -165,6 +167,7 @@ class _GroupsViewState extends State<GroupsView> {
                   ],
                 );
               } else {
+                final groups = snapshot.data!;
                 return Expanded(
                   child: SizedBox(
                     child: RefreshIndicator(
@@ -177,13 +180,25 @@ class _GroupsViewState extends State<GroupsView> {
                       backgroundColor:
                           Colors.green, // Background of the spinner circle
 
-                      child: ListView.builder(
+                      child: ReorderableListView.builder(
+                        onReorder: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final movedRecipe = groups.removeAt(oldIndex);
+                          groups.insert(newIndex, movedRecipe);
+                          setState(() {});
+                        },
                         shrinkWrap: true,
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
-                          return GroupTileWidget(
-                            group: snapshot.data![index],
-                            editGroupCallback: editGroupCallback,
+                          final group = groups.elementAt(index);
+                          return ReorderableDragStartListener(
+                            key: ValueKey(group.id),
+                            index: index,
+
+                            child: GroupTileWidget(
+                              group: snapshot.data![index],
+                              editGroupCallback: editGroupCallback,
+                            ),
                           );
                         },
                       ),
@@ -214,6 +229,25 @@ class _GroupsViewState extends State<GroupsView> {
     });
   }
 
+  bool pastGroupsContainsCurrentGroups(
+    List<Group> currentGroups,
+    List<GroupOrder> pastGroups,
+  ) {
+    if (pastGroups.length != currentGroups.length) {
+      return false;
+    }
+
+    for (var pastGroup in pastGroups) {
+      if (currentGroups
+          .where((group) => group.id == pastGroup.groupId)
+          .isEmpty) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   Future<List<Group>> _fetchGroups() async {
     final groups = await SupabaseHelper.groups.getGroupsForUser();
 
@@ -221,6 +255,30 @@ class _GroupsViewState extends State<GroupsView> {
       return [];
     }
 
-    return groups;
+    final sqliteHelper = SqliteHelper();
+    final groupOrders = await sqliteHelper.getGroupOrders();
+
+    late final List<Group> newGroups;
+
+    if (pastGroupsContainsCurrentGroups(groups, groupOrders)) {
+      newGroups =
+          groupOrders
+              .map(
+                (order) =>
+                    groups.firstWhere((group) => group.id == order.groupId),
+              )
+              .toList();
+    } else {
+      newGroups =
+          groupOrders
+              .map(
+                (order) =>
+                    groups.firstWhere((group) => group.id == order.groupId),
+              )
+              .toList();
+      newGroups.addAll(groups.where((group) => !newGroups.contains(group)));
+    }
+
+    return newGroups;
   }
 }
