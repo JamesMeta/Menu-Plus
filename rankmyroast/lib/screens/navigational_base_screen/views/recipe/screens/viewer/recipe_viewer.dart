@@ -201,7 +201,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                     } else {
                                       return TextButton(
                                         onPressed:
-                                            () async => _goToRanking(ratings!),
+                                            () async => _goToRanking(ratings),
                                         child: Text(
                                           "Be the first to leave a ranking",
                                           style: TextStyle(
@@ -335,59 +335,81 @@ class _RecipeViewerState extends State<RecipeViewer> {
                                 } else {
                                   if (_group != null) {
                                     if (_group.useRating) {
-                                      return _hasUserRated
-                                          ? TextButton(
-                                            onPressed:
-                                                () async => _showRatingDialog(),
-                                            child: Text(
-                                              "Tap to update your rating",
-                                              style: TextStyle(
-                                                fontSize: 12.sp,
-                                                color: Colors.grey[600],
-                                                fontWeight: FontWeight.bold,
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_document,
+                                            color: Colors.grey[600],
+                                          ),
+                                          SizedBox(width: 4),
+                                          _hasUserRated
+                                              ? TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _showRatingDialog(),
+                                                child: Text(
+                                                  "Tap to update your rating",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                              : TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _showRatingDialog(),
+                                                child: Text(
+                                                  "Tap to leave a rating",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          )
-                                          : TextButton(
-                                            onPressed:
-                                                () async => _showRatingDialog(),
-                                            child: Text(
-                                              "Tap to leave a rating",
-                                              style: TextStyle(
-                                                fontSize: 12.sp,
-                                                color: Colors.grey[600],
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          );
+                                        ],
+                                      );
                                     } else {
-                                      return _hasUserRated
-                                          ? TextButton(
-                                            onPressed:
-                                                () async =>
-                                                    _goToRanking(ratings),
-                                            child: Text(
-                                              "Tap to update your ranking",
-                                              style: TextStyle(
-                                                fontSize: 12.sp,
-                                                color: Colors.grey[600],
-                                                fontWeight: FontWeight.bold,
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_document,
+                                            color: Colors.grey[600],
+                                          ),
+                                          SizedBox(width: 4),
+                                          _hasUserRated
+                                              ? TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _goToRanking(ratings),
+                                                child: Text(
+                                                  "Tap to update your ranking",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                              : TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _goToRanking(ratings),
+                                                child: Text(
+                                                  "Tap to leave a ranking",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          )
-                                          : TextButton(
-                                            onPressed:
-                                                () async =>
-                                                    _goToRanking(ratings),
-                                            child: Text(
-                                              "Tap to leave a ranking",
-                                              style: TextStyle(
-                                                fontSize: 12.sp,
-                                                color: Colors.grey[600],
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          );
+                                        ],
+                                      );
                                     }
                                   } else {
                                     return Text("No Group Found For Recipe");
@@ -522,7 +544,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
     );
   }
 
-  Future<void> _goToRanking(List<RecipeRating> ratings) async {
+  Future<void> _goToRanking(List<RecipeRating>? ratings) async {
     final response = await context.push(
       "/base/rank-recipe",
       extra: RankRecipeExtra(

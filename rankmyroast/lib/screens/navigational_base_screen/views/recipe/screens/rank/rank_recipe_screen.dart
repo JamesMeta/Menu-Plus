@@ -386,12 +386,12 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
         userSpecificRatings,
       );
     } else {
-      final ratings = await SupabaseHelper.recipe.getRatingsByGroupId(
-        _group?.id ?? '',
-      );
+      final ratings =
+          await SupabaseHelper.recipe.getRatingsByGroupId(_group?.id ?? '') ??
+          [];
 
       final userSpecificRatings =
-          _ratings!
+          ratings
               .where(
                 (r) =>
                     r.userId == Supabase.instance.client.auth.currentUser?.id,
@@ -400,7 +400,7 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
 
       recipeGroupUserRankingList = _buildRecipeGroupUserRanking(
         recipes,
-        ratings!,
+        ratings,
         userSpecificRatings,
       );
     }
@@ -423,8 +423,8 @@ class _RankRecipeScreenState extends State<RankRecipeScreen> {
               .toList();
     } else {
       final ratings =
-          await SupabaseHelper.recipe.getRatingsByGroupId(_group?.id ?? '')
-              as List<RecipeRating>;
+          await SupabaseHelper.recipe.getRatingsByGroupId(_group?.id ?? '') ??
+          [];
 
       currentUserRankings =
           ratings
