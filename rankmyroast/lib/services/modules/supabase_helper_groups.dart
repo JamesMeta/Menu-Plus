@@ -197,6 +197,44 @@ class SupabaseHelperGroups {
 
         final List<GroupMember> failedToAddMembers = [];
 
+        // Get current members of the group
+        final currentMembersResponse = await _client
+            .from("user_group")
+            .select("user_id")
+            .eq("group_id", group.id);
+        final currentMemberIds =
+            (currentMembersResponse as List)
+                .map((data) => data["user_id"] as String)
+                .toSet();
+
+        // Get all user ids from the new list of members
+        final newMemberIds = <String>{};
+        for (var member in group.groupMembers) {
+          final userAuthId =
+              await _client
+                  .from("user")
+                  .select("auth_id")
+                  .eq("username", member.username)
+                  .limit(1)
+                  .single();
+
+          if (userAuthId["auth_id"] != null) {
+            newMemberIds.add(userAuthId["auth_id"]);
+          }
+        }
+
+        // Determine which members to remove (in current but not in new)
+        final membersToRemove = currentMemberIds.difference(newMemberIds);
+        // Remove members that are no longer in the group
+        for (var userId in membersToRemove) {
+          await _client
+              .from("user_group")
+              .delete()
+              .eq("group_id", group.id)
+              .eq("user_id", userId);
+        }
+
+        // Attempt to upsert all members in the new list of members
         for (var member in group.groupMembers) {
           final userAuthId =
               await _client
@@ -251,7 +289,7 @@ class SupabaseHelperGroups {
 
     if (authId != null) {
       try {
-        final response = await _client
+        await _client
             .from("group")
             .delete()
             .eq("id", groupId)
@@ -274,5 +312,36 @@ class SupabaseHelperGroups {
       }
     }
     return false;
+  }
+
+  Future<bool?> leaveGroup(String groupId) async {
+    final authId = _client.auth.currentUser?.id;
+
+    if (authId != null) {
+      try {
+        await _client
+            .from("user_group")
+            .delete()
+            .eq("group_id", groupId)
+            .eq("user_id", authId);
+
+        final confirmLeave =
+            await _client
+                .from("user_group")
+                .select("id")
+                .eq("group_id", groupId)
+                .eq("user_id", authId)
+                .maybeSingle();
+
+        if (confirmLeave == null) {
+          return true;
+        }
+        return false;
+      } on Exception catch (e) {
+        print(e);
+        return false;
+      }
+    }
+    return null;
   }
 }

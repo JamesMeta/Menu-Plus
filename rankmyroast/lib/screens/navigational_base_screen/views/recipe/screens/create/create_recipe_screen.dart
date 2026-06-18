@@ -1,23 +1,16 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:rankmyroast/common_widgets/take_photo_bottom_modal_widget.dart';
-import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/time_section_widget.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/add_to_groups_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/group_form_section_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/image_content_widget.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/create/widgets/widgets/item_list_view_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   final Recipe? recipeToEdit;

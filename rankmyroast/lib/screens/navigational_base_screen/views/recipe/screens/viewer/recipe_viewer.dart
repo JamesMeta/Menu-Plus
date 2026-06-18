@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
+import 'package:rankmyroast/classes/extra/rank_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/widgets/rating_dialog_widget.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/viewer/widgets/recipe_list_widget.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,6 +25,8 @@ class RecipeViewer extends StatefulWidget {
 
 class _RecipeViewerState extends State<RecipeViewer> {
   late final bool _isOwner;
+  late final bool _hasUserRated;
+  late final RecipeRating? _userRating;
   late final Recipe _recipe;
   late final Group? _group;
   late final List<Group>? _userGroups;
@@ -30,8 +34,11 @@ class _RecipeViewerState extends State<RecipeViewer> {
 
   late final Future<List<RecipeRating>?> _ratings;
 
+  final TextEditingController _ratingController = TextEditingController();
+
   @override
   void initState() {
+    super.initState();
     _recipe = widget.recipe!;
     _recipeImageUrl = _recipe.publicImageUrl;
     _group = widget.group;
@@ -154,7 +161,7 @@ class _RecipeViewerState extends State<RecipeViewer> {
                     children: [
                       Text(
                         _recipe.name,
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -163,128 +170,259 @@ class _RecipeViewerState extends State<RecipeViewer> {
                         overflow: TextOverflow.ellipsis,
                       ),
 
-                      SizedBox(height: 12),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FutureBuilder(
+                            future: _ratings,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.connectionState ==
+                                  ConnectionState.done) {
+                                final ratings = snapshot.data;
+                                if (ratings == null || ratings.isEmpty) {
+                                  if (_group != null) {
+                                    if (_group.useRating) {
+                                      return TextButton(
+                                        onPressed:
+                                            () async => _showRatingDialog(),
+                                        child: Text(
+                                          "Be the first to leave a rating",
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      return TextButton(
+                                        onPressed:
+                                            () async => _goToRanking(ratings),
+                                        child: Text(
+                                          "Be the first to leave a ranking",
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    return Text("Error: Group not found");
+                                  }
+                                } else {
+                                  if (_group != null) {
+                                    if (_group.useRating &&
+                                        ratings.isNotEmpty) {
+                                      // 1. Filter for specific recipe and non-null ratings once
+                                      final recipeRatings = ratings.where(
+                                        (r) =>
+                                            r.recipeId == _recipe.id &&
+                                            r.rating != null,
+                                      );
 
-                      FutureBuilder(
-                        future: _ratings,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return CircularProgressIndicator();
-                          } else if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            final ratings = snapshot.data;
-                            if (ratings == null || ratings.isEmpty) {
-                              return Text(
-                                "No reviews yet",
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            } else {
-                              if (_group != null) {
-                                if (_group.useRating && ratings.isNotEmpty) {
-                                  // 1. Filter for specific recipe and non-null ratings once
-                                  final recipeRatings = ratings.where(
-                                    (r) =>
-                                        r.recipeId == _recipe.id &&
-                                        r.rating != null,
-                                  );
+                                      // 2. Calculate average safely
+                                      final averageRating =
+                                          recipeRatings.isEmpty
+                                              ? 0.0
+                                              : recipeRatings.fold<double>(
+                                                    0,
+                                                    (sum, r) => sum + r.rating!,
+                                                  ) /
+                                                  recipeRatings.length;
 
-                                  // 2. Calculate average safely
-                                  final averageRating =
-                                      recipeRatings.isEmpty
-                                          ? 0.0
-                                          : recipeRatings.fold<double>(
-                                                0,
-                                                (sum, r) => sum + r.rating!,
-                                              ) /
-                                              recipeRatings.length;
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            "${averageRating.toStringAsFixed(1)} / 10 (${recipeRatings.length} ratings)",
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      final averages = <String, double>{};
+                                      final counts = <String, int>{};
 
-                                  return Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        "${averageRating.toStringAsFixed(1)} / 10 (${recipeRatings.length} ratings)",
+                                      for (var r in ratings) {
+                                        final val =
+                                            r.ranking?.toDouble() ?? 0.0;
+                                        averages.update(
+                                          r.recipeId,
+                                          (curr) => curr + val,
+                                          ifAbsent: () => val,
+                                        );
+                                        counts.update(
+                                          r.recipeId,
+                                          (curr) => curr + 1,
+                                          ifAbsent: () => 1,
+                                        );
+                                      }
+
+                                      // 2. Map to averages and sort descending (highest score = Rank #1)
+                                      final sortedIds =
+                                          averages.keys.toList()..sort((a, b) {
+                                            final avgA =
+                                                averages[a]! / counts[a]!;
+                                            final avgB =
+                                                averages[b]! / counts[b]!;
+                                            return avgA.compareTo(avgB);
+                                          });
+
+                                      // 3. Find rank (1-indexed)
+                                      final rank =
+                                          sortedIds.indexOf(_recipe.id) + 1;
+
+                                      String rankText;
+                                      Color rankColor;
+                                      if (rank == 0) {
+                                        rankText = "Unranked";
+                                        rankColor = Colors.grey[600]!;
+                                      } else if (rank == 1) {
+                                        rankText = "Top Ranked Recipe!";
+                                        rankColor = Colors.green;
+                                      } else {
+                                        rankText =
+                                            "Standing: #$rank of ${sortedIds.length} Recipes";
+                                        rankColor = Colors.grey[600]!;
+                                      }
+
+                                      return Text(
+                                        rankText,
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.grey[600],
+                                          color: rankColor,
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                } else {
-                                  final averages = <String, double>{};
-                                  final counts = <String, int>{};
-
-                                  for (var r in ratings) {
-                                    final val = r.ranking?.toDouble() ?? 0.0;
-                                    averages.update(
-                                      r.recipeId,
-                                      (curr) => curr + val,
-                                      ifAbsent: () => val,
-                                    );
-                                    counts.update(
-                                      r.recipeId,
-                                      (curr) => curr + 1,
-                                      ifAbsent: () => 1,
-                                    );
-                                  }
-
-                                  // 2. Map to averages and sort descending (highest score = Rank #1)
-                                  final sortedIds =
-                                      averages.keys.toList()..sort((a, b) {
-                                        final avgA = averages[a]! / counts[a]!;
-                                        final avgB = averages[b]! / counts[b]!;
-                                        return avgA.compareTo(avgB);
-                                      });
-
-                                  // 3. Find rank (1-indexed)
-                                  final rank =
-                                      sortedIds.indexOf(_recipe.id) + 1;
-
-                                  String rankText;
-                                  Color rankColor;
-                                  if (rank == 0) {
-                                    rankText = "Unranked";
-                                    rankColor = Colors.grey[600]!;
-                                  } else if (rank == 1) {
-                                    rankText = "Top Ranked Recipe!";
-                                    rankColor = Colors.green;
+                                      );
+                                    }
                                   } else {
-                                    rankText =
-                                        "Standing: #$rank of ${sortedIds.length} Recipes";
-                                    rankColor = Colors.grey[600]!;
+                                    return Text("Error: Group not found");
                                   }
-
-                                  return Text(
-                                    rankText,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: rankColor,
-                                    ),
-                                  );
                                 }
                               } else {
-                                return Text("Error: Group not found");
+                                return Text("Error fetching ratings");
                               }
-                            }
-                          } else {
-                            return Text("Error fetching ratings");
-                          }
-                        },
+                            },
+                          ),
+
+                          FutureBuilder(
+                            future: _ratings,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return SizedBox();
+                              } else if (snapshot.connectionState ==
+                                  ConnectionState.done) {
+                                final ratings = snapshot.data;
+                                if (ratings == null || ratings.isEmpty) {
+                                  return SizedBox();
+                                } else {
+                                  if (_group != null) {
+                                    if (_group.useRating) {
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_document,
+                                            color: Colors.grey[600],
+                                          ),
+                                          SizedBox(width: 4),
+                                          _hasUserRated
+                                              ? TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _showRatingDialog(),
+                                                child: Text(
+                                                  "Tap to update your rating",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                              : TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _showRatingDialog(),
+                                                child: Text(
+                                                  "Tap to leave a rating",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                        ],
+                                      );
+                                    } else {
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_document,
+                                            color: Colors.grey[600],
+                                          ),
+                                          SizedBox(width: 4),
+                                          _hasUserRated
+                                              ? TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _goToRanking(ratings),
+                                                child: Text(
+                                                  "Tap to update your ranking",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                              : TextButton(
+                                                onPressed:
+                                                    () async =>
+                                                        _goToRanking(ratings),
+                                                child: Text(
+                                                  "Tap to leave a ranking",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                        ],
+                                      );
+                                    }
+                                  } else {
+                                    return Text("No Group Found For Recipe");
+                                  }
+                                }
+                              } else {
+                                return SizedBox();
+                              }
+                            },
+                          ),
+                        ],
                       ),
 
-                      SizedBox(height: 12),
                       Column(
                         children: [
                           Row(
@@ -406,6 +544,33 @@ class _RecipeViewerState extends State<RecipeViewer> {
     );
   }
 
+  Future<void> _goToRanking(List<RecipeRating>? ratings) async {
+    final response = await context.push(
+      "/base/rank-recipe",
+      extra: RankRecipeExtra(
+        ratings: ratings,
+        recipeToRank: _recipe,
+        group: _group,
+      ),
+    );
+
+    if (response == true && mounted) {
+      context.pop();
+    }
+  }
+
+  Future<void> _showRatingDialog() async {
+    showDialog(
+      context: context,
+      builder:
+          (context) => RatingDialogWidget(
+            recipe: _recipe,
+            group: _group,
+            pastRating: _userRating?.rating?.toInt(),
+          ),
+    );
+  }
+
   Future<List<RecipeRating>?> _fetchRatings() async {
     final groupId = widget.group?.id;
     final recipeId = widget.recipe?.id;
@@ -415,7 +580,49 @@ class _RecipeViewerState extends State<RecipeViewer> {
     }
 
     final response = await SupabaseHelper.recipe.getRatingsByGroupId(groupId);
+    _hasUserRated = response != null ? _checkIfUserHasRated(response) : false;
+
+    if (_hasUserRated) {
+      _userRating = response!.firstWhere(
+        (r) =>
+            r.userId == Supabase.instance.client.auth.currentUser?.id &&
+            r.recipeId == widget.recipe?.id,
+      );
+    } else {
+      _userRating = null;
+    }
 
     return response;
+  }
+
+  bool _checkIfUserHasRated(List<RecipeRating> ratings) {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      return false;
+    }
+
+    final groupUsesRatings = _group?.useRating ?? false;
+
+    if (groupUsesRatings) {
+      return ratings.any(
+        (r) =>
+            r.userId == userId &&
+            r.recipeId == widget.recipe?.id &&
+            r.rating != null,
+      );
+    } else {
+      return ratings.any(
+        (r) =>
+            r.userId == userId &&
+            r.recipeId == widget.recipe?.id &&
+            r.ranking != null,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _ratingController.dispose();
+    super.dispose();
   }
 }

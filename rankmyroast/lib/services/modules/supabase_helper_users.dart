@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseHelperUsers {
   static final _client = Supabase.instance.client;
 
-  String getAuthId() {
+  String? getAuthId() {
     final authId = _client.auth.currentUser?.id;
 
     if (authId == null) {
@@ -28,7 +28,7 @@ class SupabaseHelperUsers {
       }
 
       try {
-        final response = await _client.from("user").insert({"auth_id": authId});
+        await _client.from("user").insert({"auth_id": authId});
       } on Exception catch (e) {
         print(e);
       }

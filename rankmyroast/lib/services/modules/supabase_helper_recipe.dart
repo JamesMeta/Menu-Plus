@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/classes/modals/recipe_rating.dart';
 import 'package:rankmyroast/classes/responses/create_recipe_response.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
-import 'package:uuid/v4.dart';
 
 class SupabaseHelperRecipe {
   static final _client = Supabase.instance.client;
@@ -219,7 +219,7 @@ class SupabaseHelperRecipe {
           )
           .eq("recipe_id", recipeId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final groups =
             (response as List)
                 .map(
@@ -235,6 +235,31 @@ class SupabaseHelperRecipe {
     return null;
   }
 
+  Future<List<Recipe>?> getRecipesByGroupId(String groupId) async {
+    try {
+      final response = await _client
+          .from("recipe_group")
+          .select(
+            "recipe_id, recipe (id, created_at, name, ingredients, instructions, groceries, prep_time, cook_time, is_public, image_name)",
+          )
+          .eq("group_id", groupId);
+
+      if (response.isNotEmpty) {
+        final recipes =
+            (response as List)
+                .map(
+                  (item) =>
+                      Recipe.fromMap(item['recipe'] as Map<String, dynamic>),
+                )
+                .toList();
+        return recipes;
+      }
+    } catch (e) {
+      print('Error fetching recipes by group id: $e');
+    }
+    return null;
+  }
+
   Future<List<RecipeRating>?> getRatingsByRecipeIdByGroupId(
     String recipeId,
     String groupId,
@@ -246,7 +271,7 @@ class SupabaseHelperRecipe {
           .eq("recipe_id", recipeId)
           .eq("group_id", groupId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final ratings =
             (response as List)
                 .map(
@@ -268,7 +293,7 @@ class SupabaseHelperRecipe {
           .select("*")
           .eq("group_id", groupId);
 
-      if (response != null) {
+      if (response.isNotEmpty) {
         final ratings =
             (response as List)
                 .map(
@@ -281,5 +306,158 @@ class SupabaseHelperRecipe {
       print('Error fetching ratings for recipe by group id: $e');
     }
     return null;
+  }
+
+  //TODO
+  //this can be optimized by doing an upsert with the full list of ratings instead of separating into creates and updates, but supabase upsert doesn't work with RLS policies that would allow users to only update their own ratings, so for now we will do separate create and update requests
+  Future<bool?> updateRecipeRanking(List<RecipeRating> newRankings) async {
+    try {
+      final newItems = <Map<String, dynamic>>[];
+      final existingItems = <Map<String, dynamic>>[];
+
+      for (var ranking in newRankings) {
+        if (ranking.id == null) {
+          newItems.add({
+            "rating": ranking.rating,
+            "ranking": ranking.ranking,
+            "recipe_id": ranking.recipeId,
+            "user_id": ranking.userId,
+            "group_id": ranking.groupId,
+          });
+        } else {
+          existingItems.add({
+            "id": ranking.id,
+            "rating": ranking.rating,
+            "ranking": ranking.ranking,
+            // Omit user_id, group_id, and recipe_id so RLS UPDATE rules don't trip
+          });
+        }
+      }
+
+      // Execute at most 2 network requests instead of a loop of N requests
+      if (newItems.isNotEmpty) {
+        await _client.from("recipe_rating").insert(newItems);
+      }
+
+      if (existingItems.isNotEmpty) {
+        final updateFutures = existingItems.map((item) {
+          final id = item['id'];
+          return _client.from("recipe_rating").update(item).eq("id", id);
+        });
+
+        await Future.wait(updateFutures);
+      }
+
+      return true;
+    } catch (e) {
+      print('Error updating Recipe Ratings $e');
+    }
+    return null;
+  }
+
+  Future<bool?> upsertRecipeRating(
+    Recipe recipe,
+    Group? group,
+    int rating,
+  ) async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        return null;
+      }
+
+      if (group == null) {
+        // Check if a rating already exists for this user and recipe without a group
+        final existingRatingResponse =
+            await _client
+                .from("recipe_rating")
+                .select("*")
+                .eq("recipe_id", recipe.id)
+                .eq("user_id", userId)
+                .single();
+
+        if (existingRatingResponse.isEmpty) {
+          // No existing rating, create a new one
+          final response =
+              await _client
+                  .from("recipe_rating")
+                  .insert({
+                    "rating": rating,
+                    "recipe_id": recipe.id,
+                    "user_id": userId,
+                    "group_id": null,
+                  })
+                  .select("*")
+                  .single();
+
+          if (response["rating"] == rating) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        // Existing rating found, update it
+        final response =
+            await _client
+                .from("recipe_rating")
+                .update({"rating": rating})
+                .eq("id", existingRatingResponse["id"])
+                .select("*")
+                .single();
+
+        if (response["rating"] == rating) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        // Check if a rating already exists for this user, recipe, and group
+        final existingRatingResponse =
+            await _client
+                .from("recipe_rating")
+                .select("*")
+                .eq("recipe_id", recipe.id)
+                .eq("user_id", userId)
+                .eq("group_id", group.id)
+                .single();
+        if (existingRatingResponse.isEmpty) {
+          // No existing rating, create a new one
+          final response =
+              await _client
+                  .from("recipe_rating")
+                  .insert({
+                    "rating": rating,
+                    "recipe_id": recipe.id,
+                    "user_id": userId,
+                    "group_id": group.id,
+                  })
+                  .select("*")
+                  .single();
+          if (response["rating"] == rating) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        // Existing rating found, update it
+
+        final response =
+            await _client
+                .from("recipe_rating")
+                .update({"rating": rating})
+                .eq("id", existingRatingResponse["id"])
+                .select("*")
+                .single();
+
+        if (response["rating"] == rating) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } on Exception catch (e) {
+      print('Error upserting recipe rating: $e');
+      return null;
+    }
   }
 }

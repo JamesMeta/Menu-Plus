@@ -64,7 +64,16 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           ),
         ),
         actions: [
-          if (widget.groupToEdit != null)
+          if (widget.groupToEdit != null) ...[
+            IconButton(
+              onPressed: () async {
+                final response = await _leaveGroup();
+                if (response == true && context.mounted) {
+                  context.pop(true);
+                }
+              },
+              icon: Icon(Icons.exit_to_app, color: Colors.white),
+            ),
             IconButton(
               onPressed: () async {
                 final response = await _deleteGroup();
@@ -74,6 +83,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               },
               icon: Icon(Icons.delete, color: Colors.white),
             ),
+          ],
         ],
       ),
 
@@ -503,7 +513,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       gradeVisible: _showRatings,
       useRating: _isUsingRating,
       isPersonalGroup: false,
-      userId: SupabaseHelper.users.getAuthId(),
+      userId: SupabaseHelper.users.getAuthId()!,
       groupMembers: _users,
       recipes: [],
     );
@@ -576,7 +586,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       gradeVisible: _showRatings,
       useRating: _isUsingRating,
       isPersonalGroup: false,
-      userId: SupabaseHelper.users.getAuthId(),
+      userId: SupabaseHelper.users.getAuthId()!,
       groupMembers: _users,
       recipes: [],
     );
@@ -662,6 +672,73 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Failed to delete group")));
+      }
+      return false;
+    }
+  }
+
+  Future<bool?> _leaveGroup() async {
+    // Check if user is owner of the group, if so, ask them to delete the group instead
+    final currentUserId = SupabaseHelper.users.getAuthId();
+    if (currentUserId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to leave group, try again later")),
+      );
+      return false;
+    }
+    if (currentUserId == widget.groupToEdit!.userId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "You are the owner of this group, please delete the group instead if you want to leave",
+          ),
+        ),
+      );
+      return false;
+    }
+
+    // Confirm leaving the group
+    final leaveConfirmation = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text("Leave Group"),
+            content: Text(
+              "Are you sure you want to leave '${widget.groupToEdit!.name}'?",
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                child: Text("Cancel", style: TextStyle(color: Colors.white)),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: Text("Leave", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+    );
+
+    if (leaveConfirmation != true) {
+      return false;
+    }
+
+    final response = await SupabaseHelper.groups.leaveGroup(
+      widget.groupToEdit!.id,
+    );
+
+    if (response == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("You have left '${widget.groupToEdit!.name}'!")),
+      );
+      return true;
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Failed to leave group")));
       }
       return false;
     }
