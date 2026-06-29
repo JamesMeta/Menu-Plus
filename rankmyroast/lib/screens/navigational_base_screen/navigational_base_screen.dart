@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/calendar/calendar_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/groups_view.dart';
@@ -60,6 +61,7 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           indicatorColor: const Color.fromARGB(255, 49, 119, 51),
+          height: 60.h,
           indicatorShape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
