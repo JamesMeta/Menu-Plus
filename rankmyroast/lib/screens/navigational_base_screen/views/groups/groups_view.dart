@@ -90,12 +90,27 @@ class _GroupsViewState extends State<GroupsView> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          "${snapshot.data!.length} group(s) found",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.grey[600],
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              "${snapshot.data!.length} group(s) found",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(width: 2),
+                            GestureDetector(
+                              onTap:
+                                  () => setState(() {
+                                    _groups = _fetchGroups();
+                                  }),
+                              child: Icon(
+                                Icons.refresh_rounded,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -170,38 +185,33 @@ class _GroupsViewState extends State<GroupsView> {
                 final groups = snapshot.data!;
                 return Expanded(
                   child: SizedBox(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        setState(() {
-                          _groups = _fetchGroups();
-                        });
+                    child: ReorderableListView.builder(
+                      onReorder: (oldIndex, newIndex) {
+                        if (newIndex > oldIndex) newIndex -= 1;
+                        final movedRecipe = groups.removeAt(oldIndex);
+                        groups.insert(newIndex, movedRecipe);
+                        setState(() {});
+                        _upsertGroupOrder(groups);
                       },
-                      color: Colors.white, // Color of the spinner
-                      backgroundColor:
-                          Colors.green, // Background of the spinner circle
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        // Pull the single source of truth from your synchronized local list
+                        final currentGroup = groups.elementAt(index);
 
-                      child: ReorderableListView.builder(
-                        onReorder: (oldIndex, newIndex) {
-                          if (newIndex > oldIndex) newIndex -= 1;
-                          final movedRecipe = groups.removeAt(oldIndex);
-                          groups.insert(newIndex, movedRecipe);
-                          setState(() {});
-                        },
-                        shrinkWrap: true,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          final group = groups.elementAt(index);
-                          return ReorderableDragStartListener(
-                            key: ValueKey(group.id),
-                            index: index,
-
-                            child: GroupTileWidget(
-                              group: snapshot.data![index],
-                              editGroupCallback: editGroupCallback,
-                            ),
-                          );
-                        },
-                      ),
+                        return ReorderableDragStartListener(
+                          index: index,
+                          // Add the key here to satisfy ReorderableDragStartListener requirements...
+                          key: ValueKey(currentGroup.id),
+                          child: GroupTileWidget(
+                            // CRITICAL FIX: Put the same key explicitly on your custom widget,
+                            // and pass the group data from the synchronized 'groups' list, NOT the snapshot.
+                            key: ValueKey(currentGroup.id),
+                            group: currentGroup,
+                            editGroupCallback: editGroupCallback,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
@@ -229,25 +239,6 @@ class _GroupsViewState extends State<GroupsView> {
     });
   }
 
-  bool pastGroupsContainsCurrentGroups(
-    List<Group> currentGroups,
-    List<GroupOrder> pastGroups,
-  ) {
-    if (pastGroups.length != currentGroups.length) {
-      return false;
-    }
-
-    for (var pastGroup in pastGroups) {
-      if (currentGroups
-          .where((group) => group.id == pastGroup.groupId)
-          .isEmpty) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   Future<List<Group>> _fetchGroups() async {
     final groups = await SupabaseHelper.groups.getGroupsForUser();
 
@@ -260,7 +251,7 @@ class _GroupsViewState extends State<GroupsView> {
 
     late final List<Group> newGroups;
 
-    if (pastGroupsContainsCurrentGroups(groups, groupOrders)) {
+    if (sqliteHelper.pastGroupsContainsCurrentGroups(groups, groupOrders)) {
       newGroups =
           groupOrders
               .map(
@@ -280,5 +271,19 @@ class _GroupsViewState extends State<GroupsView> {
     }
 
     return newGroups;
+  }
+
+  Future<void> _upsertGroupOrder(List<Group> groups) async {
+    final List<Map<int, String>> groupOrder = [];
+    final sqliteHelper = SqliteHelper();
+
+    for (final item in groups.indexed) {
+      final index = item.$1;
+      final group = item.$2;
+
+      groupOrder.add({index: group.id});
+    }
+
+    await sqliteHelper.upsertGroupOrder(groupOrder);
   }
 }

@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/extra/create_recipe_extra.dart';
 import 'package:rankmyroast/classes/extra/view_recipe_extra.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/group_order.dart';
 import 'package:rankmyroast/classes/modals/recipe.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/screens/widgets/recipe_tile_widget.dart';
+import 'package:rankmyroast/services/sqlite_helper.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class RecipeView extends StatefulWidget {
@@ -18,6 +20,7 @@ class RecipeView extends StatefulWidget {
 class _RecipeViewState extends State<RecipeView> {
   bool groupRecipes = true;
   Group? _selectedGroup;
+
   List<Recipe> _recipes = [];
 
   late Future<List<Group>?> _groupsList;
@@ -174,6 +177,38 @@ class _RecipeViewState extends State<RecipeView> {
                 final groups = snapshot.data;
 
                 if (groups != null && groups.isNotEmpty) {
+                  // late final List<Group> newGroups;
+                  // final sqliteHelper = SqliteHelper();
+
+                  // if (sqliteHelper.pastGroupsContainsCurrentGroups(
+                  //   groups,
+                  //   _groupOrders,
+                  // )) {
+                  //   newGroups =
+                  //       _groupOrders
+                  //           .map(
+                  //             (order) => groups.firstWhere(
+                  //               (group) => group.id == order.groupId,
+                  //             ),
+                  //           )
+                  //           .toList();
+                  // } else {
+                  //   newGroups =
+                  //       _groupOrders
+                  //           .map(
+                  //             (order) => groups.firstWhere(
+                  //               (group) => group.id == order.groupId,
+                  //             ),
+                  //           )
+                  //           .toList();
+                  //   newGroups.addAll(
+                  //     groups.where((group) => !newGroups.contains(group)),
+                  //   );
+                  // }
+
+                  // _selectedGroup = newGroups.first;
+                  // _recipes = _selectedGroup!.recipes;
+
                   return SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -353,7 +388,38 @@ class _RecipeViewState extends State<RecipeView> {
   }
 
   Future<void> _loadData() async {
-    _groupsList = SupabaseHelper.groups.getGroupsForUser();
+    final sqliteHelper = SqliteHelper();
+    _groupsList = SupabaseHelper.groups.getGroupsForUser().then((groups) async {
+      try {
+        List<Group> newGroups;
+        final groupOrders = await sqliteHelper.getGroupOrders();
+        if (sqliteHelper.pastGroupsContainsCurrentGroups(
+          groups!,
+          groupOrders,
+        )) {
+          newGroups =
+              groupOrders
+                  .map(
+                    (order) =>
+                        groups.firstWhere((group) => group.id == order.groupId),
+                  )
+                  .toList();
+        } else {
+          newGroups =
+              groupOrders
+                  .map(
+                    (order) =>
+                        groups.firstWhere((group) => group.id == order.groupId),
+                  )
+                  .toList();
+          newGroups.addAll(groups.where((group) => !newGroups.contains(group)));
+        }
+        return newGroups;
+      } on Exception {
+        return groups;
+      }
+    });
+
     try {
       _selectedGroup = (await _groupsList)?.first;
       _recipes = _selectedGroup?.recipes ?? [];

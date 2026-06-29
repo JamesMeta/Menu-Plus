@@ -1,3 +1,4 @@
+import 'package:rankmyroast/classes/modals/group.dart';
 import 'package:rankmyroast/classes/modals/group_order.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -50,9 +51,30 @@ class SqliteHelper {
     ''');
   }
 
+  bool pastGroupsContainsCurrentGroups(
+    List<Group> currentGroups,
+    List<GroupOrder> pastGroups,
+  ) {
+    if (pastGroups.length != currentGroups.length) {
+      return false;
+    }
+
+    for (var pastGroup in pastGroups) {
+      if (currentGroups
+          .where((group) => group.id == pastGroup.groupId)
+          .isEmpty) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   Future<List<GroupOrder>> getGroupOrders() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('groupOrder');
+    final List<Map<String, dynamic>> mapsRaw = await db.query('groupOrder');
+
+    final maps = List<Map<String, dynamic>>.from(mapsRaw);
 
     // sort by index
     maps.sort((a, b) => a['group_index'].compareTo(b['group_index']));
@@ -62,19 +84,35 @@ class SqliteHelper {
     });
   }
 
-  Future<void> upsertGroupOrder(List<GroupOrder> groupOrders) async {
+  Future<void> upsertGroupOrder(List<Map<int, String>> groupOrders) async {
     final db = await database;
 
     final batch = db.batch();
 
-    for (final order in groupOrders) {
-      batch.insert(
-        'groupOrder',
-        order.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
+    for (final groupOrder in groupOrders) {
+      final index = groupOrder.keys.first;
+      final groupId = groupOrder.values.first;
 
+      // Check if the record already exists
+      final existingRecords = await db.query(
+        'groupOrder',
+        where: 'group_id = ?',
+        whereArgs: [groupId],
+      );
+
+      if (existingRecords.isNotEmpty) {
+        // Update the existing record
+        batch.update(
+          'groupOrder',
+          {'group_index': index},
+          where: 'group_id = ?',
+          whereArgs: [groupId],
+        );
+      } else {
+        // Insert a new record
+        batch.insert('groupOrder', {'group_id': groupId, 'group_index': index});
+      }
+    }
     await batch.commit(noResult: true);
   }
 }
