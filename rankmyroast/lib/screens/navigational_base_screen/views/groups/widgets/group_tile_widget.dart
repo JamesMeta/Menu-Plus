@@ -17,39 +17,42 @@ class GroupTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
-      child: ListTile(
-        title: Text(
-          group.name,
-          style: TextStyle(
-            fontSize: 16.sp,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(
-          "${group.groupMembers.length} members | ${group.recipes.length} recipes",
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        shape: RoundedRectangleBorder(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.green,
+          border: Border.all(),
           borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: Colors.black, width: 1),
         ),
-        tileColor: Colors.green,
-        trailing: IconButton(
-          onPressed: () async {
-            final refresh = await context.push(
-              '/base/create-group',
-              extra: group,
-            );
-            if (refresh == true && editGroupCallback != null) {
-              editGroupCallback!();
-            }
-          },
-          icon: Icon(Icons.edit, color: Colors.white, size: 20.sp),
+        child: ListTile(
+          title: Text(
+            group.name,
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            "${group.groupMembers.length} members | ${group.recipes.length} recipes",
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          trailing: IconButton(
+            onPressed: () async {
+              final refresh = await context.push(
+                '/base/create-group',
+                extra: group,
+              );
+              if (refresh == true && editGroupCallback != null) {
+                editGroupCallback!();
+              }
+            },
+            icon: Icon(Icons.edit, color: Colors.white, size: 20.sp),
+          ),
         ),
       ),
     );

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rankmyroast/classes/modals/group.dart';
+import 'package:rankmyroast/classes/modals/group_order.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/widgets/group_tile_widget.dart';
+import 'package:rankmyroast/services/sqlite_helper.dart';
 import 'package:rankmyroast/services/supabase_helper.dart';
 
 class GroupsView extends StatefulWidget {
@@ -88,12 +90,27 @@ class _GroupsViewState extends State<GroupsView> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          "${snapshot.data!.length} group(s) found",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.grey[600],
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              "${snapshot.data!.length} group(s) found",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(width: 2),
+                            GestureDetector(
+                              onTap:
+                                  () => setState(() {
+                                    _groups = _fetchGroups();
+                                  }),
+                              child: Icon(
+                                Icons.refresh_rounded,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -165,28 +182,36 @@ class _GroupsViewState extends State<GroupsView> {
                   ],
                 );
               } else {
+                final groups = snapshot.data!;
                 return Expanded(
                   child: SizedBox(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        setState(() {
-                          _groups = _fetchGroups();
-                        });
+                    child: ReorderableListView.builder(
+                      onReorder: (oldIndex, newIndex) {
+                        if (newIndex > oldIndex) newIndex -= 1;
+                        final movedRecipe = groups.removeAt(oldIndex);
+                        groups.insert(newIndex, movedRecipe);
+                        setState(() {});
+                        _upsertGroupOrder(groups);
                       },
-                      color: Colors.white, // Color of the spinner
-                      backgroundColor:
-                          Colors.green, // Background of the spinner circle
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        // Pull the single source of truth from your synchronized local list
+                        final currentGroup = groups.elementAt(index);
 
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return GroupTileWidget(
-                            group: snapshot.data![index],
+                        return ReorderableDragStartListener(
+                          index: index,
+                          // Add the key here to satisfy ReorderableDragStartListener requirements...
+                          key: ValueKey(currentGroup.id),
+                          child: GroupTileWidget(
+                            // CRITICAL FIX: Put the same key explicitly on your custom widget,
+                            // and pass the group data from the synchronized 'groups' list, NOT the snapshot.
+                            key: ValueKey(currentGroup.id),
+                            group: currentGroup,
                             editGroupCallback: editGroupCallback,
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
@@ -221,6 +246,44 @@ class _GroupsViewState extends State<GroupsView> {
       return [];
     }
 
-    return groups;
+    final sqliteHelper = SqliteHelper();
+    final groupOrders = await sqliteHelper.getGroupOrders();
+
+    late final List<Group> newGroups;
+
+    if (sqliteHelper.pastGroupsContainsCurrentGroups(groups, groupOrders)) {
+      newGroups =
+          groupOrders
+              .map(
+                (order) =>
+                    groups.firstWhere((group) => group.id == order.groupId),
+              )
+              .toList();
+    } else {
+      newGroups =
+          groupOrders
+              .map(
+                (order) =>
+                    groups.firstWhere((group) => group.id == order.groupId),
+              )
+              .toList();
+      newGroups.addAll(groups.where((group) => !newGroups.contains(group)));
+    }
+
+    return newGroups;
+  }
+
+  Future<void> _upsertGroupOrder(List<Group> groups) async {
+    final List<Map<int, String>> groupOrder = [];
+    final sqliteHelper = SqliteHelper();
+
+    for (final item in groups.indexed) {
+      final index = item.$1;
+      final group = item.$2;
+
+      groupOrder.add({index: group.id});
+    }
+
+    await sqliteHelper.upsertGroupOrder(groupOrder);
   }
 }
