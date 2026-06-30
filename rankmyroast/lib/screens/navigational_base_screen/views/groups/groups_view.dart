@@ -59,11 +59,15 @@ class _GroupsViewState extends State<GroupsView> {
                     IconButton(
                       onPressed: createGroup,
                       icon: Icon(Icons.add, color: Colors.white, size: 22.sp),
+                      constraints: BoxConstraints(
+                        minWidth: 40.w,
+                        minHeight: 40.w,
+                      ),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
-                          side: BorderSide(color: Colors.black, width: 1),
+                          side: BorderSide(color: Colors.transparent, width: 1),
                         ),
                       ),
                     ),

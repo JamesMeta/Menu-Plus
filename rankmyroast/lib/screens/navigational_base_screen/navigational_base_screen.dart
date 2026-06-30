@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rankmyroast/screens/navigational_base_screen/views/calendar/calendar_view.dart';
+import 'package:rankmyroast/screens/navigational_base_screen/views/calendar/schedule_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/groups/groups_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/home/home_view.dart';
 import 'package:rankmyroast/screens/navigational_base_screen/views/recipe/recipe_view.dart';
@@ -25,7 +25,7 @@ class _NavigationalBaseScreenState extends State<NavigationalBaseScreen> {
   int navigationalIndex = 1;
 
   final List<Widget> navigationalViews = [
-    CalendarView(),
+    ScheduleView(),
     HomeView(),
     GroupsView(),
     RecipeView(),
