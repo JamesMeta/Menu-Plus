@@ -42,7 +42,7 @@ class _RecipeViewState extends State<RecipeView> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
         children: [
           FutureBuilder(
@@ -147,7 +147,7 @@ class _RecipeViewState extends State<RecipeView> {
             },
           ),
 
-          SizedBox(height: 16.h),
+          SizedBox(height: 8.h),
 
           TextField(
             controller: _searchController,
@@ -166,7 +166,7 @@ class _RecipeViewState extends State<RecipeView> {
             ),
           ),
 
-          SizedBox(height: 16.h),
+          SizedBox(height: 8.h),
 
           FutureBuilder(
             future: _groupsList,
